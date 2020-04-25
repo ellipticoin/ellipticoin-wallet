@@ -74,8 +74,15 @@ export default function App() {
     }
     const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
     const ellipticoin = new ECClient({ privateKey: keyPair.secretKey });
+    Buffer.concat(
+    [
+      new Buffer(32),
+      Buffer.from("Ellipticoin", "utf8"),
+      Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
+    ]
+    )
     const balanceBytes = await ellipticoin.getMemory(
-      Buffer(32),
+      new Buffer(32),
       "Ellipticoin",
       Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
     );
