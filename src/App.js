@@ -95,6 +95,7 @@ export default function App() {
     }
   }, [secretKey]);
   React.useEffect(() => {
+    updateBalance()
   // var blocksSocket = new WebSocket(`${WEBSOCKET_HOST}/websocket`);
   // blocksSocket.binaryType = "arraybuffer";
   // blocksSocket.onerror = console.log;
