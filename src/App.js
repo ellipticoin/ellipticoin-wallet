@@ -102,7 +102,7 @@ export default function App() {
   //   console.log("updating balance")
     setInterval(updateBalance, 1000)
   // };
-  });
+  }, [balance]);
   // React.useEffect(() => {
   //   (async function anyNameFunction() {
   //     if (secretKey) {
