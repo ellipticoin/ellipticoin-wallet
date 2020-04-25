@@ -12,10 +12,10 @@ import { Buffer } from "buffer/";
 import Wallet from "./Wallet";
 import { Client as ECClient } from "ec-client";
 
-const WEBSOCKET_HOST =
-  process.env.NODE_ENV === "production"||true
-    ? "wss://davenport.ellipticoin.org"
-    : "ws://localhost:4462";
+// const WEBSOCKET_HOST =
+//   process.env.NODE_ENV === "production"||true
+//     ? "wss://davenport.ellipticoin.org"
+//     : "ws://localhost:4462";
 function TabPanel(props) {
   const { children, tab, index, ...other } = props;
 
@@ -95,20 +95,21 @@ export default function App() {
     }
   }, [secretKey]);
   React.useEffect(() => {
-  var blocksSocket = new WebSocket(`${WEBSOCKET_HOST}/websocket`);
-  blocksSocket.binaryType = "arraybuffer";
-  blocksSocket.onerror = console.log;
-  blocksSocket.onmessage = async ({ data }) => {
-    await updateBalance()
-  };
+  // var blocksSocket = new WebSocket(`${WEBSOCKET_HOST}/websocket`);
+  // blocksSocket.binaryType = "arraybuffer";
+  // blocksSocket.onerror = console.log;
+  // blocksSocket.onmessage = async ({ data }) => {
+  //   console.log("updating balance")
+    setInterval(updateBalance, 1000)
+  // };
   });
-  React.useEffect(() => {
-    (async function anyNameFunction() {
-      if (secretKey) {
-        await updateBalance();
-      }
-    })();
-  }, [secretKey, updateBalance]);
+  // React.useEffect(() => {
+  //   (async function anyNameFunction() {
+  //     if (secretKey) {
+  //       await updateBalance();
+  //     }
+  //   })();
+  // }, [secretKey]);
   React.useEffect(() => {
     localStorage.setItem("tab", JSON.stringify(tab));
   }, [tab]);
