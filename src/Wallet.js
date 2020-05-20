@@ -10,11 +10,11 @@ import CardContent from "@material-ui/core/CardContent";
 import AssignmentIcon from "@material-ui/icons/AssignmentOutlined";
 import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { Client as ECClient } from "ec-client";
 import copy from "copy-to-clipboard";
 
@@ -62,11 +62,11 @@ export default function Wallet(props) {
   const confirm = async (evt) => {
     evt.preventDefault();
     setOpen(true);
-  }
+  };
   const clearForm = () => {
     setSendAmount(0);
     setToAddress(0);
-  }
+  };
   const send = async (evt) => {
     clearForm();
     setOpen(false);
@@ -85,8 +85,9 @@ export default function Wallet(props) {
       ],
     });
   };
-  return <>
-    <Dialog
+  return (
+    <>
+      <Dialog
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -107,41 +108,41 @@ export default function Wallet(props) {
           </Button>
         </DialogActions>
       </Dialog>
-    {publicKey ? (
-    <Card className={classes.root}>
-      <CardHeader
-        classes={{
-          root: classes.cardHeader,
-        }}
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
-        }
-        title={
-          <>
-            Wallet Address: {publicKey ? base64url(publicKey) : ""}
-            <IconButton
-              aria-label="delete"
-              className={classes.margin}
-              onClick={() => copy(base64url(publicKey))}
+      {publicKey ? (
+        <Card className={classes.root}>
+          <CardHeader
+            classes={{
+              root: classes.cardHeader,
+            }}
+            action={
+              <IconButton aria-label="settings">
+                <MoreVertIcon />
+              </IconButton>
+            }
+            title={
+              <>
+                Wallet Address: {publicKey ? base64url(publicKey) : ""}
+                <IconButton
+                  aria-label="delete"
+                  className={classes.margin}
+                  onClick={() => copy(base64url(publicKey))}
+                >
+                  <AssignmentIcon className={classes.assignmentIcon} />
+                </IconButton>
+              </>
+            }
+          />
+          <CardContent>
+            <form
+              noValidate
+              autoComplete="off"
+              onSubmit={(evt) => confirm(evt)}
             >
-              <AssignmentIcon className={classes.assignmentIcon} />
-            </IconButton>
-          </>
-        }
-      />
-      <CardContent>
-        <form
-          noValidate
-          autoComplete="off"
-          onSubmit={(evt) => confirm(evt)}
-        >
               <TextField
                 id="outlined-basic"
                 label="To Address"
                 variant="outlined"
-                style={{width: '64ch'}}
+                style={{ width: "64ch" }}
                 value={toAddress}
                 onChange={(event) => setToAddress(event.target.value)}
               />
@@ -149,25 +150,33 @@ export default function Wallet(props) {
                 id="outlined-basic"
                 label="Amount"
                 variant="outlined"
-                style={{width: '20ch'}}
+                style={{ width: "20ch" }}
                 value={sendAmount}
                 onChange={(event) => setSendAmount(event.target.value)}
               />
               <Button
                 type="submit"
-                style={{width: '20em'}}
-                variant="contained" color="primary">
+                style={{ width: "20em" }}
+                variant="contained"
+                color="primary"
+              >
                 Send
               </Button>
-        </form>
-        <Box className={classes.balance}>
-          Balance: ${(balance / 10000).toFixed(2)} EC
-        </Box>
-      </CardContent>
-    </Card>
-  ) :
-    <Button onClick={() => createWallet()} variant="contained" color="primary">
-      Create Wallet
-    </Button>}
+            </form>
+            <Box className={classes.balance}>
+              Balance: ${(balance / 10000).toFixed(2)} EC
+            </Box>
+          </CardContent>
+        </Card>
+      ) : (
+        <Button
+          onClick={() => createWallet()}
+          variant="contained"
+          color="primary"
+        >
+          Create Wallet
+        </Button>
+      )}
     </>
+  );
 }

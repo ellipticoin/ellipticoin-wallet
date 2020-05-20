@@ -10,6 +10,8 @@ import nacl from "tweetnacl";
 import Long from "long";
 import { Buffer } from "buffer/";
 import Wallet from "./Wallet";
+import Trade from "./Trade";
+import UnlockEllipticoin from "./UnlockEllipticoin";
 import { Client as ECClient } from "ec-client";
 
 // const WEBSOCKET_HOST =
@@ -69,25 +71,23 @@ export default function App() {
     }
   });
   const updateBalance = async () => {
-    if(!secretKey) {
-      return
-    }
-    const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
-    const ellipticoin = new ECClient({ privateKey: keyPair.secretKey });
-    Buffer.concat(
-    [
-      new Buffer(32),
-      Buffer.from("Ellipticoin", "utf8"),
-      Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
-    ]
-    )
-    const balanceBytes = await ellipticoin.getMemory(
-      new Buffer(32),
-      "Ellipticoin",
-      Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
-    );
-    setBalance(bytesToNumber(balanceBytes));
-  }
+    // if (!secretKey) {
+    //   return;
+    // }
+    // const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
+    // const ellipticoin = new ECClient({ privateKey: keyPair.secretKey });
+    // Buffer.concat([
+    //   new Buffer(32),
+    //   Buffer.from("Ellipticoin", "utf8"),
+    //   Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)]),
+    // ]);
+    // const balanceBytes = await ellipticoin.getMemory(
+    //   new Buffer(32),
+    //   "Ellipticoin",
+    //   Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
+    // );
+    // setBalance(bytesToNumber(balanceBytes));
+  };
   React.useEffect(() => {
     if (secretKey) {
       let keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
@@ -95,14 +95,14 @@ export default function App() {
     }
   }, [secretKey]);
   React.useEffect(() => {
-    updateBalance()
-  // var blocksSocket = new WebSocket(`${WEBSOCKET_HOST}/websocket`);
-  // blocksSocket.binaryType = "arraybuffer";
-  // blocksSocket.onerror = console.log;
-  // blocksSocket.onmessage = async ({ data }) => {
-  //   console.log("updating balance")
-    setInterval(updateBalance, 1000)
-  // };
+    updateBalance();
+    // var blocksSocket = new WebSocket(`${WEBSOCKET_HOST}/websocket`);
+    // blocksSocket.binaryType = "arraybuffer";
+    // blocksSocket.onerror = console.log;
+    // blocksSocket.onmessage = async ({ data }) => {
+    //   console.log("updating balance")
+    setInterval(updateBalance, 1000);
+    // };
   }, [balance]);
   // React.useEffect(() => {
   //   (async function anyNameFunction() {
@@ -155,10 +155,32 @@ export default function App() {
         />
       </TabPanel>
       <TabPanel tab={tab} index={1}>
-        Coming soon...
+        <Trade
+          {...{
+            secretKey,
+            toAddress,
+            sendAmount,
+            setToAddress,
+            setSendAmount,
+            balance,
+            publicKey,
+            createWallet,
+          }}
+        />
       </TabPanel>
       <TabPanel tab={tab} index={2}>
-        Coming soon...
+        <UnlockEllipticoin
+          {...{
+            secretKey,
+            toAddress,
+            sendAmount,
+            setToAddress,
+            setSendAmount,
+            balance,
+            publicKey,
+            createWallet,
+          }}
+        />
       </TabPanel>
     </div>
   );
