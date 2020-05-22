@@ -83,7 +83,7 @@ export default function Wallet(props) {
     if (web3IsSetup && window.web3) {
       callGetAccounts();
     }
-  }, [web3IsSetup, ellipticoin]);
+  }, [web3IsSetup, ellipticoin, mining]);
 
   const [open, setOpen] = React.useState(false);
 
