@@ -53,6 +53,7 @@ export default function Wallet(props) {
   } = props;
   const classes = useStyles();
   const [web3IsSetup] = React.useState(() => {
+    setupWeb3();
     return true;
   });
   const [accounts, setAccounts] = React.useState([]);
@@ -76,7 +77,6 @@ export default function Wallet(props) {
   };
 
   const unlockEther = async (address) => {
-    setupWeb3();
     let signature = window.web3.utils.hexToBytes(await window.web3.eth.personal.sign(window.web3.utils.toHex(`Unlock Ellipticoin at address: ${base64url(publicKey)}`), address));
     const ellipticoin = new ECClient({
       privateKey: Uint8Array.from(secretKey),
