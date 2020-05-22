@@ -12,7 +12,7 @@
     "base64url": "^3.0.1",
     "buffer": "^5.6.0",
     "copy-to-clipboard": "^3.3.1",
-    "ec-client": "^0.0.13",
+    "ec-client": "^0.0.14",
     "es6-promisify": "^6.1.1",
     "ethereumjs-abi": "^0.6.8",
     "ethereumjs-util": "^7.0.1",
