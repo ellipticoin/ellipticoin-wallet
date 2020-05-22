@@ -23,7 +23,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Paper from '@material-ui/core/Paper';
 import { Client as ECClient } from "ec-client";
 import { signUnlock, setupWeb3, getAccounts } from "./ethereum-utils.js";
-import { getSignature } from "./eip712-demo.js";
 
 const useStyles = makeStyles((theme) => ({
   root: {
