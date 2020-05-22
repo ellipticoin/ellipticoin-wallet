@@ -52,20 +52,45 @@ export default function Wallet(props) {
     secretKey,
   } = props;
   const classes = useStyles();
-  const [web3IsSetup] = React.useState(() => {
-    setupWeb3();
-    return true;
-  });
   const [accounts, setAccounts] = React.useState([]);
   const [amountUnlocked, setAmountUnlocked] = React.useState();
   const [mining, setMining] = React.useState(false);
+  const [web3IsSetup, setWeb3IsSetup] = React.useState(false);
+  useEffect(() => {
+    (async function() {
+
+      await setupWeb3()
+      setWeb3IsSetup(true)
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async function() {
+    })();
+  }, [secretKey, publicKey, accounts]);
+  const getUnlocked = async (address) => {
+      const ellipticoin = new ECClient({
+        privateKey: Uint8Array.from(secretKey),
+      });
+      if(publicKey && accounts.length > 0) { 
+        const unlocked = await ellipticoin.getStorage(
+          new Buffer(32),
+          "Ellipticoin",
+          Buffer.concat([new Buffer([6]), Buffer.from(accounts[0].substring(2), "hex")])
+        );
+        return !!unlocked
+      }
+  }
   useEffect(() => {
     async function callGetAccounts() {
       let accounts = await getAccounts();
-      console.log(accounts);
+      accounts = accounts.map((account) => { return {
+        isUnlocked: getUnlocked(account),
+        account: account,
+        }})
       setAccounts(accounts);
     }
-    if (web3IsSetup) {
+    if (web3IsSetup && window.web3) {
       callGetAccounts();
     }
   }, [setAccounts, web3IsSetup]);
@@ -81,6 +106,7 @@ export default function Wallet(props) {
     const ellipticoin = new ECClient({
       privateKey: Uint8Array.from(secretKey),
     });
+    console.log(Buffer.from(signature).toString("hex"))
     setOpen(true)
     let transaction = await ellipticoin.post({
       contract_address: Buffer.concat([
@@ -95,6 +121,7 @@ export default function Wallet(props) {
     });
     setMining(true)
     let result = await ellipticoin.waitForTransactionToBeMined(transaction)
+    console.log(result)
     setMining(false)
     setAmountUnlocked(result.return_value["Ok"])
   }
@@ -160,15 +187,21 @@ alignItems="center"
     <TableContainer component={Paper}>
       <Table className={classes.table} aria-label="simple table">
         <TableBody>
-          {accounts.map((account) => (
+          {accounts.map(({account, isUnlocked}) => (
             <TableRow key={account}>
               <TableCell component="th" scope="row">
                 <a href={`https://etherscan.io/address/${account}`} target="_blank">{account}</a>
               </TableCell>
               <TableCell align="right">
+            {isUnlocked?
+      <Button disabled="true" variant="contained" color="primary">
+        Already Unlocked
+      </Button>
+              :
       <Button onClick={() => unlockEther(account)} variant="contained" color="primary">
         Unlock
       </Button>
+            }
             </TableCell>
             </TableRow>
           ))}
