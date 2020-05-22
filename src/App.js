@@ -71,22 +71,22 @@ export default function App() {
     }
   });
   const updateBalance = async () => {
-    // if (!secretKey) {
-    //   return;
-    // }
-    // const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
-    // const ellipticoin = new ECClient({ privateKey: keyPair.secretKey });
-    // Buffer.concat([
-    //   new Buffer(32),
-    //   Buffer.from("Ellipticoin", "utf8"),
-    //   Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)]),
-    // ]);
-    // const balanceBytes = await ellipticoin.getMemory(
-    //   new Buffer(32),
-    //   "Ellipticoin",
-    //   Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
-    // );
-    // setBalance(bytesToNumber(balanceBytes));
+    if (!secretKey) {
+      return;
+    }
+    const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
+    const ellipticoin = new ECClient({ privateKey: keyPair.secretKey });
+    Buffer.concat([
+      new Buffer(32),
+      Buffer.from("Ellipticoin", "utf8"),
+      Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)]),
+    ]);
+    const balanceBytes = await ellipticoin.getMemory(
+      new Buffer(32),
+      "Ellipticoin",
+      Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
+    );
+    setBalance(bytesToNumber(balanceBytes));
   };
   React.useEffect(() => {
     if (secretKey) {
@@ -101,9 +101,9 @@ export default function App() {
     // blocksSocket.onerror = console.log;
     // blocksSocket.onmessage = async ({ data }) => {
     //   console.log("updating balance")
-    setInterval(updateBalance, 1000);
+    setInterval(updateBalance, 2500);
     // };
-  }, [balance]);
+  }, []);
   // React.useEffect(() => {
   //   (async function anyNameFunction() {
   //     if (secretKey) {
