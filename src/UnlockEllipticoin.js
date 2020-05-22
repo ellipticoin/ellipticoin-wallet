@@ -93,8 +93,12 @@ export default function Wallet(props) {
 
   const unlockEther = async (address) => {
     let {
-      web3: { utils: hexToBytes, toHex },
-      eth: { personal: sign },
+      web3: {
+        utils: { hexToBytes, toHex },
+        eth: {
+          personal: { sign },
+        },
+      },
     } = window;
     let signature = hexToBytes(
       await sign(
@@ -180,48 +184,51 @@ export default function Wallet(props) {
           }
         />
         <CardContent>
-          {window.web3?
-          <TableContainer component={Paper}>
-            <Table className={classes.table} aria-label="simple table">
-              <TableBody>
-                {accounts.map(({ account, isUnlocked }) => (
-                  <TableRow key={account}>
-                    <TableCell component="th" scope="row">
-                      <a
-                        href={`https://etherscan.io/address/${account}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {account}
-                      </a>
-                    </TableCell>
-                    <TableCell align="right">
-                      {isUnlocked ? (
-                        <Button
-                          disabled={true}
-                          variant="contained"
-                          color="primary"
+          {window.web3 ? (
+            <TableContainer component={Paper}>
+              <Table className={classes.table} aria-label="simple table">
+                <TableBody>
+                  {accounts.map(({ account, isUnlocked }) => (
+                    <TableRow key={account}>
+                      <TableCell component="th" scope="row">
+                        <a
+                          href={`https://etherscan.io/address/${account}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                          Already Unlocked
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => unlockEther(account)}
-                          variant="contained"
-                          color="primary"
-                        >
-                          Unlock
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-            :
-          <>Please install <a href="https://metamask.io/">MetaMask</a> to unlock Ether</>
-          }
+                          {account}
+                        </a>
+                      </TableCell>
+                      <TableCell align="right">
+                        {isUnlocked ? (
+                          <Button
+                            disabled={true}
+                            variant="contained"
+                            color="primary"
+                          >
+                            Already Unlocked
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => unlockEther(account)}
+                            variant="contained"
+                            color="primary"
+                          >
+                            Unlock
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <>
+              Please install <a href="https://metamask.io/">MetaMask</a> to
+              unlock Ether
+            </>
+          )}
         </CardContent>
       </Card>
     </>

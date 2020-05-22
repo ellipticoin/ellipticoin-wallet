@@ -71,10 +71,10 @@ export default function App() {
     }
   });
   const [ellipticoin] = React.useState(() => {
-    if(secretKey) {
-    return new ECClient({
-      privateKey: Uint8Array.from(secretKey),
-    });
+    if (secretKey) {
+      return new ECClient({
+        privateKey: Uint8Array.from(secretKey),
+      });
     }
   }, [secretKey]);
   React.useEffect(() => {
