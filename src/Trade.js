@@ -12,12 +12,6 @@ import CardContent from "@material-ui/core/CardContent";
 import AssignmentIcon from "@material-ui/icons/AssignmentOutlined";
 import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import { Client as ECClient } from "ec-client";
 import copy from "copy-to-clipboard";
 
 const useStyles = makeStyles((theme) => ({
@@ -43,16 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 export default function Wallet(props) {
-  const {
-    secretKey,
-    toAddress,
-    createWallet,
-    sendAmount,
-    setToAddress,
-    setSendAmount,
-    balance,
-    publicKey,
-  } = props;
+  const { createWallet, sendAmount, setSendAmount, balance, publicKey } = props;
   const classes = useStyles();
   const [tradeType, setTradeType] = React.useState(null);
 

@@ -70,47 +70,44 @@ export default function App() {
       return Buffer.from(JSON.parse(localStorage.getItem("secretKey")));
     }
   });
-  const updateBalance = async () => {
-    if (!secretKey) {
-      return;
+  const [ellipticoin] = React.useState(() => {
+    if(secretKey) {
+    return new ECClient({
+      privateKey: Uint8Array.from(secretKey),
+    });
     }
-    const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
-    const ellipticoin = new ECClient({ privateKey: keyPair.secretKey });
-    Buffer.concat([
-      new Buffer(32),
-      Buffer.from("Ellipticoin", "utf8"),
-      Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)]),
-    ]);
-    const balanceBytes = await ellipticoin.getMemory(
-      new Buffer(32),
-      "Ellipticoin",
-      Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
-    );
-    setBalance(bytesToNumber(balanceBytes));
-  };
+  }, [secretKey]);
   React.useEffect(() => {
     if (secretKey) {
       let keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
       setPublicKey(keyPair.publicKey);
     }
   }, [secretKey]);
+
   React.useEffect(() => {
-    updateBalance();
-    // var blocksSocket = new WebSocket(`${WEBSOCKET_HOST}/websocket`);
-    // blocksSocket.binaryType = "arraybuffer";
-    // blocksSocket.onerror = console.log;
-    // blocksSocket.onmessage = async ({ data }) => {
-    //   console.log("updating balance")
-    setInterval(updateBalance, 2500);
-    // };
-  }, []);
-  // React.useEffect(() => {
-  //   (async function anyNameFunction() {
-  //     if (secretKey) {
-  //       await updateBalance();
-  //     }
-  //   })();
-  // }, [secretKey]);
+    const interval = setInterval(async () => {
+      if (!secretKey) {
+        return;
+      }
+      const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
+      const ellipticoin = new ECClient({ privateKey: keyPair.secretKey });
+      Buffer.concat([
+        new Buffer(32),
+        Buffer.from("Ellipticoin", "utf8"),
+        Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)]),
+      ]);
+      const balanceBytes = await ellipticoin.getMemory(
+        new Buffer(32),
+        "Ellipticoin",
+        Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
+      );
+      setBalance(bytesToNumber(balanceBytes));
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [secretKey]);
   React.useEffect(() => {
     localStorage.setItem("tab", JSON.stringify(tab));
   }, [tab]);
@@ -171,14 +168,15 @@ export default function App() {
       <TabPanel tab={tab} index={2}>
         <UnlockEllipticoin
           {...{
-            secretKey,
-            toAddress,
-            sendAmount,
-            setToAddress,
-            setSendAmount,
             balance,
-            publicKey,
             createWallet,
+            ellipticoin,
+            publicKey,
+            secretKey,
+            sendAmount,
+            setSendAmount,
+            setToAddress,
+            toAddress,
           }}
         />
       </TabPanel>
