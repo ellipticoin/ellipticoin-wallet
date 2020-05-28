@@ -72,6 +72,7 @@ export default function Wallet(props) {
     setOpen(false);
     const ellipticoin = new ECClient({
       privateKey: Uint8Array.from(secretKey),
+      bootnodes: ["http://localhost:4461"]
     });
     await ellipticoin.post({
       contract_address: Buffer.concat([
@@ -80,7 +81,7 @@ export default function Wallet(props) {
       ]),
       function: "transfer",
       arguments: [
-        base64url.toBuffer(toAddress),
+        Array.from(base64url.toBuffer(toAddress)),
         Math.floor(parseFloat(sendAmount) * 10000),
       ],
     });
