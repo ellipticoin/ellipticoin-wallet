@@ -22,9 +22,10 @@
     "long": "^4.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-flip-move": "^3.0.4",
     "react-scripts": "3.4.1",
     "tweetnacl": "^1.0.3",
-    "web3": "^1.2.7"
+    "web3": "^1.2.8"
   },
   "scripts": {
     "start": "react-scripts start",

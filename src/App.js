@@ -74,7 +74,7 @@ export default function App() {
     if (secretKey) {
       return new ECClient({
         privateKey: Uint8Array.from(secretKey),
-        bootnodes: ["http://localhost:4461"]
+        bootnodes: ["http://localhost:4461"],
       });
     }
   }, [secretKey]);
@@ -93,7 +93,7 @@ export default function App() {
       const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
       const ellipticoin = new ECClient({
         privateKey: keyPair.secretKey,
-        bootnodes: ["http://localhost:4461"]
+        bootnodes: ["http://localhost:4461"],
       });
       Buffer.concat([
         new Buffer(32),
