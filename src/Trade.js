@@ -1,11 +1,7 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import InputAdornment from "@material-ui/core/InputAdornment";
 import base64url from "base64url";
-import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
@@ -20,6 +16,10 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableRow from "@material-ui/core/TableRow";
 import SwapVertIcon from "@material-ui/icons/SwapVert";
 import Paper from "@material-ui/core/Paper";
+import CurrencyTextField from "@unicef/material-ui-currency-textfield";
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+
 import copy from "copy-to-clipboard";
 import { Client as ECClient } from "ec-client";
 import {
@@ -34,7 +34,6 @@ import {
 } from "@uniswap/sdk";
 import { ethers } from "ethers";
 import { setupWeb3 } from "./ethereum-utils.js";
-import FlipMove from "react-flip-move";
 const WETH_TOKEN = new Token(
   ChainId.KOVAN,
   "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
@@ -58,18 +57,13 @@ const ECCB_TOKEN = new Token(
 );
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    "& .MuiTextField-root": {
-      margin: theme.spacing(1),
-    },
-    "& form": {
-      display: "flex",
-      flexDirection: "column",
-      margin: theme.spacing(1),
-    },
-  },
   balance: {
     margin: theme.spacing(1),
+  },
+  tableContainer: {
+    maxWidth: 500,
+    position: "relative",
+    marginBottom: 20,
   },
   cardHeader: {
     color: "white",
@@ -78,16 +72,34 @@ const useStyles = makeStyles((theme) => ({
   assignmentIcon: {
     margin: theme.spacing(1),
   },
+  currencyIcon: {
+    width: 12,
+    margin: 5,
+    verticalAlign: "bottom",
+  },
 }));
 export default function Wallet(props) {
   const { createWallet, balance, publicKey, secretKey } = props;
   const classes = useStyles();
   const [tradeType, setTradeType] = React.useState("buy");
-  const [inputAmount, setInputAmount] = React.useState(0.01);
+  const [inputAmount, setInputAmount] = React.useState(1.0);
+  const [etherAmount, setEtherAmount] = React.useState(null);
   const [outputAmount, setOutputAmount] = React.useState(0);
+  const [ethBidPrice, setEthBidPrice] = React.useState(null);
+  const [ethBalance, setEthBalance] = React.useState();
+  const [loading, setLoading] = React.useState(false);
   React.useEffect(() => {
     (async () => {
-      if (inputAmount > 0) {
+      setupWeb3()
+      let [ethereumAddress] = await window.web3.eth.getAccounts();
+      setEthBalance(await window.web3.eth.getBalance(ethereumAddress))
+
+    })();
+  }, []);
+
+  React.useEffect(() => {
+    (async () => {
+      if (etherAmount) {
         let pair = await Pair.fetchData(
           WETH_TOKEN,
           ECCB_TOKEN,
@@ -101,19 +113,17 @@ export default function Wallet(props) {
             route,
             new TokenAmount(
               WETH_TOKEN,
-              ethers.utils.parseEther(inputAmount.toString())
+              ethers.utils.parseEther(etherAmount.toFixed(18).toString())
             ),
             TradeType.EXACT_INPUT
           );
         } else {
           route = new Route([pair], ECCB_TOKEN);
-          console.log(parseFloat(inputAmount) * 1000);
           trade = new Trade(
             route,
             new TokenAmount(
               ECCB_TOKEN,
-              ethers.utils.parseEther(inputAmount.toString())
-              // Math.floor(parseFloat(inputAmount) * 10000)
+              ethers.utils.parseEther(etherAmount.toString())
             ),
             TradeType.EXACT_INPUT
           );
@@ -121,14 +131,23 @@ export default function Wallet(props) {
         setOutputAmount(trade.minimumAmountOut(SLIPPAGE).raw.toString());
       }
     })();
-  }, [inputAmount, tradeType]);
+  }, [tradeType, etherAmount, inputAmount]);
 
-  const handleChangeTradeType = (value) => {
-    setTradeType(value);
-  };
+  React.useEffect(() => {
+    if (ethBidPrice) {
+      setEtherAmount(inputAmount / ethBidPrice);
+    }
+  }, [inputAmount, ethBidPrice]);
+  React.useEffect(() => {
+    fetch("https://api.infura.io/v1/ticker/ethusd")
+      .then((response) => response.json())
+      .then(({ bid }) => setEthBidPrice(bid));
+  }, []);
+
   const clearForm = () => {
     setInputAmount(0);
   };
+
   const sell = async () => {
     setupWeb3();
     clearForm();
@@ -153,7 +172,25 @@ export default function Wallet(props) {
       ],
     });
   };
+  React.useEffect(() => {
+    const interval = setInterval(async () => {
+      let [ethereumAddress] = await window.web3.eth.getAccounts();
+      let newEthBalance = await window.web3.eth.getBalance(ethereumAddress);
+      if(ethBalance !== newEthBalance) {
+        console.log(ethBalance)
+        console.log(newEthBalance)
+        console.log("new balance")
+        setLoading(false)
+        setEthBalance(newEthBalance)
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [ethBalance]);
   const buy = async () => {
+    setLoading(true);
     await setupWeb3();
     let [ethereumAddress] = await window.web3.eth.getAccounts();
     const ECCBToken = new window.web3.eth.Contract(ECCBTokenABI, ECCB_ADDRESS, {
@@ -169,12 +206,12 @@ export default function Wallet(props) {
       route,
       new TokenAmount(
         WETH_TOKEN,
-        ethers.utils.parseEther(inputAmount.toString())
+        ethers.utils.parseEther(etherAmount.toString())
       ),
       TradeType.EXACT_INPUT
     );
     let deadline = Math.ceil(Date.now() / 1000) + 60 * 20;
-    console.log(trade.minimumAmountOut(SLIPPAGE).raw.toString());
+    try {
     await ECCBToken.methods
       .swapAndBurn(
         trade.minimumAmountOut(SLIPPAGE).raw.toString(),
@@ -187,10 +224,16 @@ export default function Wallet(props) {
           trade.maximumAmountIn(SLIPPAGE).raw.toString()
         ),
       });
+    } catch {
+      setLoading(false)
+    }
   };
   const trade = async (evt) => {
     evt.preventDefault();
     await (tradeType === "buy" ? buy() : sell());
+  };
+  const toggleTradeType = () => {
+    tradeType === "buy" ? setTradeType("sell") : setTradeType("buy");
   };
   const rows = [
     <TableRow key="2">
@@ -198,17 +241,26 @@ export default function Wallet(props) {
         To
       </TableCell>
       <TableCell align="left">
-        <img src="" />
+        <img
+          className={classes.currencyIcon}
+          style={{ position: "relative", height: 15, top: 2 }}
+          src="ethereum_logo.svg"
+          alt="Ethereum Logo"
+        />
         Ethereum
       </TableCell>
-      <TableCell align="right">{inputAmount}</TableCell>
+      <TableCell align="right">{etherAmount}</TableCell>
     </TableRow>,
     <TableRow key="1">
       <TableCell component="th" scope="row" style={{ paddingLeft: 80 }}>
         From
       </TableCell>
       <TableCell align="left">
-        <img src="" />
+        <img
+          className={classes.currencyIcon}
+          src="ellipticoin_logo.svg"
+          alt="Ellipticoin Logo"
+        />
         Ellipticoin
       </TableCell>
       <TableCell align="right">{(outputAmount / 10000).toFixed(4)}</TableCell>
@@ -243,103 +295,66 @@ export default function Wallet(props) {
           />
           <CardContent>
             <form noValidate autoComplete="off" onSubmit={(evt) => trade(evt)}>
-              <TextField
-                id="outlined-basic"
-                label="Input"
-                variant="outlined"
-                style={{ width: "50ch" }}
+              <CurrencyTextField
+                label="Amount (USD)"
+                variant="standard"
                 value={inputAmount}
-                onChange={(event) => setInputAmount(event.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="start">
-                      <div style={{ paddingRight: "10px" }}>
-                        <span>
-                          Balance:{" "}
-                          {tradeType === "buy"
-                            ? `? ETH`
-                            : `${(balance / 10000).toFixed(2)} EC`}
-                        </span>
-                      </div>
-                      <div>
-                        <ToggleButtonGroup
-                          value={tradeType}
-                          exclusive
-                          onChange={(e) => {
-                            handleChangeTradeType(
-                              e.target.closest("button").value
-                            );
-                          }}
-                          aria-label="text alignment"
-                        >
-                          <ToggleButton
-                            value="buy"
-                            style={{ width: "4em" }}
-                            aria-label="ETH"
-                          >
-                            ETH
-                          </ToggleButton>
-                          <ToggleButton
-                            value="sell"
-                            style={{ width: "4em" }}
-                            aria-label="EC"
-                          >
-                            EC
-                          </ToggleButton>
-                        </ToggleButtonGroup>
-                      </div>
-                    </InputAdornment>
-                  ),
+                width="10ch"
+                currencySymbol="$"
+                style={{
+                  width: "20ch",
+                  position: "relative",
+                  marginBottom: 20,
                 }}
+                onChange={(event, value) => setInputAmount(value)}
               />
-              <TextField
-                id="outlined-basic"
-                label="Output"
-                variant="outlined"
-                disabled={true}
-                style={{ width: "50ch" }}
-                value={(outputAmount / 10000).toFixed(4)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="start">
-                      <ToggleButtonGroup
-                        value={tradeType}
-                        exclusive
-                        onChange={(e) =>
-                          handleChangeTradeType(
-                            e.target.closest("button").value
-                          )
-                        }
-                        aria-label="text alignment"
-                      >
-                        <ToggleButton
-                          value="sell"
-                          style={{ width: "4em" }}
-                          aria-label="ETH"
-                        >
-                          ETH
-                        </ToggleButton>
-                        <ToggleButton
-                          value="buy"
-                          style={{ width: "4em" }}
-                          aria-label="EC"
-                        >
-                          EC
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              <TableContainer
+                className={classes.tableContainer}
+                style={{}}
+                component={Paper}
+              >
+                <Table className={classes.table} aria-label="simple table">
+                  <TableBody>
+                    {tradeType === "buy"
+                      ? [...rows].map((row) => row)
+                      : [...rows].reverse().map((row) => row)}
+                  </TableBody>
+                </Table>
+                <IconButton
+                  style={{
+                    position: "absolute",
+                    top: 30,
+                    left: 10,
+                    maxWidth: 400,
+                    backgroundColor: "#fff",
+                    border: "1px solid #eee",
+                  }}
+                  onClick={() => toggleTradeType()}
+                  aria-label="delete"
+                  size="medium"
+                >
+                  <SwapVertIcon fontSize="inherit" />
+                </IconButton>
+              </TableContainer>
               <Button
                 type="submit"
+                disabled={loading}
                 style={{ width: "20em" }}
                 variant="contained"
                 color="primary"
               >
-                Trade
+        {loading? <CircularProgress size="1.5rem" style={{padding: 1}} />: "Trade"}
               </Button>
             </form>
+            {balance?
+            <div style={{marginTop: 20}}>
+            EC Balance: {(balance/10000).toFixed(2)}
+            </div>: null}
+            {ethBalance?
+            <div>
+            ETH Balance: {ethers.utils.formatEther(ethBalance)}
+            </div>
+            :null}
           </CardContent>
         </Card>
       ) : (
