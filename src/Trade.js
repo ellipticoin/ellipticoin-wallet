@@ -21,7 +21,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 import copy from "copy-to-clipboard";
-import { Client as ECClient } from "ec-client";
+import { Client as ECClient, Ellipticoin } from "ec-client";
 import {
   ChainId,
   Token,
@@ -46,7 +46,7 @@ const ELLIPTICOIN_ADDRESS = Buffer.from(
   "vQMn3JvS3ATITteQ-gOYfuVSn2buuAH-4e8NY_CvtwA",
   "base64"
 );
-const ECCB_ADDRESS = "0xDca3a8576197460da74e43fD44fd760D68A80647";
+const ECCB_ADDRESS = "0x89108B7Bf410Ce52e41eFd41e565ca180Df1EC53";
 const SLIPPAGE = new Percent(5, 1000);
 const ECCB_TOKEN = new Token(
   ChainId.KOVAN,
@@ -81,10 +81,10 @@ const useStyles = makeStyles((theme) => ({
 export default function Wallet(props) {
   const { createWallet, balance, publicKey, secretKey } = props;
   const classes = useStyles();
-  const [tradeType, setTradeType] = React.useState("buy");
+  const [tradeType, setTradeType] = React.useState("sell");
   const [inputAmount, setInputAmount] = React.useState(1.0);
   const [etherAmount, setEtherAmount] = React.useState(null);
-  const [outputAmount, setOutputAmount] = React.useState(0);
+  const [ellipticoinAmount, setEllipticoinAmount] = React.useState(0);
   const [ethBidPrice, setEthBidPrice] = React.useState(null);
   const [ethBalance, setEthBalance] = React.useState();
   const [loading, setLoading] = React.useState(false);
@@ -99,7 +99,6 @@ export default function Wallet(props) {
 
   React.useEffect(() => {
     (async () => {
-      if (etherAmount) {
         let pair = await Pair.fetchData(
           WETH_TOKEN,
           ECCB_TOKEN,
@@ -107,37 +106,62 @@ export default function Wallet(props) {
         );
         let trade;
         let route;
-        if (tradeType === "buy") {
+        if (tradeType === "buy" && etherAmount > 0) {
           route = new Route([pair], WETH_TOKEN);
           trade = new Trade(
             route,
             new TokenAmount(
               WETH_TOKEN,
-              ethers.utils.parseEther(etherAmount.toFixed(18).toString())
+              etherAmount
             ),
             TradeType.EXACT_INPUT
           );
-        } else {
+        setEllipticoinAmount(trade.minimumAmountOut(SLIPPAGE).raw.toString());
+        } else if(ellipticoinAmount > 0) {
           route = new Route([pair], ECCB_TOKEN);
           trade = new Trade(
             route,
             new TokenAmount(
               ECCB_TOKEN,
-              ethers.utils.parseEther(etherAmount.toString())
+              Math.floor(ellipticoinAmount)
             ),
             TradeType.EXACT_INPUT
           );
+          setEtherAmount(trade.minimumAmountOut(SLIPPAGE).raw.toString());
         }
-        setOutputAmount(trade.minimumAmountOut(SLIPPAGE).raw.toString());
-      }
     })();
-  }, [tradeType, etherAmount, inputAmount]);
+  }, [tradeType, etherAmount, inputAmount, ellipticoinAmount]);
 
   React.useEffect(() => {
-    if (ethBidPrice) {
-      setEtherAmount(inputAmount / ethBidPrice);
+    (async () => {
+    if (!ethBidPrice) {
+      return
     }
-  }, [inputAmount, ethBidPrice]);
+    if (tradeType === "buy") {
+      setEtherAmount(ethers.utils.parseEther((inputAmount / ethBidPrice).toFixed(8).toString()));
+    } else if(inputAmount && inputAmount > 0) {
+    let pair = await Pair.fetchData(
+      WETH_TOKEN,
+      ECCB_TOKEN,
+      ethers.getDefaultProvider("kovan")
+    );
+          let route = new Route([pair], ECCB_TOKEN);
+      try{
+          let trade = new Trade(
+            route,
+            new TokenAmount(
+              ECCB_TOKEN,
+              inputAmount
+            ),
+            TradeType.EXACT_INPUT
+          );
+      setEllipticoinAmount(inputAmount/ethers.utils.formatEther(trade.minimumAmountOut(SLIPPAGE).raw.toString())/ethBidPrice)
+      } catch {
+      }
+      }
+  })()
+  }
+      , [inputAmount, ethBidPrice, tradeType]);
   React.useEffect(() => {
     fetch("https://api.infura.io/v1/ticker/ethusd")
       .then((response) => response.json())
@@ -149,17 +173,26 @@ export default function Wallet(props) {
   };
 
   const sell = async () => {
+    setLoading(true)
     setupWeb3();
     clearForm();
     const ellipticoin = new ECClient({
       privateKey: Uint8Array.from(secretKey),
-      bootnodes: ["http://localhost:4461"],
     });
+    Ellipticoin.client = ellipticoin;
     const OWNER_ADDRESS = Buffer.from(
       "vQMn3JvS3ATITteQ-gOYfuVSn2buuAH-4e8NY_CvtwA",
       "base64"
     );
     let [ethereumAddress] = await window.web3.eth.getAccounts();
+    await Ellipticoin.approve(
+      Array.from(Buffer.concat([
+        OWNER_ADDRESS,
+        Buffer.from("EthereumBridge", "utf8"),
+      ])),
+      Math.floor(parseFloat(ellipticoinAmount))
+    );
+
     await ellipticoin.post({
       contract_address: Buffer.concat([
         OWNER_ADDRESS,
@@ -167,7 +200,7 @@ export default function Wallet(props) {
       ]),
       function: "burn_and_swap",
       arguments: [
-        Math.floor(parseFloat(inputAmount) * 10000),
+        Math.floor(parseFloat(ellipticoinAmount)),
         Array.from(Buffer.from(ethereumAddress.substring(2), "hex")),
       ],
     });
@@ -177,9 +210,6 @@ export default function Wallet(props) {
       let [ethereumAddress] = await window.web3.eth.getAccounts();
       let newEthBalance = await window.web3.eth.getBalance(ethereumAddress);
       if(ethBalance !== newEthBalance) {
-        console.log(ethBalance)
-        console.log(newEthBalance)
-        console.log("new balance")
         setLoading(false)
         setEthBalance(newEthBalance)
       }
@@ -206,7 +236,7 @@ export default function Wallet(props) {
       route,
       new TokenAmount(
         WETH_TOKEN,
-        ethers.utils.parseEther(etherAmount.toString())
+        etherAmount
       ),
       TradeType.EXACT_INPUT
     );
@@ -238,7 +268,7 @@ export default function Wallet(props) {
   const rows = [
     <TableRow key="2">
       <TableCell component="th" scope="row" style={{ paddingLeft: 80 }}>
-        To
+        {tradeType === "sell" ? "From" : "To"}
       </TableCell>
       <TableCell align="left">
         <img
@@ -249,11 +279,11 @@ export default function Wallet(props) {
         />
         Ethereum
       </TableCell>
-      <TableCell align="right">{etherAmount}</TableCell>
+      <TableCell align="right">{etherAmount ? ethers.utils.formatEther(etherAmount): null}</TableCell>
     </TableRow>,
     <TableRow key="1">
       <TableCell component="th" scope="row" style={{ paddingLeft: 80 }}>
-        From
+        {tradeType === "buy" ? "From" : "To"}
       </TableCell>
       <TableCell align="left">
         <img
@@ -263,7 +293,7 @@ export default function Wallet(props) {
         />
         Ellipticoin
       </TableCell>
-      <TableCell align="right">{(outputAmount / 10000).toFixed(4)}</TableCell>
+      <TableCell align="right" style={{minWidth: 100}}>{(ellipticoinAmount/10000).toFixed(4)}</TableCell>
     </TableRow>,
   ];
 
