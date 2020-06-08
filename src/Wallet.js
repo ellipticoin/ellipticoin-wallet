@@ -72,7 +72,6 @@ export default function Wallet(props) {
     setOpen(false);
     const ellipticoin = new ECClient({
       privateKey: Uint8Array.from(secretKey),
-      bootnodes: ["http://localhost:4461"],
     });
     await ellipticoin.post({
       contract_address: Buffer.concat([

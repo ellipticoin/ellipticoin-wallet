@@ -18,8 +18,6 @@ import SwapVertIcon from "@material-ui/icons/SwapVert";
 import Paper from "@material-ui/core/Paper";
 import CurrencyTextField from "@unicef/material-ui-currency-textfield";
 import CircularProgress from '@material-ui/core/CircularProgress';
-
-
 import copy from "copy-to-clipboard";
 import { Client as ECClient, Ellipticoin } from "ec-client";
 import {
