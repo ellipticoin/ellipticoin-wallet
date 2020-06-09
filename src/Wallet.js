@@ -96,7 +96,7 @@ export default function Wallet(props) {
         <DialogTitle id="alert-dialog-title">{"Send Confirmation"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Send ${sendAmount} EC to {toAddress}?
+            Send {sendAmount} EC to {toAddress}?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -164,7 +164,7 @@ export default function Wallet(props) {
               </Button>
             </form>
             <Box className={classes.balance}>
-              Balance: ${(balance / 10000).toFixed(2)} EC
+              Balance: {(balance / 10000).toFixed(2)} EC
             </Box>
           </CardContent>
         </Card>

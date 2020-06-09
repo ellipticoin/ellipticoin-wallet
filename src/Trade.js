@@ -44,7 +44,7 @@ const ELLIPTICOIN_ADDRESS = Buffer.from(
   "vQMn3JvS3ATITteQ-gOYfuVSn2buuAH-4e8NY_CvtwA",
   "base64"
 );
-const ECCB_ADDRESS = "0x89108B7Bf410Ce52e41eFd41e565ca180Df1EC53";
+const ECCB_ADDRESS = "0x2fFa5945Ce2BEe020cC5AeC1985f4103CF0aC289";
 const SLIPPAGE = new Percent(5, 1000);
 const ECCB_TOKEN = new Token(
   ChainId.KOVAN,
@@ -266,7 +266,7 @@ export default function Wallet(props) {
   const rows = [
     <TableRow key="2">
       <TableCell component="th" scope="row" style={{ paddingLeft: 80 }}>
-        {tradeType === "sell" ? "From" : "To"}
+        {tradeType === "sell" ? "To" : "From"}
       </TableCell>
       <TableCell align="left">
         <img
@@ -281,7 +281,7 @@ export default function Wallet(props) {
     </TableRow>,
     <TableRow key="1">
       <TableCell component="th" scope="row" style={{ paddingLeft: 80 }}>
-        {tradeType === "buy" ? "From" : "To"}
+        {tradeType === "buy" ? "To" : "From"}
       </TableCell>
       <TableCell align="left">
         <img
