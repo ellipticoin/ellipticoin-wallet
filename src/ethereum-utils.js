@@ -38,7 +38,6 @@ export async function signUnlock(ellipticoinAddress) {
 
 export async function setupWeb3() {
   if (window.ethereum) {
-    window.ethereum.autoRefreshOnNetworkChange = false;
     window.web3 = new Web3(window.ethereum);
     try {
       await window.ethereum.enable();

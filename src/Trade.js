@@ -2,7 +2,6 @@ import React from "react";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import base64url from "base64url";
-import { makeStyles } from "@material-ui/core/styles";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
 import AssignmentIcon from "@material-ui/icons/AssignmentOutlined";
@@ -17,7 +16,7 @@ import TableRow from "@material-ui/core/TableRow";
 import SwapVertIcon from "@material-ui/icons/SwapVert";
 import Paper from "@material-ui/core/Paper";
 import CurrencyTextField from "@unicef/material-ui-currency-textfield";
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from "@material-ui/core/CircularProgress";
 import copy from "copy-to-clipboard";
 import { Client as ECClient, Ellipticoin } from "ec-client";
 import {
@@ -27,151 +26,126 @@ import {
   Pair,
   TradeType,
   Route,
-  Trade,
+  InsufficientInputAmountError,
+  Trade as UniswapTrade,
   Percent,
 } from "@uniswap/sdk";
 import { ethers } from "ethers";
 import { setupWeb3 } from "./ethereum-utils.js";
-const WETH_TOKEN = new Token(
+import useStyles from "./Trade.styles.js"
+const WETH = new Token(
   ChainId.KOVAN,
   "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
   18,
-  "WETH",
-  "Wrapped Ether"
 );
-// const {utils: {parseEther}} = ethers
+const ECCB = new Token(
+  ChainId.KOVAN,
+  "0x2fFa5945Ce2BEe020cC5AeC1985f4103CF0aC289",
+  4,
+);
+const DAI = new Token(
+  ChainId.KOVAN,
+  "0xD169aCd2bE441fDBE6773BC5736467593343ac49",
+  18,
+);
+const SLIPPAGE = new Percent(5, 1000);
 const ELLIPTICOIN_ADDRESS = Buffer.from(
   "vQMn3JvS3ATITteQ-gOYfuVSn2buuAH-4e8NY_CvtwA",
   "base64"
 );
-const ECCB_ADDRESS = "0x2fFa5945Ce2BEe020cC5AeC1985f4103CF0aC289";
-const SLIPPAGE = new Percent(5, 1000);
-const ECCB_TOKEN = new Token(
-  ChainId.KOVAN,
-  ECCB_ADDRESS,
-  4,
-  "ECCB",
-  "Ellipticoin Community Burn Bridge"
-);
+async function convert(amount, pair) {
+  // let pair = await Pair.fetchData(
+  //   from,
+  //   to,
+  //   ethers.getDefaultProvider("kovan")
+  // );
+      const route = new Route([pair], pair.tokenAmounts[1].token);
+      try {
+        const trade = new UniswapTrade(
+          route,
+          tokenAmount(pair.tokenAmounts[1].token, amount),
+          TradeType.EXACT_INPUT
+        );
+        return trade.outputAmount.toFixed()
+      } catch(e) {
+        if(e instanceof InsufficientInputAmountError) {
+        } else {
+          throw e;
+        }
+      }
+}
 
-const useStyles = makeStyles((theme) => ({
-  balance: {
-    margin: theme.spacing(1),
-  },
-  tableContainer: {
-    maxWidth: 500,
-    position: "relative",
-    marginBottom: 20,
-  },
-  cardHeader: {
-    color: "white",
-    backgroundColor: theme.palette.primary.main,
-  },
-  assignmentIcon: {
-    margin: theme.spacing(1),
-  },
-  currencyIcon: {
-    width: 12,
-    margin: 5,
-    verticalAlign: "bottom",
-  },
-}));
+function tokenAmount(token, amount) {
+  if(token.decimals === 18) {
+    return new TokenAmount(
+      token,
+      ethers.utils.parseEther(amount.toString()),
+    )
+  } else {
+    return new TokenAmount(
+      token,
+      amount * (10^token.decimals)
+    )
+  }
+}
 export default function Wallet(props) {
   const { createWallet, balance, publicKey, secretKey } = props;
   const classes = useStyles();
-  const [tradeType, setTradeType] = React.useState("sell");
+  const [tradeType, setTradeType] = React.useState("buy");
   const [inputAmount, setInputAmount] = React.useState(1.0);
   const [etherAmount, setEtherAmount] = React.useState(null);
   const [ellipticoinAmount, setEllipticoinAmount] = React.useState(0);
-  const [ethBidPrice, setEthBidPrice] = React.useState(null);
   const [ethBalance, setEthBalance] = React.useState();
+  const [firstPair, setFirstPair] = React.useState();
+  const [secondPair, setSecondPair] = React.useState();
   const [loading, setLoading] = React.useState(false);
   React.useEffect(() => {
     (async () => {
-      setupWeb3()
-      let [ethereumAddress] = await window.web3.eth.getAccounts();
-      setEthBalance(await window.web3.eth.getBalance(ethereumAddress))
-
+      setFirstPair(await Pair.fetchData(
+        DAI,
+        WETH,
+        ethers.getDefaultProvider("kovan")
+      ));
+      setSecondPair(await Pair.fetchData(
+        WETH,
+        ECCB,
+        ethers.getDefaultProvider("kovan")
+      ));
     })();
-  }, []);
+  }, [tradeType]);
 
   React.useEffect(() => {
     (async () => {
-        let pair = await Pair.fetchData(
-          WETH_TOKEN,
-          ECCB_TOKEN,
-          ethers.getDefaultProvider("kovan")
-        );
-        let trade;
-        let route;
-        if (tradeType === "buy" && etherAmount > 0) {
-          route = new Route([pair], WETH_TOKEN);
-          trade = new Trade(
-            route,
-            new TokenAmount(
-              WETH_TOKEN,
-              etherAmount
-            ),
-            TradeType.EXACT_INPUT
-          );
-        setEllipticoinAmount(trade.minimumAmountOut(SLIPPAGE).raw.toString());
-        } else if(ellipticoinAmount > 0) {
-          route = new Route([pair], ECCB_TOKEN);
-          trade = new Trade(
-            route,
-            new TokenAmount(
-              ECCB_TOKEN,
-              Math.floor(ellipticoinAmount)
-            ),
-            TradeType.EXACT_INPUT
-          );
-          setEtherAmount(trade.minimumAmountOut(SLIPPAGE).raw.toString());
+      await setupWeb3();
+      window.ethereum.on('accountsChanged', async (accounts) => {
+        if(accounts.length) {
+          let [account] = accounts;
+           setEthBalance(await window.web3.eth.getBalance(account));
         }
+      })
     })();
-  }, [tradeType, etherAmount, inputAmount, ellipticoinAmount]);
-
+  }, []);
   React.useEffect(() => {
     (async () => {
-    if (!ethBidPrice) {
-      return
-    }
-    if (tradeType === "buy") {
-      setEtherAmount(ethers.utils.parseEther((inputAmount / ethBidPrice).toFixed(8).toString()));
-    } else if(inputAmount && inputAmount > 0) {
-    let pair = await Pair.fetchData(
-      WETH_TOKEN,
-      ECCB_TOKEN,
-      ethers.getDefaultProvider("kovan")
-    );
-          let route = new Route([pair], ECCB_TOKEN);
-      try{
-          let trade = new Trade(
-            route,
-            new TokenAmount(
-              ECCB_TOKEN,
-              inputAmount
-            ),
-            TradeType.EXACT_INPUT
-          );
-      setEllipticoinAmount(inputAmount/ethers.utils.formatEther(trade.minimumAmountOut(SLIPPAGE).raw.toString())/ethBidPrice)
-      } catch {
+      if(tradeType === "buy" && firstPair && secondPair) {
+        let newEtherAmount = await convert(inputAmount, firstPair)
+        if (newEtherAmount) {
+          setEtherAmount(newEtherAmount)
+          setEllipticoinAmount(await convert(newEtherAmount, secondPair))
+        } else {
+          setEtherAmount(null)
+          setEllipticoinAmount(null)
+        }
       }
-      }
-  })()
-  }
-      , [inputAmount, ethBidPrice, tradeType]);
-  React.useEffect(() => {
-    fetch("https://api.infura.io/v1/ticker/ethusd")
-      .then((response) => response.json())
-      .then(({ bid }) => setEthBidPrice(bid));
-  }, []);
+    })();
+  }, [inputAmount, tradeType, firstPair, secondPair]);
 
   const clearForm = () => {
-    setInputAmount(0);
+    setInputAmount(null);
   };
 
   const sell = async () => {
-    setLoading(true)
+    setLoading(true);
     setupWeb3();
     clearForm();
     const ellipticoin = new ECClient({
@@ -184,10 +158,9 @@ export default function Wallet(props) {
     );
     let [ethereumAddress] = await window.web3.eth.getAccounts();
     await Ellipticoin.approve(
-      Array.from(Buffer.concat([
-        OWNER_ADDRESS,
-        Buffer.from("EthereumBridge", "utf8"),
-      ])),
+      Array.from(
+        Buffer.concat([OWNER_ADDRESS, Buffer.from("EthereumBridge", "utf8")])
+      ),
       Math.floor(parseFloat(ellipticoinAmount))
     );
 
@@ -207,9 +180,9 @@ export default function Wallet(props) {
     const interval = setInterval(async () => {
       let [ethereumAddress] = await window.web3.eth.getAccounts();
       let newEthBalance = await window.web3.eth.getBalance(ethereumAddress);
-      if(ethBalance !== newEthBalance) {
-        setLoading(false)
-        setEthBalance(newEthBalance)
+      if (ethBalance !== newEthBalance) {
+        setLoading(false);
+        setEthBalance(newEthBalance);
       }
     }, 1000);
 
@@ -221,39 +194,36 @@ export default function Wallet(props) {
     setLoading(true);
     await setupWeb3();
     let [ethereumAddress] = await window.web3.eth.getAccounts();
-    const ECCBToken = new window.web3.eth.Contract(ECCBTokenABI, ECCB_ADDRESS, {
+    const ECCBToken = new window.web3.eth.Contract(ECCBTokenABI, ECCB.address, {
       from: ethereumAddress,
     });
     let pair = await Pair.fetchData(
-      WETH_TOKEN,
-      ECCB_TOKEN,
+      WETH,
+      ECCB,
       ethers.getDefaultProvider("kovan")
     );
-    let route = new Route([pair], WETH_TOKEN);
-    const trade = new Trade(
+    let route = new Route([pair], WETH);
+    const trade = new UniswapTrade(
       route,
-      new TokenAmount(
-        WETH_TOKEN,
-        etherAmount
-      ),
+      new TokenAmount(WETH, etherAmount),
       TradeType.EXACT_INPUT
     );
     let deadline = Math.ceil(Date.now() / 1000) + 60 * 20;
     try {
-    await ECCBToken.methods
-      .swapAndBurn(
-        trade.minimumAmountOut(SLIPPAGE).raw.toString(),
-        trade.route.path.map((t) => t.address),
-        ELLIPTICOIN_ADDRESS,
-        deadline
-      )
-      .send({
-        value: new window.web3.utils.BN(
-          trade.maximumAmountIn(SLIPPAGE).raw.toString()
-        ),
-      });
+      await ECCBToken.methods
+        .swapAndBurn(
+          trade.minimumAmountOut(SLIPPAGE).raw.toString(),
+          trade.route.path.map((t) => t.address),
+          ELLIPTICOIN_ADDRESS,
+          deadline
+        )
+        .send({
+          value: new window.web3.utils.BN(
+            trade.maximumAmountIn(SLIPPAGE).raw.toString()
+          ),
+        });
     } catch {
-      setLoading(false)
+      setLoading(false);
     }
   };
   const trade = async (evt) => {
@@ -277,7 +247,9 @@ export default function Wallet(props) {
         />
         Ethereum
       </TableCell>
-      <TableCell align="right">{etherAmount ? ethers.utils.formatEther(etherAmount): null}</TableCell>
+      <TableCell align="right">
+        {etherAmount ? etherAmount : null}
+      </TableCell>
     </TableRow>,
     <TableRow key="1">
       <TableCell component="th" scope="row" style={{ paddingLeft: 80 }}>
@@ -291,7 +263,9 @@ export default function Wallet(props) {
         />
         Ellipticoin
       </TableCell>
-      <TableCell align="right" style={{minWidth: 100}}>{(ellipticoinAmount/10000).toFixed(4)}</TableCell>
+      <TableCell align="right" style={{ minWidth: 100 }}>
+        {ellipticoinAmount}
+      </TableCell>
     </TableRow>,
   ];
 
@@ -371,18 +345,21 @@ export default function Wallet(props) {
                 variant="contained"
                 color="primary"
               >
-        {loading? <CircularProgress size="1.5rem" style={{padding: 1}} />: "Trade"}
+                {loading ? (
+                  <CircularProgress size="1.5rem" style={{ padding: 1 }} />
+                ) : (
+                  "Trade"
+                )}
               </Button>
             </form>
-            {balance?
-            <div style={{marginTop: 20}}>
-            EC Balance: {(balance/10000).toFixed(2)}
-            </div>: null}
-            {ethBalance?
-            <div>
-            ETH Balance: {ethers.utils.formatEther(ethBalance)}
-            </div>
-            :null}
+            {balance ? (
+              <div style={{ marginTop: 20 }}>
+                EC Balance: {(balance / 10000).toFixed(2)}
+              </div>
+            ) : null}
+            {ethBalance ? (
+              <div>ETH Balance: {ethers.utils.formatEther(ethBalance)}</div>
+            ) : null}
           </CardContent>
         </Card>
       ) : (
