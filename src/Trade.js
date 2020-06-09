@@ -148,7 +148,9 @@ export default function Wallet(props) {
 
   React.useEffect(() => {
     (async () => {
-      setEthBalance(ethereumAccount);
+      if (ethereumAccount) {
+        setEthBalance(await window.web3.eth.getBalance(ethereumAccount));
+      }
     })();
   }, [ethereumAccount]);
   React.useEffect(() => {
@@ -217,8 +219,7 @@ export default function Wallet(props) {
 
   React.useEffect(() => {
     const interval = setInterval(async () => {
-      let [ethereumAddress] = await window.web3.eth.getAccounts();
-      let newEthBalance = await window.web3.eth.getBalance(ethereumAddress);
+      let newEthBalance = await window.web3.eth.getBalance(ethereumAccount);
       if (ethBalance !== newEthBalance) {
         setLoading(false);
         setEthBalance(newEthBalance);
