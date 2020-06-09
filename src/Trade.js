@@ -32,113 +32,150 @@ import {
 } from "@uniswap/sdk";
 import { ethers } from "ethers";
 import { setupWeb3 } from "./ethereum-utils.js";
-import useStyles from "./Trade.styles.js"
+import useStyles from "./Trade.styles.js";
 const WETH = new Token(
   ChainId.KOVAN,
-  "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
-  18,
+  "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
+  18
 );
 const ECCB = new Token(
   ChainId.KOVAN,
-  "0x2fFa5945Ce2BEe020cC5AeC1985f4103CF0aC289",
-  4,
+  "0x07afee68F707eF6eC040Aa58c2FA182Cf10A1634",
+  4
 );
 const DAI = new Token(
   ChainId.KOVAN,
   "0xD169aCd2bE441fDBE6773BC5736467593343ac49",
-  18,
+  18
 );
 const SLIPPAGE = new Percent(5, 1000);
 const ELLIPTICOIN_ADDRESS = Buffer.from(
   "vQMn3JvS3ATITteQ-gOYfuVSn2buuAH-4e8NY_CvtwA",
   "base64"
 );
-async function convert(amount, pair) {
-  // let pair = await Pair.fetchData(
-  //   from,
-  //   to,
-  //   ethers.getDefaultProvider("kovan")
-  // );
-      const route = new Route([pair], pair.tokenAmounts[1].token);
-      try {
-        const trade = new UniswapTrade(
-          route,
-          tokenAmount(pair.tokenAmounts[1].token, amount),
-          TradeType.EXACT_INPUT
-        );
-        return trade.outputAmount.toFixed()
-      } catch(e) {
-        if(e instanceof InsufficientInputAmountError) {
-        } else {
-          throw e;
-        }
-      }
+function convert(amount, route) {
+  try {
+    const trade = new UniswapTrade(
+      route,
+      tokenAmount(route.input, amount),
+      TradeType.EXACT_INPUT
+    );
+    return trade.outputAmount.toFixed();
+  } catch (e) {
+    if (e instanceof InsufficientInputAmountError) {
+    } else {
+      throw e;
+    }
+  }
 }
 
-function tokenAmount(token, amount) {
-  if(token.decimals === 18) {
+function tokenAmount(token, amount = 0) {
+  if (token.decimals === 18) {
     return new TokenAmount(
       token,
-      ethers.utils.parseEther(amount.toString()),
-    )
+      ethers.utils.parseEther((amount || 0).toString())
+    );
   } else {
     return new TokenAmount(
       token,
-      amount * (10^token.decimals)
-    )
+      Math.round(amount * Math.pow(10, token.decimals)).toString()
+    );
   }
 }
 export default function Wallet(props) {
   const { createWallet, balance, publicKey, secretKey } = props;
   const classes = useStyles();
-  const [tradeType, setTradeType] = React.useState("buy");
-  const [inputAmount, setInputAmount] = React.useState(1.0);
+  const [tradeType, setTradeType] = React.useState("sell");
+  const [inputAmount, setInputAmount] = React.useState();
   const [etherAmount, setEtherAmount] = React.useState(null);
-  const [ellipticoinAmount, setEllipticoinAmount] = React.useState(0);
+  const [ellipticoinAmount, setEllipticoinAmount] = React.useState();
   const [ethBalance, setEthBalance] = React.useState();
-  const [firstPair, setFirstPair] = React.useState();
-  const [secondPair, setSecondPair] = React.useState();
+  const [firstRoute, setFirstRoute] = React.useState();
+  const [secondRoute, setSecondRoute] = React.useState();
   const [loading, setLoading] = React.useState(false);
+  const [ethereumAccount, setEthereumAccount] = React.useState();
   React.useEffect(() => {
     (async () => {
-      setFirstPair(await Pair.fetchData(
-        DAI,
-        WETH,
-        ethers.getDefaultProvider("kovan")
-      ));
-      setSecondPair(await Pair.fetchData(
-        WETH,
-        ECCB,
-        ethers.getDefaultProvider("kovan")
-      ));
+      if (tradeType === "buy") {
+        let DAI_WETH = await Pair.fetchData(
+          DAI,
+          WETH,
+          ethers.getDefaultProvider("kovan")
+        );
+        let WETH_ECCB = await Pair.fetchData(
+          WETH,
+          ECCB,
+          ethers.getDefaultProvider("kovan")
+        );
+        setFirstRoute(new Route([DAI_WETH], DAI));
+        setSecondRoute(new Route([WETH_ECCB], WETH));
+      } else {
+        let DAI_WETH = await Pair.fetchData(
+          DAI,
+          WETH,
+          ethers.getDefaultProvider("kovan")
+        );
+        let WETH_ECCB = await Pair.fetchData(
+          WETH,
+          ECCB,
+          ethers.getDefaultProvider("kovan")
+        );
+        setFirstRoute(new Route([DAI_WETH, WETH_ECCB], DAI));
+        let ECCB_WETH = await Pair.fetchData(
+          ECCB,
+          WETH,
+          ethers.getDefaultProvider("kovan")
+        );
+        setSecondRoute(new Route([ECCB_WETH], ECCB));
+      }
     })();
-  }, [tradeType]);
+  }, [tradeType, loading]);
 
   React.useEffect(() => {
     (async () => {
       await setupWeb3();
-      window.ethereum.on('accountsChanged', async (accounts) => {
-        if(accounts.length) {
-          let [account] = accounts;
-           setEthBalance(await window.web3.eth.getBalance(account));
+      let accounts = await window.web3.eth.getAccounts();
+      if (accounts.length) {
+        setEthereumAccount(accounts[0]);
+      }
+      window.ethereum.on("accountsChanged", async (accounts) => {
+        if (accounts.length) {
+          setEthereumAccount(accounts[0]);
         }
-      })
+      });
     })();
   }, []);
+
   React.useEffect(() => {
     (async () => {
-      if(tradeType === "buy" && firstPair && secondPair) {
-        let newEtherAmount = await convert(inputAmount, firstPair)
+      setEthBalance(ethereumAccount);
+    })();
+  }, [ethereumAccount]);
+  React.useEffect(() => {
+    (async () => {
+      if (!firstRoute || !secondRoute) {
+        return;
+      }
+
+      if (tradeType === "buy") {
+        let newEtherAmount = convert(inputAmount, firstRoute);
         if (newEtherAmount) {
-          setEtherAmount(newEtherAmount)
-          setEllipticoinAmount(await convert(newEtherAmount, secondPair))
+          setEtherAmount(newEtherAmount);
+          setEllipticoinAmount(convert(newEtherAmount, secondRoute));
         } else {
-          setEtherAmount(null)
-          setEllipticoinAmount(null)
+          setEtherAmount(null);
+          setEllipticoinAmount(null);
+        }
+      } else {
+        let newEllipticoinAmount = convert(inputAmount, firstRoute);
+        if (newEllipticoinAmount) {
+          setEllipticoinAmount(newEllipticoinAmount);
+          setEtherAmount(convert(newEllipticoinAmount, secondRoute));
+        } else {
         }
       }
     })();
-  }, [inputAmount, tradeType, firstPair, secondPair]);
+  }, [inputAmount, tradeType, firstRoute, secondRoute]);
 
   const clearForm = () => {
     setInputAmount(null);
@@ -152,16 +189,16 @@ export default function Wallet(props) {
       privateKey: Uint8Array.from(secretKey),
     });
     Ellipticoin.client = ellipticoin;
+    console.log(ethereumAccount);
     const OWNER_ADDRESS = Buffer.from(
       "vQMn3JvS3ATITteQ-gOYfuVSn2buuAH-4e8NY_CvtwA",
       "base64"
     );
-    let [ethereumAddress] = await window.web3.eth.getAccounts();
     await Ellipticoin.approve(
       Array.from(
         Buffer.concat([OWNER_ADDRESS, Buffer.from("EthereumBridge", "utf8")])
       ),
-      Math.floor(parseFloat(ellipticoinAmount))
+      Math.floor(parseFloat(ellipticoinAmount) * 10000)
     );
 
     await ellipticoin.post({
@@ -171,11 +208,13 @@ export default function Wallet(props) {
       ]),
       function: "burn_and_swap",
       arguments: [
-        Math.floor(parseFloat(ellipticoinAmount)),
-        Array.from(Buffer.from(ethereumAddress.substring(2), "hex")),
+        Math.floor(parseFloat(ellipticoinAmount) * 10000),
+        Array.from(Buffer.from(ethereumAccount.substring(2), "hex")),
       ],
     });
+    clearForm();
   };
+
   React.useEffect(() => {
     const interval = setInterval(async () => {
       let [ethereumAddress] = await window.web3.eth.getAccounts();
@@ -190,22 +229,16 @@ export default function Wallet(props) {
       clearInterval(interval);
     };
   }, [ethBalance]);
+
   const buy = async () => {
     setLoading(true);
-    await setupWeb3();
     let [ethereumAddress] = await window.web3.eth.getAccounts();
     const ECCBToken = new window.web3.eth.Contract(ECCBTokenABI, ECCB.address, {
       from: ethereumAddress,
     });
-    let pair = await Pair.fetchData(
-      WETH,
-      ECCB,
-      ethers.getDefaultProvider("kovan")
-    );
-    let route = new Route([pair], WETH);
     const trade = new UniswapTrade(
-      route,
-      new TokenAmount(WETH, etherAmount),
+      secondRoute,
+      tokenAmount(WETH, etherAmount),
       TradeType.EXACT_INPUT
     );
     let deadline = Math.ceil(Date.now() / 1000) + 60 * 20;
@@ -222,8 +255,10 @@ export default function Wallet(props) {
             trade.maximumAmountIn(SLIPPAGE).raw.toString()
           ),
         });
+      clearForm();
     } catch {
       setLoading(false);
+      clearForm();
     }
   };
   const trade = async (evt) => {
@@ -247,9 +282,7 @@ export default function Wallet(props) {
         />
         Ethereum
       </TableCell>
-      <TableCell align="right">
-        {etherAmount ? etherAmount : null}
-      </TableCell>
+      <TableCell align="right">{etherAmount ? etherAmount : null}</TableCell>
     </TableRow>,
     <TableRow key="1">
       <TableCell component="th" scope="row" style={{ paddingLeft: 80 }}>
