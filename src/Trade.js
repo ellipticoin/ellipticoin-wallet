@@ -49,10 +49,11 @@ const DAI = new Token(
   18
 );
 const SLIPPAGE = new Percent(5, 1000);
-const ELLIPTICOIN_ADDRESS = Buffer.from(
+const OWNER_ADDRESS = Buffer.from(
   "vQMn3JvS3ATITteQ-gOYfuVSn2buuAH-4e8NY_CvtwA",
   "base64"
 );
+
 function convert(amount, route) {
   try {
     const trade = new UniswapTrade(
@@ -191,17 +192,14 @@ export default function Wallet(props) {
       privateKey: Uint8Array.from(secretKey),
     });
     Ellipticoin.client = ellipticoin;
-    console.log(ethereumAccount);
-    const OWNER_ADDRESS = Buffer.from(
-      "vQMn3JvS3ATITteQ-gOYfuVSn2buuAH-4e8NY_CvtwA",
-      "base64"
-    );
     await Ellipticoin.approve(
       Array.from(
         Buffer.concat([OWNER_ADDRESS, Buffer.from("EthereumBridge", "utf8")])
       ),
       Math.floor(parseFloat(ellipticoinAmount) * 10000)
     );
+
+    // await ellipticoin.waitForTransactionToBeMined(approve)
 
     await ellipticoin.post({
       contract_address: Buffer.concat([
@@ -219,6 +217,9 @@ export default function Wallet(props) {
 
   React.useEffect(() => {
     const interval = setInterval(async () => {
+      if (!ethereumAccount) {
+        return;
+      }
       let newEthBalance = await window.web3.eth.getBalance(ethereumAccount);
       if (ethBalance !== newEthBalance) {
         setLoading(false);
@@ -229,7 +230,7 @@ export default function Wallet(props) {
     return () => {
       clearInterval(interval);
     };
-  }, [ethBalance]);
+  }, [ethereumAccount, ethBalance]);
 
   const buy = async () => {
     setLoading(true);
@@ -248,7 +249,7 @@ export default function Wallet(props) {
         .swapAndBurn(
           trade.minimumAmountOut(SLIPPAGE).raw.toString(),
           trade.route.path.map((t) => t.address),
-          ELLIPTICOIN_ADDRESS,
+          "0x" + Buffer.from(publicKey).toString("hex"),
           deadline
         )
         .send({
