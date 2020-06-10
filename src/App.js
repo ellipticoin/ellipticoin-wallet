@@ -12,6 +12,7 @@ import { Buffer } from "buffer/";
 import Wallet from "./Wallet";
 import Trade from "./Trade";
 import UnlockEllipticoin from "./UnlockEllipticoin";
+import Alert from '@material-ui/lab/Alert';
 import { Client as ECClient } from "ec-client";
 
 // const WEBSOCKET_HOST =
@@ -135,6 +136,10 @@ export default function App() {
 
   return (
     <div className={classes.root}>
+    {!window.localStorage.getItem("hideWarning") ?
+    <Alert severity="error">
+      WARNING The Ellipticoin network is not yet live. Balances here will be erased. The Network is sceduled to be launched June 17th. Please check back then!
+    </Alert>: null}
       <AppBar position="static">
         <Tabs
           value={tab}
