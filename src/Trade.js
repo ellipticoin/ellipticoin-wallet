@@ -38,7 +38,7 @@ const WETH = WETH_MAP[ChainId.MAINNET];
 console.log(ChainId)
 const ECCB = new Token(
   ChainId.MAINNET,
-  "0x59eb2e859726c7d69f942c907363485127c342f9",
+  "0x8b4da1ccc931eb26e70e86d9706517ce2dbf0ad1",
   4
 );
 const DAI = new Token(
