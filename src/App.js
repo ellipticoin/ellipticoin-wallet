@@ -86,32 +86,37 @@ export default function App() {
   }, [secretKey]);
 
   React.useEffect(() => {
-    const interval = setInterval(async () => {
+    (async () => {
       if (!secretKey) {
         return;
       }
+    const interval = setInterval(async () => {
       const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
-      const ellipticoin = new ECClient({
-        privateKey: keyPair.secretKey,
-        // bootnodes: ["http://localhost:4461"],
-      });
-      Buffer.concat([
-        new Buffer(32),
-        Buffer.from("Ellipticoin", "utf8"),
-        Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)]),
-      ]);
-      const balanceBytes = await ellipticoin.getMemory(
-        new Buffer(32),
-        "Ellipticoin",
-        Buffer.concat([new Buffer([1]), Buffer.from(keyPair.publicKey)])
-      );
-      setBalance(bytesToNumber(balanceBytes));
+      setBalance(await getBalance(ellipticoin, keyPair.publicKey));
     }, 1000);
+
+    const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(ellipticoin.privateKey));
+    setBalance(await getBalance(ellipticoin, keyPair.publicKey));
 
     return () => {
       clearInterval(interval);
     };
-  }, [secretKey]);
+    })();
+  }, [secretKey, ellipticoin]);
+
+  const getBalance = async (ellipticoin, address) => {
+      Buffer.concat([
+        new Buffer(32),
+        Buffer.from("Ellipticoin", "utf8"),
+        Buffer.concat([new Buffer([1]), Buffer.from(address)]),
+      ]);
+      const balanceBytes = await ellipticoin.getMemory(
+        new Buffer(32),
+        "Ellipticoin",
+        Buffer.concat([new Buffer([1]), Buffer.from(address)])
+      );
+      return bytesToNumber(balanceBytes)
+  }
   React.useEffect(() => {
     localStorage.setItem("tab", JSON.stringify(tab));
   }, [tab]);

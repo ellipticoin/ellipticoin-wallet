@@ -86,7 +86,7 @@ function tokenAmount(token, amount = 0) {
 export default function Wallet(props) {
   const { createWallet, balance, publicKey, secretKey } = props;
   const classes = useStyles();
-  const [tradeType, setTradeType] = React.useState("sell");
+  const [tradeType, setTradeType] = React.useState("buy");
   const [inputAmount, setInputAmount] = React.useState();
   const [etherAmount, setEtherAmount] = React.useState(null);
   const [ellipticoinAmount, setEllipticoinAmount] = React.useState();
@@ -181,7 +181,7 @@ export default function Wallet(props) {
   }, [inputAmount, tradeType, firstRoute, secondRoute]);
 
   const clearForm = () => {
-    setInputAmount(null);
+    setInputAmount("");
   };
 
   const sell = async () => {
@@ -357,6 +357,7 @@ export default function Wallet(props) {
                       : [...rows].reverse().map((row) => row)}
                   </TableBody>
                 </Table>
+                { balance !== 0 ?
                 <IconButton
                   style={{
                     position: "absolute",
@@ -371,17 +372,17 @@ export default function Wallet(props) {
                   size="medium"
                 >
                   <SwapVertIcon fontSize="inherit" />
-                </IconButton>
+                </IconButton>: null}
               </TableContainer>
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={loading || inputAmount === undefined}
                 style={{ width: "20em" }}
                 variant="contained"
                 color="primary"
               >
                 {loading ? (
-                  <CircularProgress size="1.5rem" style={{ padding: 1 }} />
+                  <>&#128034; Waiting for Ethereum <CircularProgress size="1.5rem" style={{ padding: "0 10px" }} /></>
                 ) : (
                   "Trade"
                 )}
