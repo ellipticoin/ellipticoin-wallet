@@ -20,6 +20,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import copy from "copy-to-clipboard";
 import { Client as ECClient, Ellipticoin } from "ec-client";
 import {
+  WETH as WETH_MAP,
   ChainId,
   Token,
   TokenAmount,
@@ -33,19 +34,16 @@ import {
 import { ethers } from "ethers";
 import { setupWeb3 } from "./ethereum-utils.js";
 import useStyles from "./Trade.styles.js";
-const WETH = new Token(
-  ChainId.KOVAN,
-  "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
-  18
-);
+const WETH = WETH_MAP[ChainId.MAINNET];
+console.log(ChainId)
 const ECCB = new Token(
-  ChainId.KOVAN,
-  "0x07afee68F707eF6eC040Aa58c2FA182Cf10A1634",
+  ChainId.MAINNET,
+  "0x59eb2e859726c7d69f942c907363485127c342f9",
   4
 );
 const DAI = new Token(
-  ChainId.KOVAN,
-  "0xD169aCd2bE441fDBE6773BC5736467593343ac49",
+  ChainId.MAINNET,
+  "0x6b175474e89094c44da98b954eedeac495271d0f",
   18
 );
 const SLIPPAGE = new Percent(5, 1000);
@@ -101,12 +99,12 @@ export default function Wallet(props) {
         let DAI_WETH = await Pair.fetchData(
           DAI,
           WETH,
-          ethers.getDefaultProvider("kovan")
+          ethers.getDefaultProvider()
         );
         let WETH_ECCB = await Pair.fetchData(
           WETH,
           ECCB,
-          ethers.getDefaultProvider("kovan")
+          ethers.getDefaultProvider()
         );
         setFirstRoute(new Route([DAI_WETH], DAI));
         setSecondRoute(new Route([WETH_ECCB], WETH));
@@ -114,18 +112,18 @@ export default function Wallet(props) {
         let DAI_WETH = await Pair.fetchData(
           DAI,
           WETH,
-          ethers.getDefaultProvider("kovan")
+          ethers.getDefaultProvider()
         );
         let WETH_ECCB = await Pair.fetchData(
           WETH,
           ECCB,
-          ethers.getDefaultProvider("kovan")
+          ethers.getDefaultProvider()
         );
         setFirstRoute(new Route([DAI_WETH, WETH_ECCB], DAI));
         let ECCB_WETH = await Pair.fetchData(
           ECCB,
           WETH,
-          ethers.getDefaultProvider("kovan")
+          ethers.getDefaultProvider()
         );
         setSecondRoute(new Route([ECCB_WETH], ECCB));
       }
