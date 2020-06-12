@@ -35,10 +35,9 @@ import { ethers } from "ethers";
 import { setupWeb3 } from "./ethereum-utils.js";
 import useStyles from "./Trade.styles.js";
 const WETH = WETH_MAP[ChainId.MAINNET];
-console.log(ChainId)
 const ECCB = new Token(
   ChainId.MAINNET,
-  "0x8b4da1ccc931eb26e70e86d9706517ce2dbf0ad1",
+  "0x33307f0F1029487e0a77Ba2A20794A5A047E3e92",
   4
 );
 const DAI = new Token(
@@ -355,22 +354,23 @@ export default function Wallet(props) {
                       : [...rows].reverse().map((row) => row)}
                   </TableBody>
                 </Table>
-                { balance !== 0 ?
-                <IconButton
-                  style={{
-                    position: "absolute",
-                    top: 30,
-                    left: 10,
-                    maxWidth: 400,
-                    backgroundColor: "#fff",
-                    border: "1px solid #eee",
-                  }}
-                  onClick={() => toggleTradeType()}
-                  aria-label="delete"
-                  size="medium"
-                >
-                  <SwapVertIcon fontSize="inherit" />
-                </IconButton>: null}
+                {balance !== 0 ? (
+                  <IconButton
+                    style={{
+                      position: "absolute",
+                      top: 30,
+                      left: 10,
+                      maxWidth: 400,
+                      backgroundColor: "#fff",
+                      border: "1px solid #eee",
+                    }}
+                    onClick={() => toggleTradeType()}
+                    aria-label="delete"
+                    size="medium"
+                  >
+                    <SwapVertIcon fontSize="inherit" />
+                  </IconButton>
+                ) : null}
               </TableContainer>
               <Button
                 type="submit"
@@ -380,7 +380,13 @@ export default function Wallet(props) {
                 color="primary"
               >
                 {loading ? (
-                  <>&#128034; Waiting for Ethereum <CircularProgress size="1.5rem" style={{ padding: "0 10px" }} /></>
+                  <>
+                    &#128034; Waiting for Ethereum{" "}
+                    <CircularProgress
+                      size="1.5rem"
+                      style={{ padding: "0 10px" }}
+                    />
+                  </>
                 ) : (
                   "Trade"
                 )}

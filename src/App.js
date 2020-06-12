@@ -12,7 +12,7 @@ import { Buffer } from "buffer/";
 import Wallet from "./Wallet";
 import Trade from "./Trade";
 import UnlockEllipticoin from "./UnlockEllipticoin";
-import Alert from '@material-ui/lab/Alert';
+import Alert from "@material-ui/lab/Alert";
 import { Client as ECClient } from "ec-client";
 
 // const WEBSOCKET_HOST =
@@ -75,7 +75,7 @@ export default function App() {
     if (secretKey) {
       return new ECClient({
         privateKey: Uint8Array.from(secretKey),
-        // bootnodes: ["http://localhost:4461"],
+        // bootnodes: ["http://localhost:8080"],
       });
     }
   }, [secretKey]);
@@ -91,33 +91,35 @@ export default function App() {
       if (!secretKey) {
         return;
       }
-    const interval = setInterval(async () => {
-      const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
+      const interval = setInterval(async () => {
+        const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
+        setBalance(await getBalance(ellipticoin, keyPair.publicKey));
+      }, 1000);
+
+      const keyPair = nacl.sign.keyPair.fromSecretKey(
+        Buffer.from(ellipticoin.privateKey)
+      );
       setBalance(await getBalance(ellipticoin, keyPair.publicKey));
-    }, 1000);
 
-    const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(ellipticoin.privateKey));
-    setBalance(await getBalance(ellipticoin, keyPair.publicKey));
-
-    return () => {
-      clearInterval(interval);
-    };
+      return () => {
+        clearInterval(interval);
+      };
     })();
   }, [secretKey, ellipticoin]);
 
   const getBalance = async (ellipticoin, address) => {
-      Buffer.concat([
-        new Buffer(32),
-        Buffer.from("Ellipticoin", "utf8"),
-        Buffer.concat([new Buffer([1]), Buffer.from(address)]),
-      ]);
-      const balanceBytes = await ellipticoin.getMemory(
-        new Buffer(32),
-        "Ellipticoin",
-        Buffer.concat([new Buffer([1]), Buffer.from(address)])
-      );
-      return bytesToNumber(balanceBytes)
-  }
+    Buffer.concat([
+      new Buffer(32),
+      Buffer.from("Ellipticoin", "utf8"),
+      Buffer.concat([new Buffer([1]), Buffer.from(address)]),
+    ]);
+    const balanceBytes = await ellipticoin.getMemory(
+      new Buffer(32),
+      "Ellipticoin",
+      Buffer.concat([new Buffer([1]), Buffer.from(address)])
+    );
+    return bytesToNumber(balanceBytes);
+  };
   React.useEffect(() => {
     localStorage.setItem("tab", JSON.stringify(tab));
   }, [tab]);
@@ -136,10 +138,13 @@ export default function App() {
 
   return (
     <div className={classes.root}>
-    {!window.localStorage.getItem("hideWarning") ?
-    <Alert severity="error">
-      WARNING The Ellipticoin network is not yet live. Balances here will be erased. The Network is sceduled to be launched June 17th. Please check back then!
-    </Alert>: null}
+      {!window.localStorage.getItem("hideWarning") ? (
+        <Alert severity="error">
+          WARNING The Ellipticoin network is not yet live. Balances here will be
+          erased. The Network is sceduled to be launched June 17th. Please check
+          back then!
+        </Alert>
+      ) : null}
       <AppBar position="static">
         <Tabs
           value={tab}
