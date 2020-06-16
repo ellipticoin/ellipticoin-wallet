@@ -37,7 +37,7 @@ import useStyles from "./Trade.styles.js";
 const WETH = WETH_MAP[ChainId.MAINNET];
 const ECCB = new Token(
   ChainId.MAINNET,
-  "0x33307f0F1029487e0a77Ba2A20794A5A047E3e92",
+  "0x60DA34eE5C163d5416B72Df3561A662155b60752",
   4
 );
 const DAI = new Token(
@@ -132,6 +132,9 @@ export default function Wallet(props) {
   React.useEffect(() => {
     (async () => {
       await setupWeb3();
+      if (!window.web3) {
+        return;
+      }
       let accounts = await window.web3.eth.getAccounts();
       if (accounts.length) {
         setEthereumAccount(accounts[0]);
@@ -301,116 +304,120 @@ export default function Wallet(props) {
     </TableRow>,
   ];
 
+  if (!window.web3) {
+    return (
+      <>
+        Please install <a href="https://metamask.io/">MetaMask</a> to continue.
+      </>
+    );
+  }
+
+  if (!publicKey) {
+    return (
+      <Button
+        onClick={() => createWallet()}
+        variant="contained"
+        color="primary"
+      >
+        Create Wallet
+      </Button>
+    );
+  }
   return (
-    <>
-      {publicKey ? (
-        <Card className={classes.root}>
-          <CardHeader
-            classes={{
-              root: classes.cardHeader,
+    <Card className={classes.root}>
+      <CardHeader
+        classes={{
+          root: classes.cardHeader,
+        }}
+        action={
+          <IconButton aria-label="settings">
+            <MoreVertIcon />
+          </IconButton>
+        }
+        title={
+          <>
+            Wallet Address: {publicKey ? base64url(publicKey) : ""}
+            <IconButton
+              aria-label="delete"
+              className={classes.margin}
+              onClick={() => copy(base64url(publicKey))}
+            >
+              <AssignmentIcon className={classes.assignmentIcon} />
+            </IconButton>
+          </>
+        }
+      />
+      <CardContent>
+        <form noValidate autoComplete="off" onSubmit={(evt) => trade(evt)}>
+          <CurrencyTextField
+            label="Amount (USD)"
+            variant="standard"
+            value={inputAmount}
+            width="10ch"
+            currencySymbol="$"
+            style={{
+              width: "20ch",
+              position: "relative",
+              marginBottom: 20,
             }}
-            action={
-              <IconButton aria-label="settings">
-                <MoreVertIcon />
-              </IconButton>
-            }
-            title={
-              <>
-                Wallet Address: {publicKey ? base64url(publicKey) : ""}
-                <IconButton
-                  aria-label="delete"
-                  className={classes.margin}
-                  onClick={() => copy(base64url(publicKey))}
-                >
-                  <AssignmentIcon className={classes.assignmentIcon} />
-                </IconButton>
-              </>
-            }
+            onChange={(event, value) => setInputAmount(value)}
           />
-          <CardContent>
-            <form noValidate autoComplete="off" onSubmit={(evt) => trade(evt)}>
-              <CurrencyTextField
-                label="Amount (USD)"
-                variant="standard"
-                value={inputAmount}
-                width="10ch"
-                currencySymbol="$"
+          <TableContainer
+            className={classes.tableContainer}
+            style={{}}
+            component={Paper}
+          >
+            <Table className={classes.table} aria-label="simple table">
+              <TableBody>
+                {tradeType === "buy"
+                  ? [...rows].map((row) => row)
+                  : [...rows].reverse().map((row) => row)}
+              </TableBody>
+            </Table>
+            {balance !== 0 ? (
+              <IconButton
                 style={{
-                  width: "20ch",
-                  position: "relative",
-                  marginBottom: 20,
+                  position: "absolute",
+                  top: 30,
+                  left: 10,
+                  maxWidth: 400,
+                  backgroundColor: "#fff",
+                  border: "1px solid #eee",
                 }}
-                onChange={(event, value) => setInputAmount(value)}
-              />
-              <TableContainer
-                className={classes.tableContainer}
-                style={{}}
-                component={Paper}
+                onClick={() => toggleTradeType()}
+                aria-label="delete"
+                size="medium"
               >
-                <Table className={classes.table} aria-label="simple table">
-                  <TableBody>
-                    {tradeType === "buy"
-                      ? [...rows].map((row) => row)
-                      : [...rows].reverse().map((row) => row)}
-                  </TableBody>
-                </Table>
-                {balance !== 0 ? (
-                  <IconButton
-                    style={{
-                      position: "absolute",
-                      top: 30,
-                      left: 10,
-                      maxWidth: 400,
-                      backgroundColor: "#fff",
-                      border: "1px solid #eee",
-                    }}
-                    onClick={() => toggleTradeType()}
-                    aria-label="delete"
-                    size="medium"
-                  >
-                    <SwapVertIcon fontSize="inherit" />
-                  </IconButton>
-                ) : null}
-              </TableContainer>
-              <Button
-                type="submit"
-                disabled={loading || inputAmount === undefined}
-                style={{ width: "20em" }}
-                variant="contained"
-                color="primary"
-              >
-                {loading ? (
-                  <>
-                    &#128034; Waiting for Ethereum{" "}
-                    <CircularProgress
-                      size="1.5rem"
-                      style={{ padding: "0 10px" }}
-                    />
-                  </>
-                ) : (
-                  "Trade"
-                )}
-              </Button>
-            </form>
-            {balance ? (
-              <div style={{ marginTop: 20 }}>
-                EC Balance: {(balance / 10000).toFixed(2)}
-              </div>
+                <SwapVertIcon fontSize="inherit" />
+              </IconButton>
             ) : null}
-            {ethBalance ? (
-              <div>ETH Balance: {ethers.utils.formatEther(ethBalance)}</div>
-            ) : null}
-          </CardContent>
-        </Card>
-      ) : (
-        <Button
-          onClick={() => createWallet()}
-          variant="contained"
-          color="primary"
-        >
-          Create Wallet
-        </Button>
-      )}
-    </>
+          </TableContainer>
+          <Button
+            type="submit"
+            disabled={loading || inputAmount === undefined}
+            style={{ width: "20em" }}
+            variant="contained"
+            color="primary"
+          >
+            {loading ? (
+              <>
+                &#128034; Waiting for Ethereum{" "}
+                <CircularProgress size="1.5rem" style={{ padding: "0 10px" }} />
+              </>
+            ) : (
+              "Trade"
+            )}
+          </Button>
+        </form>
+        {balance ? (
+          <div style={{ marginTop: 20 }}>
+            EC Balance: {(balance / 10000).toFixed(2)}
+          </div>
+        ) : null}
+        {ethBalance ? (
+          <div>ETH Balance: {ethers.utils.formatEther(ethBalance)}</div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }
