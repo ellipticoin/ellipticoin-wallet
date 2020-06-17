@@ -23,7 +23,6 @@
     "file-saver": "^2.0.2",
     "long": "^4.0.0",
     "react": "^16.13.1",
-    "react-countdown": "^2.2.1",
     "react-dom": "^16.13.1",
     "react-flip-move": "^3.0.4",
     "react-scripts": "3.4.1",

@@ -152,9 +152,9 @@ export default function Wallet(props) {
               </>
             ) : (
               <>
-                Congratulations! You&#39;ve unlocked $
+                Congratulations! You&#39;ve unlocked&nbsp;
                 {amountUnlocked ? (amountUnlocked / 10000).toFixed(2) : null}{" "}
-                EC!
+                ELC!
               </>
             )}
           </DialogContentText>
@@ -226,7 +226,7 @@ export default function Wallet(props) {
           ) : (
             <>
               Please install <a href="https://metamask.io/">MetaMask</a> to
-              unlock Ether
+              unlock Ether.
             </>
           )}
         </CardContent>

@@ -142,9 +142,7 @@ export default function App() {
     <div className={classes.root}>
       {!window.localStorage.getItem("hideWarning") ? (
         <Alert severity="error">
-          WARNING The Ellipticoin network is not yet live. Balances here will be
-          erased. The Network is sceduled to be launched June 17th. Please check
-          back then!
+          WARNING The Ellipticoin network has not been audited. Please don&apos;t buy more tokens then you'd be happy to loose.
         </Alert>
       ) : null}
       <AppBar position="static">

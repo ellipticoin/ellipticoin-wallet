@@ -165,7 +165,7 @@ export default function Wallet(props) {
               </Button>
             </form>
             <Box className={classes.balance}>
-              Balance: {(balance / 10000).toFixed(2)} EC
+              Balance: {(balance / 10000).toFixed(4)} ELC
             </Box>
           </CardContent>
         </Card>
