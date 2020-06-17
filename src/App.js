@@ -66,12 +66,13 @@ export default function App() {
     ""
   );
   const [publicKey, setPublicKey] = React.useState();
-  const [secretKey] = React.useState(() => {
+  const [secretKey, setSecretKey] = React.useState(() => {
     if (localStorage.getItem("secretKey")) {
       return Buffer.from(JSON.parse(localStorage.getItem("secretKey")));
     }
   });
   const [ellipticoin] = React.useState(() => {
+    console.log(secretKey);
     if (secretKey) {
       return new ECClient({
         privateKey: Uint8Array.from(secretKey),
@@ -88,7 +89,7 @@ export default function App() {
 
   React.useEffect(() => {
     (async () => {
-      if (!secretKey) {
+      if (!secretKey || !ellipticoin) {
         return;
       }
       const interval = setInterval(async () => {
@@ -133,6 +134,7 @@ export default function App() {
       "secretKey",
       JSON.stringify(Array.from(keyPair.secretKey))
     );
+    setSecretKey(keyPair.secretKey);
     setPublicKey(keyPair.publicKey);
   };
 
@@ -167,6 +169,7 @@ export default function App() {
             balance,
             publicKey,
             createWallet,
+            setSecretKey,
           }}
         />
       </TabPanel>
