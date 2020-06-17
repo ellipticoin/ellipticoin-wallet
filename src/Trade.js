@@ -37,7 +37,7 @@ import useStyles from "./Trade.styles.js";
 const WETH = WETH_MAP[ChainId.MAINNET];
 const ECCB = new Token(
   ChainId.MAINNET,
-  "0x60DA34eE5C163d5416B72Df3561A662155b60752",
+  "0x67052F36152098e1001f62Ba8B4d40BA53730110",
   4
 );
 const DAI = new Token(
