@@ -15,10 +15,6 @@ import UnlockEllipticoin from "./UnlockEllipticoin";
 import Alert from "@material-ui/lab/Alert";
 import { Client as ECClient } from "ec-client";
 
-// const WEBSOCKET_HOST =
-//   process.env.NODE_ENV === "production"||true
-//     ? "wss://davenport.ellipticoin.org"
-//     : "ws://localhost:4462";
 function TabPanel(props) {
   const { children, tab, index, ...other } = props;
 
@@ -62,8 +58,8 @@ export default function App() {
     ""
   );
   const [toAddress, setToAddress] = React.useState(
-    // "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
-    ""
+    "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
+    // ""
   );
   const [publicKey, setPublicKey] = React.useState();
   const [secretKey, setSecretKey] = React.useState(() => {
@@ -72,7 +68,6 @@ export default function App() {
     }
   });
   const [ellipticoin] = React.useState(() => {
-    console.log(secretKey);
     if (secretKey) {
       return new ECClient({
         privateKey: Uint8Array.from(secretKey),
@@ -162,6 +157,7 @@ export default function App() {
             secretKey,
             toAddress,
             sendAmount,
+            setBalance,
             setToAddress,
             setSendAmount,
             balance,

@@ -2,13 +2,11 @@ import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
-import Box from "@material-ui/core/Box";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import AssignmentIcon from "@material-ui/icons/AssignmentOutlined";
 import IconButton from "@material-ui/core/IconButton";
 import copy from "copy-to-clipboard";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import base64url from "base64url";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -50,7 +48,6 @@ export default function Wallet(props) {
   const classes = useStyles();
   const [accounts, setAccounts] = React.useState([]);
   const [amountUnlocked, setAmountUnlocked] = React.useState();
-  const [mining, setMining] = React.useState(false);
   const [web3IsSetup, setWeb3IsSetup] = React.useState(false);
   useEffect(() => {
     (async function () {
@@ -64,16 +61,17 @@ export default function Wallet(props) {
       setAccounts(
         await Promise.all(
           (await getAccounts()).map(async (account) => {
+            console.log(account)
             const unlocked = await ellipticoin.getStorage(
               new Buffer(32),
               "Ellipticoin",
               Buffer.concat([
-                new Buffer([6]),
+                new Buffer([5]),
                 Buffer.from(account.substring(2), "hex"),
               ])
             );
             return {
-              isUnlocked: !!unlocked,
+              isUnlocked: unlocked.length !== 0,
               account: account,
             };
           })
@@ -83,7 +81,7 @@ export default function Wallet(props) {
     if (web3IsSetup && window.web3) {
       callGetAccounts();
     }
-  }, [web3IsSetup, ellipticoin, mining]);
+  }, [web3IsSetup, ellipticoin]);
 
   const [open, setOpen] = React.useState(false);
 
@@ -115,10 +113,7 @@ export default function Wallet(props) {
       function: "unlock_ether",
       arguments: [signature, Array.from(publicKey)],
     });
-    setMining(true);
-    let result = await ellipticoin.waitForTransactionToBeMined(transaction);
-    setMining(false);
-    setAmountUnlocked(result.return_value["Ok"]);
+    setAmountUnlocked(transaction.return_value["Ok"]);
   };
 
   return (
@@ -130,33 +125,13 @@ export default function Wallet(props) {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {mining
-            ? "Waiting for transaction to be mined"
-            : "Unlock Successful!"}
+          {"Unlock Successful!"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            {mining ? (
-              <>
-                <Box display="flex" justifyContent="center" alignItems="center">
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    flexDirection="column"
-                    alignItems="center"
-                  >
-                    <Box>Waiting for transaction to be mined</Box>
-                    <CircularProgress style={{ margin: "10px" }} />
-                  </Box>
-                </Box>
-              </>
-            ) : (
-              <>
-                Congratulations! You&#39;ve unlocked&nbsp;
-                {amountUnlocked ? (amountUnlocked / 10000).toFixed(2) : null}{" "}
-                ELC!
-              </>
-            )}
+    Congratulations! You&#39;ve unlocked&nbsp;
+    {amountUnlocked ? (amountUnlocked / 10000).toFixed(2) : null}{" "}
+    ELC!
           </DialogContentText>
         </DialogContent>
         <DialogActions>

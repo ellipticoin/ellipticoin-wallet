@@ -48,6 +48,7 @@ export default function Wallet(props) {
     createWallet,
     sendAmount,
     setToAddress,
+    setBalance,
     setSendAmount,
     balance,
     publicKey,
@@ -73,8 +74,9 @@ export default function Wallet(props) {
     const ellipticoin = new ECClient({
       privateKey: Uint8Array.from(secretKey),
       // bootnodes: ["http://localhost:8080"],
+      networkId: 3750925312,
     });
-    await ellipticoin.post({
+    let response = await ellipticoin.post({
       contract_address: Buffer.concat([
         Buffer(32),
         Buffer.from("Ellipticoin", "utf8"),
@@ -85,6 +87,9 @@ export default function Wallet(props) {
         Math.floor(parseFloat(sendAmount) * 10000),
       ],
     });
+    if (response.return_value.Ok) {
+      setBalance(response.return_value.Ok)
+    }
   };
   return (
     <>

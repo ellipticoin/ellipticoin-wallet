@@ -16,7 +16,6 @@ export default function WalletMenu(props) {
 
   const handleClose = (option) => {
     if (option === "Download Private Key") {
-      console.log(secretKey)
       var blob = new Blob([Buffer.from(secretKey).toString("base64")], {
         type: "text/plain;charset=utf-8",
       });
