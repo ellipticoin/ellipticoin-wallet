@@ -19,7 +19,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Paper from "@material-ui/core/Paper";
-import { setupWeb3, getAccounts } from "./ethereum-utils.js";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,47 +42,55 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
   },
 }));
+const bytesToNumber = (bytes) =>
+  Number(new DataView(new Uint8Array(bytes).buffer).getBigUint64(0, true));
 export default function Wallet(props) {
-  const { publicKey, ellipticoin } = props;
+  const { publicKey, ellipticoin, ethereumAccount } = props;
   const classes = useStyles();
-  const [accounts, setAccounts] = React.useState([]);
   const [amountUnlocked, setAmountUnlocked] = React.useState();
-  const [web3IsSetup, setWeb3IsSetup] = React.useState(false);
-  useEffect(() => {
-    (async function () {
-      await setupWeb3();
-      setWeb3IsSetup(true);
-    })();
-  }, []);
-
-  useEffect(() => {
-    async function callGetAccounts() {
-      setAccounts(
-        await Promise.all(
-          (await getAccounts()).map(async (account) => {
-            console.log(account);
-            const unlocked = await ellipticoin.getStorage(
-              new Buffer(32),
-              "Ellipticoin",
-              Buffer.concat([
-                new Buffer([5]),
-                Buffer.from(account.substring(2), "hex"),
-              ])
-            );
-            return {
-              isUnlocked: unlocked.length !== 0,
-              account: account,
-            };
-          })
-        )
-      );
-    }
-    if (web3IsSetup && window.web3) {
-      callGetAccounts();
-    }
-  }, [web3IsSetup, ellipticoin]);
-
+  const [isUnlocked, setUnlocked] = React.useState();
+  const [unlockableBalance, setUnlockableBalance] = React.useState();
   const [open, setOpen] = React.useState(false);
+
+  useEffect(() => {
+    if (!ellipticoin || !ethereumAccount) {
+      return;
+    }
+    (async function () {
+      setUnlockableBalance(
+        bytesToNumber(
+          await ellipticoin.getStorage(
+            new Buffer(32),
+            "Ellipticoin",
+            Buffer.concat([
+              new Buffer([3]),
+              Buffer.from(ethereumAccount.substring(2), "hex"),
+            ])
+          )
+        ) / 100
+      );
+    })();
+  }, [ellipticoin, ethereumAccount]);
+
+  useEffect(() => {
+    if (!ethereumAccount) {
+      return;
+    }
+    (async function () {
+      setUnlocked(
+        (
+          await ellipticoin.getStorage(
+            new Buffer(32),
+            "Ellipticoin",
+            Buffer.concat([
+              new Buffer([5]),
+              Buffer.from(ethereumAccount.substring(2), "hex"),
+            ])
+          )
+        )[0] === 1
+      );
+    })();
+  }, [ellipticoin, ethereumAccount, open]);
 
   const handleClose = () => {
     setOpen(false);
@@ -116,6 +123,9 @@ export default function Wallet(props) {
     setAmountUnlocked(transaction.return_value["Ok"]);
   };
 
+  if (!ethereumAccount || isUnlocked === undefined) {
+    return <></>;
+  }
   return (
     <>
       <Dialog
@@ -162,38 +172,36 @@ export default function Wallet(props) {
             <TableContainer component={Paper}>
               <Table className={classes.table} aria-label="simple table">
                 <TableBody>
-                  {accounts.map(({ account, isUnlocked }) => (
-                    <TableRow key={account}>
-                      <TableCell component="th" scope="row">
-                        <a
-                          href={`https://etherscan.io/address/${account}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                  <TableRow key={ethereumAccount}>
+                    <TableCell component="th" scope="row">
+                      <a
+                        href={`https://etherscan.io/address/${ethereumAccount}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {ethereumAccount}
+                      </a>
+                    </TableCell>
+                    <TableCell align="right">
+                      {isUnlocked ? (
+                        <Button
+                          disabled={true}
+                          variant="contained"
+                          color="primary"
                         >
-                          {account}
-                        </a>
-                      </TableCell>
-                      <TableCell align="right">
-                        {isUnlocked ? (
-                          <Button
-                            disabled={true}
-                            variant="contained"
-                            color="primary"
-                          >
-                            Already Unlocked
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={() => unlockEther(account)}
-                            variant="contained"
-                            color="primary"
-                          >
-                            Unlock
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          Already Unlocked
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => unlockEther(ethereumAccount)}
+                          variant="contained"
+                          color="primary"
+                        >
+                          Unlock {unlockableBalance} ELC
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>

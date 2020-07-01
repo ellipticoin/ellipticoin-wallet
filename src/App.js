@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
+import { setupWeb3 } from "./ethereum-utils.js";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
@@ -54,11 +55,12 @@ export default function App() {
   });
   const [balance, setBalance] = React.useState(0);
   const [sendAmount, setSendAmount] = React.useState(
-    // "0.01"
+    // "1"
     ""
   );
   const [toAddress, setToAddress] = React.useState(
     // "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
+    // "JZoYzwPNn_k82INoA-auebXqRvZwBWiqYUKLMWUpXCQ"
     ""
   );
   const [publicKey, setPublicKey] = React.useState();
@@ -80,6 +82,7 @@ export default function App() {
           });
     }
   }, [secretKey]);
+  const [ethereumAccount, setEthereumAccount] = React.useState();
   React.useEffect(() => {
     if (secretKey) {
       let keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
@@ -107,6 +110,23 @@ export default function App() {
       };
     })();
   }, [secretKey, ellipticoin]);
+  React.useEffect(() => {
+    (async () => {
+      await setupWeb3();
+      if (!window.web3) {
+        return;
+      }
+      let accounts = await window.web3.eth.getAccounts();
+      if (accounts.length) {
+        setEthereumAccount(accounts[0]);
+      }
+      window.ethereum.on("accountsChanged", async (accounts) => {
+        if (accounts.length) {
+          setEthereumAccount(accounts[0]);
+        }
+      });
+    })();
+  }, []);
 
   const getBalance = async (ellipticoin, address) => {
     Buffer.concat([
@@ -191,6 +211,7 @@ export default function App() {
       <TabPanel tab={tab} index={2}>
         <UnlockEllipticoin
           {...{
+            ethereumAccount,
             balance,
             createWallet,
             ellipticoin,

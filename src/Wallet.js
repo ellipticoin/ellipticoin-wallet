@@ -82,6 +82,8 @@ export default function Wallet(props) {
         Math.floor(parseFloat(sendAmount) * 10000),
       ],
     });
+    console.log(response);
+    console.log(response.return_value);
     if (response.return_value.Ok) {
       setBalance(response.return_value.Ok);
     }
