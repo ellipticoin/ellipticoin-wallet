@@ -1,0 +1,43 @@
+////////////////////////////////////////////////////
+// Colors
+////////////////////////////////////////////////////
+
+// Body Background
+$bodyBackground: #ededf5;
+
+// Primary Colors
+$colorPrimary: #2196f3;
+$colorSecondary: #8494a8;
+$colorSuccess: #1dcc70;
+$colorDanger: #ff396f;
+$colorWarning: #ffb400;
+$colorInfo: #05d0a4;
+
+// Line Colors
+$colorLine: #dcdce9;
+
+// Text Colors
+$colorHeading: #27173e;
+$colorText: rgb(149, 141, 158);
+$colorLight: #a9abad;
+
+// Border Radius
+$borderRadius: 10px;
+
+// Safearea
+$safeBottom: env(safe-area-inset-bottom);
+$safeTop: env(safe-area-inset-top);
+
+////////////////////////////////////////////////////
+// Font Sizes
+////////////////////////////////////////////////////
+// You can change font family in _font.scss
+$fontSizeHeadingXLarge: 32px;
+$fontSizeHeadingLarge: 20px;
+$fontSizeHeading: 20px;
+$fontSize: 15px;
+$fontSizeSub: 13px;
+$fontSizeCaption: 11px;
+
+$bodyLineHeight: 1.6rem;
+$bodyLetterSpacing: 0.004em;

@@ -1,0 +1,27 @@
+.toast-box {
+  position: fixed;
+  left: 0;
+  // top: -100%;
+  right: 0;
+  width: 100%;
+  z-index: 600;
+  min-height: 50px;
+  margin-top: $safeTop;
+  transition: 0.2s all;
+  background: rgba(0, 0, 0, 0.85);
+  font-size: $fontSizeSub;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 12px;
+  &.toast-bottom {
+    top: auto;
+    bottom: -50px;
+    &.show {
+      bottom: 0px;
+      top: auto;
+      margin-bottom: $safeBottom;
+    }
+  }
+  .spinner-border {
+    margin: 0 10px;
+  }
+}
