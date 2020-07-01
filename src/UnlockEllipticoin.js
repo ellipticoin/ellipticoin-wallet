@@ -61,7 +61,7 @@ export default function Wallet(props) {
       setAccounts(
         await Promise.all(
           (await getAccounts()).map(async (account) => {
-            console.log(account)
+            console.log(account);
             const unlocked = await ellipticoin.getStorage(
               new Buffer(32),
               "Ellipticoin",
@@ -129,9 +129,8 @@ export default function Wallet(props) {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-    Congratulations! You&#39;ve unlocked&nbsp;
-    {amountUnlocked ? (amountUnlocked / 10000).toFixed(2) : null}{" "}
-    ELC!
+            Congratulations! You&#39;ve unlocked&nbsp;
+            {amountUnlocked ? (amountUnlocked / 10000).toFixed(2) : null} ELC!
           </DialogContentText>
         </DialogContent>
         <DialogActions>

@@ -58,8 +58,8 @@ export default function App() {
     ""
   );
   const [toAddress, setToAddress] = React.useState(
-    "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
-    // ""
+    // "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
+    ""
   );
   const [publicKey, setPublicKey] = React.useState();
   const [secretKey, setSecretKey] = React.useState(() => {
@@ -69,10 +69,15 @@ export default function App() {
   });
   const [ellipticoin] = React.useState(() => {
     if (secretKey) {
-      return new ECClient({
-        privateKey: Uint8Array.from(secretKey),
-        // bootnodes: ["http://localhost:8080"],
-      });
+      return process.env.NODE_ENV === "production"
+        ? new ECClient({
+            privateKey: Uint8Array.from(secretKey),
+          })
+        : new ECClient({
+            networkId: 3750925312,
+            privateKey: Uint8Array.from(secretKey),
+            bootnodes: ["http://localhost:8080"],
+          });
     }
   }, [secretKey]);
   React.useEffect(() => {
@@ -137,7 +142,8 @@ export default function App() {
     <div className={classes.root}>
       {!window.localStorage.getItem("hideWarning") ? (
         <Alert severity="error">
-          WARNING The Ellipticoin network has not been audited. Please don&apos;t buy more tokens then you'd be happy to loose.
+          WARNING The Ellipticoin network has not been audited. Please
+          don&apos;t buy more tokens then you'd be happy to loose.
         </Alert>
       ) : null}
       <AppBar position="static">
@@ -160,6 +166,7 @@ export default function App() {
             setBalance,
             setToAddress,
             setSendAmount,
+            ellipticoin,
             balance,
             publicKey,
             createWallet,

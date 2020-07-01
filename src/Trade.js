@@ -82,5 +82,5 @@ import React from "react";
 // }
 //
 export default function Wallet(props) {
-  return <div>Trading has been disabled</div>
+  return <div>Trading has been disabled</div>;
 }

@@ -14,7 +14,6 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { Client as ECClient } from "ec-client";
 import copy from "copy-to-clipboard";
 import WalletMenu from "./WalletMenu.js";
 
@@ -43,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Wallet(props) {
   const {
+    ellipticoin,
     secretKey,
     toAddress,
     createWallet,
@@ -71,11 +71,6 @@ export default function Wallet(props) {
   const send = async (evt) => {
     clearForm();
     setOpen(false);
-    const ellipticoin = new ECClient({
-      privateKey: Uint8Array.from(secretKey),
-      // bootnodes: ["http://localhost:8080"],
-      networkId: 3750925312,
-    });
     let response = await ellipticoin.post({
       contract_address: Buffer.concat([
         Buffer(32),
@@ -88,7 +83,7 @@ export default function Wallet(props) {
       ],
     });
     if (response.return_value.Ok) {
-      setBalance(response.return_value.Ok)
+      setBalance(response.return_value.Ok);
     }
   };
   return (
@@ -120,11 +115,7 @@ export default function Wallet(props) {
             classes={{
               root: classes.cardHeader,
             }}
-            action={
-              <WalletMenu
-                secretKey={secretKey}
-              />
-            }
+            action={<WalletMenu secretKey={secretKey} />}
             title={
               <>
                 Wallet Address: {publicKey ? base64url(publicKey) : ""}
