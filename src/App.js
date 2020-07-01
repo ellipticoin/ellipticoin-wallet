@@ -1,232 +1,184 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import { setupWeb3 } from "./ethereum-utils.js";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import nacl from "tweetnacl";
-import Long from "long";
+import { BRIDGE_TOKENS, NATIVE_TOKEN, PROD } from "./constants.js";
+import { default as React, useEffect, useState } from "react";
+
+import Actions from "./Actions";
+import Balances from "./Balances";
+import Bridge from "./Bridge";
 import { Buffer } from "buffer/";
-import Wallet from "./Wallet";
-import Trade from "./Trade";
-import UnlockEllipticoin from "./UnlockEllipticoin";
-import Alert from "@material-ui/lab/Alert";
 import { Client as ECClient } from "ec-client";
-
-function TabPanel(props) {
-  const { children, tab, index, ...other } = props;
-
-  return (
-    <Typography
-      component="div"
-      role="tabpanel"
-      hidden={tab !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {tab === index && <Box p={3}>{children}</Box>}
-    </Typography>
-  );
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  tab: PropTypes.any.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
-
-const useStyles = makeStyles((theme) => ({}));
+import Header from "./Header";
+import Loader from "./Loader";
+import PendingTransactions from "./PendingTransactions";
+import Rewards from "./Rewards";
+import Send from "./Send";
+import Sidebar from "./Sidebar";
+import { Token } from "ec-client";
+import YourAddress from "./YourAddress";
+import { default as ethers } from "ethers";
+import nacl from "tweetnacl";
+import { useLocalStorage } from "./helpers";
 
 export default function App() {
-  const classes = useStyles();
-  const [tab, setValue] = React.useState(() => {
-    return JSON.parse(localStorage.getItem("tab")) || 0;
+  const [blockHash, setBlockHash] = useState();
+  const [web3, setWeb3] = useState();
+  const [ethBlockNumber, setEthBlockNumber] = useState();
+  const [publicKey, setPublicKey] = useState();
+  const [ellipticoin, setEllipticoin] = useState();
+  const [signer, setSigner] = useState();
+  const [tokens, setTokens] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [secretKey, setSecretKey] = useLocalStorage("secretKey", () => {
+    const keyPair = nacl.sign.keyPair();
+    return Array.from(keyPair.secretKey);
   });
-  const [balance, setBalance] = React.useState(0);
-  const [sendAmount, setSendAmount] = React.useState(
-    // "1"
-    ""
-  );
-  const [toAddress, setToAddress] = React.useState(
-    // "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
-    // "JZoYzwPNn_k82INoA-auebXqRvZwBWiqYUKLMWUpXCQ"
-    ""
-  );
-  const [publicKey, setPublicKey] = React.useState();
-  const [secretKey, setSecretKey] = React.useState(() => {
-    if (localStorage.getItem("secretKey")) {
-      return Buffer.from(JSON.parse(localStorage.getItem("secretKey")));
-    }
-  });
-  const [ellipticoin] = React.useState(() => {
+  React.useEffect(() => {
+    (async () => {
+      let ethereum = window.ethereum;
+      if (!ethereum) return;
+      ethereum.autoRefreshOnNetworkChange = false;
+
+      await ethereum.enable();
+
+      setWeb3(window.web3);
+    })();
+  }, []);
+  useEffect(() => {
+    if (!ellipticoin) return
+    ellipticoin.addBlockListener((blockHash) => {
+       setBlockHash(blockHash) 
+    })
+    return () => ellipticoin.close();
+  }, [ellipticoin]);
+
+  React.useEffect(() => {
+    if (!web3) return;
+    (async () => {
+      let provider = new ethers.providers.Web3Provider(web3.currentProvider);
+      provider.on("block", (blockNumber) => {
+        setEthBlockNumber(blockNumber);
+      });
+    })();
+  }, [web3]);
+
+  React.useEffect(() => {
     if (secretKey) {
-      return process.env.NODE_ENV === "production"
-        ? new ECClient({
-            privateKey: Uint8Array.from(secretKey),
-          })
-        : new ECClient({
-            networkId: 3750925312,
-            privateKey: Uint8Array.from(secretKey),
-            bootnodes: ["http://localhost:8080"],
-          });
+      setEllipticoin(
+        PROD
+          ? new ECClient({
+              privateKey: Uint8Array.from(secretKey),
+            })
+          : new ECClient({
+              privateKey: Uint8Array.from(secretKey),
+              bootnodes: ["http://127.0.0.1:8080"],
+            })
+      );
     }
   }, [secretKey]);
-  const [ethereumAccount, setEthereumAccount] = React.useState();
+
   React.useEffect(() => {
     if (secretKey) {
       let keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
-      setPublicKey(keyPair.publicKey);
+      setPublicKey(Array.from(keyPair.publicKey));
     }
   }, [secretKey]);
 
   React.useEffect(() => {
     (async () => {
-      if (!secretKey || !ellipticoin) {
-        return;
-      }
-      const interval = setInterval(async () => {
-        const keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
-        setBalance(await getBalance(ellipticoin, keyPair.publicKey));
-      }, 1000);
-
-      const keyPair = nacl.sign.keyPair.fromSecretKey(
-        Buffer.from(ellipticoin.privateKey)
-      );
-      setBalance(await getBalance(ellipticoin, keyPair.publicKey));
-
-      return () => {
-        clearInterval(interval);
-      };
-    })();
-  }, [secretKey, ellipticoin]);
-  React.useEffect(() => {
-    (async () => {
-      await setupWeb3();
-      if (!window.web3) {
-        return;
-      }
-      let accounts = await window.web3.eth.getAccounts();
-      if (accounts.length) {
-        setEthereumAccount(accounts[0]);
-      }
+      if (!web3) return;
+      let provider = new ethers.providers.Web3Provider(web3.currentProvider);
+      setSigner(await provider.getSigner());
       window.ethereum.on("accountsChanged", async (accounts) => {
-        if (accounts.length) {
-          setEthereumAccount(accounts[0]);
-        }
+        setSigner(await provider.getSigner());
       });
     })();
-  }, []);
+  }, [web3]);
 
-  const getBalance = async (ellipticoin, address) => {
-    Buffer.concat([
-      new Buffer(32),
-      Buffer.from("Ellipticoin", "utf8"),
-      Buffer.concat([new Buffer([1]), Buffer.from(address)]),
-    ]);
-    const balanceBytes = await ellipticoin.getMemory(
-      new Buffer(32),
-      "Ellipticoin",
-      Buffer.concat([new Buffer([1]), Buffer.from(address)])
-    );
-    return bytesToNumber(balanceBytes);
-  };
-  React.useEffect(() => {
-    localStorage.setItem("tab", JSON.stringify(tab));
-  }, [tab]);
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+  useEffect(() => {
+    (async () => {
+      if (!publicKey || !ellipticoin) {
+        return;
+      }
+      let tokens = await Promise.all(
+        [NATIVE_TOKEN, ...BRIDGE_TOKENS].map(async (token) => {
+          const tokenContract = new Token(ellipticoin, token.issuer, token.id);
+          const balance = await tokenContract.getBalance(publicKey);
+          return {
+            balance,
+            ...token,
+          };
+        })
+      );
+      setTokens(tokens);
+      setLoading(false);
+    })();
+  }, [publicKey, ellipticoin, blockHash]);
 
-  const createWallet = () => {
-    const keyPair = nacl.sign.keyPair();
-    localStorage.setItem(
-      "secretKey",
-      JSON.stringify(Array.from(keyPair.secretKey))
-    );
-    setSecretKey(keyPair.secretKey);
-    setPublicKey(keyPair.publicKey);
-  };
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showModal, setShowModal] = useState();
+  const [pendingTransactions, setPendingTransactions] = useState([]);
 
+  if (!publicKey) return null;
   return (
-    <div className={classes.root}>
-      {!window.localStorage.getItem("hideWarning") ? (
-        <Alert severity="error">
-          WARNING The Ellipticoin network has not been audited. Please
-          don&apos;t buy more tokens then you'd be happy to loose.
-        </Alert>
-      ) : null}
-      <AppBar position="static">
-        <Tabs
-          value={tab}
-          onChange={handleChange}
-          aria-label="simple tabs example"
-        >
-          <Tab label="Wallet" {...a11yProps(0)} />
-          <Tab label="Trade" {...a11yProps(1)} />
-          <Tab label="Unlock Ether" {...a11yProps(1)} />
-        </Tabs>
-      </AppBar>
-      <TabPanel tab={tab} index={0}>
-        <Wallet
-          {...{
-            secretKey,
-            toAddress,
-            sendAmount,
-            setBalance,
-            setToAddress,
-            setSendAmount,
-            ellipticoin,
-            balance,
-            publicKey,
-            createWallet,
-            setSecretKey,
-          }}
+    <>
+      <Loader loading={loading} />
+      <Header
+        setShowSidebar={setShowSidebar}
+        publicKey={publicKey}
+        setSecretKey={setSecretKey}
+      />
+      <div id="appCapsule">
+        <Actions
+          balance={
+            tokens.length ? tokens[0].balance * (tokens[0].price / 10000) : 0
+          }
+          setShowModal={setShowModal}
         />
-      </TabPanel>
-      <TabPanel tab={tab} index={1}>
-        <Trade
-          {...{
-            secretKey,
-            toAddress,
-            sendAmount,
-            setToAddress,
-            setSendAmount,
+        <YourAddress publicKey={publicKey} />
+        <Rewards />
+        <Balances tokens={tokens} />
+      </div>
+      <PendingTransactions
+        pendingTransactions={pendingTransactions}
+        setPendingTransactions={setPendingTransactions}
+        ethBlockNumber={ethBlockNumber}
+      />
+      <Send
+        setShow={(show) => (show ? setShowModal("send") : setShowModal(null))}
+        show={showModal === "send"}
+        ellipticoin={ellipticoin}
+        setBalance={(balance) => {
+          tokens[0] = {
+            ...tokens[0],
             balance,
-            publicKey,
-            createWallet,
-          }}
-        />
-      </TabPanel>
-      <TabPanel tab={tab} index={2}>
-        <UnlockEllipticoin
-          {...{
-            ethereumAccount,
+          };
+          setTokens(tokens);
+        }}
+      />
+      <Bridge
+        show={showModal === "bridge"}
+        onHide={() => setShowModal(null)}
+        ellipticoin={ellipticoin}
+        signer={signer}
+        pushPendingTransation={(tx) =>
+          setPendingTransactions([...pendingTransactions, tx])
+        }
+        publicKey={publicKey}
+        setBalance={(balance) => {
+          tokens[0] = {
+            ...tokens[0],
             balance,
-            createWallet,
-            ellipticoin,
-            publicKey,
-            secretKey,
-            sendAmount,
-            setSendAmount,
-            setToAddress,
-            toAddress,
-          }}
-        />
-      </TabPanel>
-    </div>
+          };
+          setTokens(tokens);
+        }}
+        tokens={tokens}
+      />
+      <Sidebar
+        setShowSidebar={setShowSidebar}
+        showSidebar={showSidebar}
+        publicKey={publicKey}
+        secretKey={secretKey}
+        setSecretKey={setSecretKey}
+      />
+    </>
   );
-}
-function bytesToNumber(bytes) {
-  return Long.fromBytesLE(Buffer.from(bytes)).toNumber();
 }
