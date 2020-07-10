@@ -69,20 +69,23 @@ export default function App() {
       return Buffer.from(JSON.parse(localStorage.getItem("secretKey")));
     }
   });
-  const [ellipticoin] = React.useState(() => {
+  const [ellipticoin, setEllipticoin] = React.useState();
+  const [ethereumAccount, setEthereumAccount] = React.useState();
+  React.useEffect(() => {
     if (secretKey) {
-      return process.env.NODE_ENV === "production"
-        ? new ECClient({
-            privateKey: Uint8Array.from(secretKey),
-          })
-        : new ECClient({
-            networkId: 3750925312,
-            privateKey: Uint8Array.from(secretKey),
-            // bootnodes: ["http://localhost:8080"],
-          });
+      setEllipticoin(
+        process.env.NODE_ENV === "production"
+          ? new ECClient({
+              privateKey: Uint8Array.from(secretKey),
+            })
+          : new ECClient({
+              networkId: 3750925312,
+              privateKey: Uint8Array.from(secretKey),
+              // bootnodes: ["http://localhost:8080"],
+            })
+      );
     }
   }, [secretKey]);
-  const [ethereumAccount, setEthereumAccount] = React.useState();
   React.useEffect(() => {
     if (secretKey) {
       let keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
@@ -199,7 +202,7 @@ export default function App() {
           {...{
             secretKey,
             toAddress,
-	    ellipticoin,
+            ellipticoin,
             sendAmount,
             setToAddress,
             setSendAmount,

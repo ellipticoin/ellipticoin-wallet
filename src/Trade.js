@@ -45,7 +45,9 @@ const ECCB = new Token(
 
 const DAI = new Token(
   CHAIN_ID,
-  CHAIN_ID === ChainId.MAINNET ? "0x6b175474e89094c44da98b954eedeac495271d0f": "0x697ed3e98aaecfa3121f536251f9d500de159dba",
+  CHAIN_ID === ChainId.MAINNET
+    ? "0x6b175474e89094c44da98b954eedeac495271d0f"
+    : "0x697ed3e98aaecfa3121f536251f9d500de159dba",
   18
 );
 const SLIPPAGE = new Percent(5, 1000);
@@ -99,30 +101,15 @@ export default function Wallet(props) {
   React.useEffect(() => {
     (async () => {
       if (tradeType === "buy") {
-        let DAI_WETH = await Fetcher.fetchPairData(
-          DAI,
-          WETH
-        );
-        let WETH_ECCB = await Fetcher.fetchPairData(
-          WETH,
-          ECCB
-        );
+        let DAI_WETH = await Fetcher.fetchPairData(DAI, WETH);
+        let WETH_ECCB = await Fetcher.fetchPairData(WETH, ECCB);
         setFirstRoute(new Route([DAI_WETH], DAI));
         setSecondRoute(new Route([WETH_ECCB], WETH));
       } else {
-        let DAI_WETH =  await Fetcher.fetchPairData(
-          DAI,
-          WETH
-        );
-        let WETH_ECCB =  await Fetcher.fetchPairData(
-          WETH,
-          ECCB
-        );
+        let DAI_WETH = await Fetcher.fetchPairData(DAI, WETH);
+        let WETH_ECCB = await Fetcher.fetchPairData(WETH, ECCB);
         setFirstRoute(new Route([DAI_WETH, WETH_ECCB], DAI));
-        let ECCB_WETH = await Fetcher.fetchPairData(
-          ECCB,
-          WETH,
-        );
+        let ECCB_WETH = await Fetcher.fetchPairData(ECCB, WETH);
         setSecondRoute(new Route([ECCB_WETH], ECCB));
       }
     })();
@@ -163,7 +150,9 @@ export default function Wallet(props) {
         let newEtherAmount = convert(inputAmount, firstRoute);
         if (newEtherAmount) {
           setEtherAmount(newEtherAmount);
-          setEllipticoinAmount(convert(newEtherAmount, secondRoute) - TRANSACTION_FEE);
+          setEllipticoinAmount(
+            convert(newEtherAmount, secondRoute) - TRANSACTION_FEE
+          );
         } else {
           setEtherAmount(null);
           setEllipticoinAmount(null);
@@ -172,7 +161,9 @@ export default function Wallet(props) {
         let newEllipticoinAmount = convert(inputAmount, firstRoute);
         if (newEllipticoinAmount) {
           setEllipticoinAmount(newEllipticoinAmount - TRANSACTION_FEE);
-          setEtherAmount(convert(newEllipticoinAmount - TRANSACTION_FEE, secondRoute));
+          setEtherAmount(
+            convert(newEllipticoinAmount - TRANSACTION_FEE, secondRoute)
+          );
         } else {
         }
       }

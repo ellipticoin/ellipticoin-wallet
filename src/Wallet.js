@@ -17,6 +17,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import copy from "copy-to-clipboard";
 import WalletMenu from "./WalletMenu.js";
 
+const TRANSACTION_FEE = 100;
 const useStyles = makeStyles((theme) => ({
   root: {
     "& .MuiTextField-root": {
@@ -97,7 +98,11 @@ export default function Wallet(props) {
         <DialogTitle id="alert-dialog-title">{"Send Confirmation"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Send {sendAmount} EC to {toAddress}?
+            <div>
+              Amount: {parseFloat(sendAmount).toFixed(2)} ELC +{" "}
+              {(TRANSACTION_FEE / 10000).toFixed(2)} ELC (Transaction Fee)
+            </div>
+            <div>To: {toAddress}</div>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
