@@ -8,7 +8,6 @@ import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import nacl from "tweetnacl";
-import Long from "long";
 import { Buffer } from "buffer/";
 import Wallet from "./Wallet";
 import Trade from "./Trade";
@@ -81,7 +80,7 @@ export default function App() {
           : new ECClient({
               networkId: 3750925312,
               privateKey: Uint8Array.from(secretKey),
-              // bootnodes: ["http://localhost:8080"],
+              bootnodes: ["http://localhost:8080"],
             })
       );
     }
@@ -137,12 +136,11 @@ export default function App() {
       Buffer.from("Ellipticoin", "utf8"),
       Buffer.concat([new Buffer([1]), Buffer.from(address)]),
     ]);
-    const balanceBytes = await ellipticoin.getMemory(
+    return await ellipticoin.getMemory(
       new Buffer(32),
       "Ellipticoin",
       Buffer.concat([new Buffer([1]), Buffer.from(address)])
     );
-    return bytesToNumber(balanceBytes);
   };
   React.useEffect(() => {
     localStorage.setItem("tab", JSON.stringify(tab));
@@ -230,7 +228,4 @@ export default function App() {
       </TabPanel>
     </div>
   );
-}
-function bytesToNumber(bytes) {
-  return Long.fromBytesLE(Buffer.from(bytes)).toNumber();
 }
