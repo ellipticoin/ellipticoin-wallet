@@ -1,58 +1,16 @@
 import React from "react";
-import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
+import {default as ethers} from "ethers";
+import cbor from "borc";
 import { setupWeb3 } from "./ethereum-utils.js";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
 import nacl from "tweetnacl";
 import { Buffer } from "buffer/";
+import {padBuffer} from "./helpers";
 import Wallet from "./Wallet";
-import Trade from "./Trade";
-import UnlockEllipticoin from "./UnlockEllipticoin";
-import Alert from "@material-ui/lab/Alert";
 import { Client as ECClient } from "ec-client";
-
-function TabPanel(props) {
-  const { children, tab, index, ...other } = props;
-
-  return (
-    <Typography
-      component="div"
-      role="tabpanel"
-      hidden={tab !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {tab === index && <Box p={3}>{children}</Box>}
-    </Typography>
-  );
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  tab: PropTypes.any.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
-
-const useStyles = makeStyles((theme) => ({}));
+import _ from "lodash";
 
 export default function App() {
-  const classes = useStyles();
-  const [tab, setValue] = React.useState(() => {
-    return JSON.parse(localStorage.getItem("tab")) || 0;
-  });
-  const [balance, setBalance] = React.useState(0);
+  const [balance, setBalance] = React.useState();
   const [sendAmount, setSendAmount] = React.useState(
     // "1"
     ""
@@ -69,7 +27,8 @@ export default function App() {
     }
   });
   const [ellipticoin, setEllipticoin] = React.useState();
-  const [ethereumAccount, setEthereumAccount] = React.useState();
+  const [signer, setSigner] = React.useState();
+  const setEthereumAccount = React.useState()[1];
   React.useEffect(() => {
     if (secretKey) {
       setEllipticoin(
@@ -81,6 +40,7 @@ export default function App() {
               networkId: 3750925312,
               privateKey: Uint8Array.from(secretKey),
               bootnodes: ["http://localhost:8080"],
+              // bootnodes: ["http://52.73.131.11:80"],
             })
       );
     }
@@ -88,7 +48,7 @@ export default function App() {
   React.useEffect(() => {
     if (secretKey) {
       let keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
-      setPublicKey(keyPair.publicKey);
+      setPublicKey(Array.from(keyPair.publicKey));
     }
   }, [secretKey]);
 
@@ -128,26 +88,78 @@ export default function App() {
         }
       });
     })();
-  }, []);
+  }, [setEthereumAccount]);
+
+  React.useEffect(() => {
+    (async () => {
+      let ethereum = window.ethereum;
+
+      await ethereum.enable();
+
+      let provider = new ethers.providers.Web3Provider(
+        window.web3.currentProvider
+      );
+      setSigner(await provider.getSigner());
+    })();
+  }, [setSigner]);
+
+  var blocksSocket = new WebSocket(`ws://localhost:81/websocket`);
+  blocksSocket.binaryType = "arraybuffer";
+  blocksSocket.onerror = console.log;
+  blocksSocket.onmessage = ({ data }) => {
+    cbor.decode(Buffer.from(data)).transactions.forEach((transaction) => {
+    switch(transaction.function) {
+        case "mint":
+            if (_.isEqual(transaction.arguments[1], publicKey)) {
+            }
+        break;
+        default:
+        break;
+    }})
+  };
+  blocksSocket.onclose = ({ code }) =>
+    console.log(`WebSocket disconnect code: ${code}`);
+
+  // Heartbeat
+  // https://stackoverflow.com/a/46112000/1356670
+  setInterval(() => blocksSocket.send(new ArrayBuffer([])), 30000);
 
   const getBalance = async (ellipticoin, address) => {
-    Buffer.concat([
-      new Buffer(32),
-      Buffer.from("Ellipticoin", "utf8"),
-      Buffer.concat([new Buffer([1]), Buffer.from(address)]),
-    ]);
-    return await ellipticoin.getMemory(
-      new Buffer(32),
-      "Ellipticoin",
-      Buffer.concat([new Buffer([1]), Buffer.from(address)])
+    return (
+      (await ellipticoin.getMemory(
+        new Buffer(32),
+        "Ellipticoin",
+        Buffer.concat([new Buffer([1]), Buffer.from(address)])
+      )) || 0
     );
   };
-  React.useEffect(() => {
-    localStorage.setItem("tab", JSON.stringify(tab));
-  }, [tab]);
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+
+  const getTokenBalance = async (ellipticoin, issuer, token, address) => {
+    return (
+      (await ellipticoin.getMemory(
+        new Buffer(32),
+        "Token",
+        Buffer.concat([
+            new Buffer([1]),
+            Buffer.from(issuer),
+            padBuffer(token, 32),
+            Buffer.from(address)
+            ]
+)
+      ))
+    );
   };
+    (async () => {
+if (ellipticoin) {
+  console.log(await getTokenBalance(
+    ellipticoin,
+    Buffer.from("OaKmwCWrUhdCCsIMN/ViVcu1uBF0VM3FW3Mi1z/VTNs=", "base64"),
+    Buffer.from("FDAI", "utf8"),
+    publicKey,
+    ))
+}
+})();
+
 
   const createWallet = () => {
     const keyPair = nacl.sign.keyPair();
@@ -155,77 +167,29 @@ export default function App() {
       "secretKey",
       JSON.stringify(Array.from(keyPair.secretKey))
     );
-    setSecretKey(keyPair.secretKey);
-    setPublicKey(keyPair.publicKey);
+    setSecretKey(Array.from(keyPair.secretKey));
+    setPublicKey(Array.from(keyPair.publicKey));
   };
 
   return (
-    <div className={classes.root}>
-      {!window.localStorage.getItem("hideWarning") ? (
-        <Alert severity="error">
-          WARNING The Ellipticoin network has not been audited. Please
-          don&apos;t buy more tokens then you'd be happy to loose.
-        </Alert>
-      ) : null}
-      <AppBar position="static">
-        <Tabs
-          value={tab}
-          onChange={handleChange}
-          aria-label="simple tabs example"
-        >
-          <Tab label="Wallet" {...a11yProps(0)} />
-          <Tab label="Trade" {...a11yProps(1)} />
-          <Tab label="Unlock Ether" {...a11yProps(1)} />
-        </Tabs>
-      </AppBar>
-      <TabPanel tab={tab} index={0}>
-        <Wallet
-          {...{
-            secretKey,
-            toAddress,
-            sendAmount,
-            setBalance,
-            setToAddress,
-            setSendAmount,
-            ellipticoin,
-            balance,
-            publicKey,
-            createWallet,
-            setSecretKey,
-          }}
-        />
-      </TabPanel>
-      <TabPanel tab={tab} index={1}>
-        <Trade
-          {...{
-            secretKey,
-            toAddress,
-            ellipticoin,
-            sendAmount,
-            setToAddress,
-            setSendAmount,
-            balance,
-            publicKey,
-            createWallet,
-          }}
-        />
-      </TabPanel>
-      <TabPanel tab={tab} index={2}>
-        <UnlockEllipticoin
-          {...{
-            ethereumAccount,
-            balance,
-            createWallet,
-            ellipticoin,
-            publicKey,
-            secretKey,
-            sendAmount,
-            setSendAmount,
-            setToAddress,
-            toAddress,
-          }}
-        />
-      </TabPanel>
+    <div>
+      {!window.localStorage.getItem("hideWarning") ? <></> : null}
+      <Wallet
+        {...{
+          secretKey,
+          toAddress,
+          sendAmount,
+          setBalance,
+          setToAddress,
+          setSendAmount,
+          ellipticoin,
+          balance,
+          signer,
+          publicKey,
+          createWallet,
+          setSecretKey,
+        }}
+      />
     </div>
   );
 }

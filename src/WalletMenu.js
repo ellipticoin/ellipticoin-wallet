@@ -1,8 +1,4 @@
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
 import React from "react";
-import IconButton from "@material-ui/core/IconButton";
 import { saveAs } from "file-saver";
 
 export default function WalletMenu(props) {
@@ -50,21 +46,19 @@ export default function WalletMenu(props) {
         ref={inputEl}
       />
 
-      <IconButton
+      <div
         aria-label="more"
         aria-controls="long-menu"
         aria-haspopup="true"
         onClick={handleClick}
-      >
-        <MoreVertIcon />
-      </IconButton>
-      <Menu id="long-menu" anchorEl={anchorEl} keepMounted open={open}>
+      ></div>
+      <ul id="long-menu" anchorEl={anchorEl} keepMounted open={open}>
         {options.map((option) => (
-          <MenuItem key={option} onClick={() => handleClose(option)}>
+          <li key={option} onClick={() => handleClose(option)}>
             {option}
-          </MenuItem>
+          </li>
         ))}
-      </Menu>
+      </ul>
     </>
   );
 }

@@ -1,0 +1,39 @@
+<svg height="102" width="102" xmlns="http://www.w3.org/2000/svg">
+   <style>
+     * {
+       stroke: white;
+       fill: transparent;
+       stroke-width: 2;
+       
+     }
+  </style>
+<rect x="1" y="1" rx="10" ry="10"
+      
+      width="100" height="100"/>
+
+ <g>
+  <path>
+    <animate attributeName="d" values="M0,50 Q0,0 50,0;M0,50 Q50,50 50,0;M0,50 Q0,0 50,0" dur="2s" repeatCount="indefinite" />
+  </path>
+  
+<path>
+    <animate attributeName="d" values="M0,50 Q0,100 50,100;M0,50 Q50,50 50,100;M0,50 Q0,100 50,100" dur="2s" repeatCount="indefinite" />
+  </path>
+   <path>
+    <animate attributeName="d" values="M0,50 Q0,0 50,0;M0,50 Q50,50 50,0;M0,50 Q0,0 50,0" dur="2s" repeatCount="indefinite" />
+  </path>
+  <path>
+      <animate attributeName="d" values="M50,0 Q100,0 100,50;M50,0 Q50,50 100,50;M50,0 Q100,0 100,50" dur="2s" repeatCount="indefinite" />
+  </path>
+    <path>
+      <animate attributeName="d" values="M100,50 Q100,100 50,100;M100,50 Q50,50 50,100;M100,50 Q100,100 50,100" dur="2s" repeatCount="indefinite" />
+  </path>
+   <animateTransform attributeName="transform"
+                          attributeType="XML"
+                          type="rotate"
+                          from="0 50 50"
+                          to="360 50 50"
+                          dur="10s"
+                          repeatCount="indefinite"/>
+  </g>  
+</svg>
