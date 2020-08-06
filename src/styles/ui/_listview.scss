@@ -95,22 +95,12 @@
       width: 100%;
       align-items: center;
       justify-content: space-between;
-      color: $colorHeading !important;
-      &:after {
-        content: "\f3d1";
-        font-family: "Ionicons";
-        font-size: 18px;
-        position: absolute;
-        right: 16px;
-        height: 18px;
-        top: 50%;
-        margin-top: -9px;
-        line-height: 1em;
-        color: $colorLight;
-        opacity: 0.6;
-      }
+      color: $colorHeading;
       &:active {
         background: rgba($colorLine, 0.3);
+      }
+      &:hover {
+        color: red !important;
       }
     }
     &.active a {
@@ -163,23 +153,13 @@
       }
     }
     a.item {
-      color: $colorHeading !important;
+      color: $colorHeading;
       padding-right: 36px;
       &:active {
         background: rgba($colorLine, 0.3);
       }
-      &:after {
-        content: "\f3d1";
-        font-family: "Ionicons";
-        font-size: 18px;
-        position: absolute;
-        right: 16px;
-        color: $colorLight;
-        opacity: 0.6;
-        line-height: 1em;
-        height: 18px;
-        top: 50%;
-        margin-top: -9px;
+      &:hover {
+        color: $colorPrimary;
       }
     }
     &.active .item {
