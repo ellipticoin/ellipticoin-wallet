@@ -39,6 +39,8 @@ export default function App() {
       setEllipticoin(
         process.env.NODE_ENV === "production"
           ? new ECClient({
+              networkId: 3750925312,
+              bootnodes: ["http://159.89.83.21"],
               privateKey: Uint8Array.from(secretKey),
             })
           : new ECClient({
