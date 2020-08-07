@@ -31,7 +31,7 @@ export default function App() {
   React.useEffect(() => {
     let source;
 
-    source = new EventSource("http://159.89.83.21/");
+    source = new EventSource("https://davenport.ellipticoin.org/");
     source.addEventListener("block", async (event) => {
       setBlockHash(event.data);
     });
@@ -40,7 +40,7 @@ export default function App() {
         process.env.NODE_ENV === "production"
           ? new ECClient({
               networkId: 3750925312,
-              bootnodes: ["http://159.89.83.21"],
+              // bootnodes: ["http://159.89.83.21"],
               privateKey: Uint8Array.from(secretKey),
             })
           : new ECClient({
