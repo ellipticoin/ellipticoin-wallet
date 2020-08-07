@@ -1,17 +1,18 @@
+import { BRIDGE_ADDRESS, TOKENS } from "./constants";
+import { stringToEthers, tokenToString } from "./helpers";
+
+import { BRIDGE_TOKENS } from "./constants";
 import BridgeJSON from "./Bridge.json";
 import Button from "react-bootstrap/Button";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
-import { BRIDGE_TOKENS } from "./constants";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import React from "react";
 import Spinner from "react-bootstrap/Spinner";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
-import {Token} from "ec-client";
+import { Token } from "ec-client";
 import { default as ethers } from "ethers";
-import { stringToEthers, tokenToString } from "./helpers";
-import { TOKENS, BRIDGE_ADDRESS } from "./constants";
 
 const { MaxUint256 } = ethers.constants;
 const ETH_BRIDGE_ADDRESS = "0xBc95C422Df85a5DF2C211D32d55d8E22b34226B7";
@@ -43,7 +44,11 @@ export default function Bridge(props) {
     if (!signer) {
       return;
     }
-    let bridge = new ethers.Contract(ETH_BRIDGE_ADDRESS, BridgeJSON.abi, signer);
+    let bridge = new ethers.Contract(
+      ETH_BRIDGE_ADDRESS,
+      BridgeJSON.abi,
+      signer
+    );
     setBridge(bridge);
   }, [signer]);
 
@@ -71,7 +76,7 @@ export default function Bridge(props) {
   }, [signer, tokenAddress, setAllowance]);
 
   const release = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
     const tokenContract = new Token(ellipticoin, token.issuer, token.id);
     const response = await tokenContract.transfer(
       BRIDGE_ADDRESS,
@@ -100,9 +105,7 @@ export default function Bridge(props) {
     setTokenAddress(tokens[0].address);
   };
   const handleTokenChange = (tokenString) => {
-    const token = TOKENS.find(
-      (token) => tokenToString(token) === tokenString
-    );
+    const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
   };
   const mint = async (evt) => {

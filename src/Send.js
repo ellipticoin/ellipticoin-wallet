@@ -1,9 +1,9 @@
 import { Button, Form, Modal } from "react-bootstrap";
 
 import React from "react";
-import base64url from "base64url";
-import { Token } from "ec-client";
 import { TOKENS } from "./constants";
+import { Token } from "ec-client";
+import base64url from "base64url";
 import { tokenToString } from "./helpers";
 
 export default function Send(props) {
@@ -23,9 +23,7 @@ export default function Send(props) {
     setToAddress("");
   };
   const handleTokenChange = (tokenString) => {
-    const token = TOKENS.find(
-      (token) => tokenToString(token) === tokenString
-    );
+    const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
   };
   const send = async (evt) => {

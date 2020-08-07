@@ -13,11 +13,11 @@ export default function WalletMenu(props) {
   return (
     <>
       {showWarning ? (
-        <div id="notification-16" class="notification-box show">
-          <div class="notification-dialog ios-style bg-danger">
-            <div class="notification-content">
-              <div class="in">
-                <h3 class="subtitle">
+        <div id="notification-16" className="notification-box show">
+          <div className="notification-dialog ios-style bg-danger">
+            <div className="notification-content">
+              <div className="in">
+                <h3 className="subtitle">
                   WARNING: Ellipticoin hasn't been audited please don't purchase
                   more tokens than you'd be happy to loose.
                 </h3>

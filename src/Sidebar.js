@@ -1,4 +1,4 @@
-import { Settings, Unlock, X, Download, Upload } from "react-feather";
+import { Download, Settings, Unlock, Upload, X } from "react-feather";
 
 import Identicon from "react-identicons";
 import { Modal } from "react-bootstrap";

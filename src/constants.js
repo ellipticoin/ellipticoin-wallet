@@ -1,6 +1,7 @@
+import { ethTokenId, padBuffer, tokenId } from "./helpers";
+
 import { SYSTEM_ADDRESS } from "ec-client";
 import base64url from "base64url";
-import { padBuffer, tokenId, ethTokenId } from "./helpers";
 export const PROD = process.env.NODE_ENV === "production";
 const NETWORK_IDS = {
   MAINNET: 1,
