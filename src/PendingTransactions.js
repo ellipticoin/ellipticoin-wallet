@@ -1,40 +1,26 @@
-import { default as React, useEffect, useState } from "react";
+import { default as React, useEffect } from "react";
 
 import { ExternalLink } from "react-feather";
 import Spinner from "react-bootstrap/Spinner";
 import classNames from "classnames";
-import { difference } from "lodash";
 
-const CONFIRMATION_API_ENDPOINT = "http://localhost:8085";
 export default function PendingTransactions(props) {
-  const { pendingTransactions, setPendingTransactions } = props;
-  const [listeners, setListeners] = useState({});
-  const [confirmations, setConfirmations] = useState({});
-
+  const { pendingTransactions, setPendingTransactions, ethBlockNumber } = props;
   useEffect(() => {
-    difference(pendingTransactions, Object.keys(listeners)).forEach(
-      (pendingTransaction) => {
-        const evtSource = new EventSource(
-          `${CONFIRMATION_API_ENDPOINT}/confirmations/${pendingTransaction}`
-        );
-        evtSource.addEventListener("confirmation", function (event) {
-          let number = parseInt(event.data);
-          if (number === 6) {
-            setPendingTransactions(
-              pendingTransactions.filter((p) => p !== pendingTransaction)
-            );
-          } else {
-            setConfirmations({
-              ...confirmations,
-              [pendingTransaction]: number,
-            });
-          }
-        });
-        listeners[pendingTransaction] = evtSource;
-        setListeners(listeners);
-      }
+    const confirmedTransactions = pendingTransactions.filter(
+      ({ blockNumber }) => ethBlockNumber - blockNumber >= 6
     );
-  }, [pendingTransactions, listeners, setPendingTransactions, confirmations]);
+    if (confirmedTransactions.length) {
+      setPendingTransactions(
+        pendingTransactions.filter((pendingTransaction) =>
+          confirmedTransactions.find(
+            ({ transactionHash }) => transactionHash === pendingTransaction.hash
+          )
+        )
+      );
+    }
+  }, [pendingTransactions, setPendingTransactions, ethBlockNumber]);
+
   return (
     <div
       className={classNames("toast-box", "toast-bottom", {
@@ -42,7 +28,9 @@ export default function PendingTransactions(props) {
       })}
     >
       {pendingTransactions.map((pendingTransaction) => (
-        <div key={pendingTransaction}>
+        <div
+          key={pendingTransaction.hash || pendingTransaction.transactionHash}
+        >
           <div>
             Waiting for Ethereum{" "}
             <span role="img" aria-label="tutle">
@@ -51,13 +39,16 @@ export default function PendingTransactions(props) {
           </div>
           <div>
             <Spinner size="sm" animation="border" />
-            Confirmations {confirmations[pendingTransaction] || 0}/6:{" "}
-            <a
+            Confirmations{" "}
+            {Math.max(ethBlockNumber - pendingTransaction.blockNumber, 0)}/6: <a
               target="_blank"
               rel="noopener noreferrer"
-              href={`https://etherscan.io/tx/${pendingTransaction}`}
+              href={`https://etherscan.io/tx/${
+                pendingTransaction.hash || pendingTransaction.transactionHash
+              }`}
             >
-              {pendingTransaction} <ExternalLink size={12} color="#2196f3" />
+              {pendingTransaction.hash || pendingTransaction.transactionHash}{" "}
+              <ExternalLink size={12} color="#2196f3" />
             </a>
           </div>
         </div>

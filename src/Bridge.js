@@ -1,4 +1,4 @@
-import { BRIDGE_ADDRESS, TOKENS } from "./constants";
+import { BRIDGE_ADDRESS, ETH_BRIDGE_ADDRESS, TOKENS } from "./constants";
 import { stringToEthers, tokenToString } from "./helpers";
 
 import { BRIDGE_TOKENS } from "./constants";
@@ -15,8 +15,6 @@ import { Token } from "ec-client";
 import { default as ethers } from "ethers";
 
 const { MaxUint256 } = ethers.constants;
-const ETH_BRIDGE_ADDRESS = "0xBc95C422Df85a5DF2C211D32d55d8E22b34226B7";
-// const ETH_BRIDGE_ADDRESS = "0x0147577624e15206945b82911541d483beb3f531";
 const { hexlify } = ethers.utils;
 
 export default function Bridge(props) {
@@ -30,14 +28,14 @@ export default function Bridge(props) {
     pushPendingTransation,
     tokens,
   } = props;
-  const [amount, setAmount] = React.useState("0.25");
+  const [amount, setAmount] = React.useState("0.01");
   const [bridge, setBridge] = React.useState();
   const [tokenAddress, setTokenAddress] = React.useState(
     BRIDGE_TOKENS[0].address
   );
   const [ETHToken, setETHToken] = React.useState();
   const [isApproved, setIsApproved] = React.useState();
-  const [isApproving, setIsApproving] = React.useState(false);
+  const [transactionPending, setTransactionPending] = React.useState(false);
   const [allowance, setAllowance] = React.useState();
   const [token, setToken] = React.useState(BRIDGE_TOKENS[0]);
   React.useEffect(() => {
@@ -60,7 +58,8 @@ export default function Bridge(props) {
     setETHToken(ETHToken);
   }, [tokenAddress, signer]);
   React.useEffect(() => {
-    setIsApproved(stringToEthers(amount) < allowance);
+    if (!allowance) return;
+    setIsApproved(stringToEthers(amount).lt(allowance));
   }, [amount, allowance]);
 
   React.useEffect(() => {
@@ -94,9 +93,9 @@ export default function Bridge(props) {
   const approve = async (evt) => {
     evt.preventDefault();
     let tx = await ETHToken.approve(ETH_BRIDGE_ADDRESS, MaxUint256);
-    setIsApproving(true);
+    setTransactionPending(true);
     await tx.wait();
-    setIsApproving(false);
+    setTransactionPending(false);
     setIsApproved(true);
   };
 
@@ -108,6 +107,7 @@ export default function Bridge(props) {
     const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
   };
+
   const mint = async (evt) => {
     evt.preventDefault();
     let tx = await bridge.mint(
@@ -115,26 +115,11 @@ export default function Bridge(props) {
       hexlify(publicKey),
       stringToEthers(amount)
     );
-    triggerMockMint(tx.hash);
-    pushPendingTransation(tx.hash);
+    setTransactionPending(true);
+    pushPendingTransation(await tx.wait());
+    setTransactionPending(false);
     clearForm();
     onHide();
-  };
-
-  const triggerMockMint = async (hash) => {
-    for (let i = 0; i < 7; i++) {
-      await new Promise((r) => setTimeout(r, 1000));
-      await fetch("http://712128db295b.ngrok.io", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          confirmations: i,
-          hash,
-        }),
-      });
-    }
   };
 
   const handleAmountChange = (event) => {
@@ -151,7 +136,7 @@ export default function Bridge(props) {
           </div>
           <div className="modal-body">
             <div className="action-sheet-content">
-              <Tabs defaultActiveKey="release" className="nav-tabs lined">
+              <Tabs defaultActiveKey="mint" className="nav-tabs lined">
                 <Tab eventKey="mint" title="Mint">
                   <Form
                     noValidate
@@ -186,22 +171,27 @@ export default function Bridge(props) {
                     </Form.Group>
                     {isApproved ? (
                       <Button
+                        disabled={transactionPending}
                         type="submit"
                         className="btn btn-lg btn-block btn-primary mr-1 mb-1"
                         variant="contained"
                         color="primary"
                       >
-                        Mint
+                        {transactionPending ? (
+                          <Spinner size="md" animation="border" />
+                        ) : (
+                          "Mint"
+                        )}
                       </Button>
                     ) : (
                       <Button
-                        disabled={isApproving}
+                        disabled={transactionPending}
                         onClick={(event) => approve(event)}
                         className="btn btn-lg btn-block btn-primary mr-1 mb-1"
                         variant="contained"
                         color="primary"
                       >
-                        {isApproving ? (
+                        {transactionPending ? (
                           <Spinner size="md" animation="border" />
                         ) : (
                           "Approve"

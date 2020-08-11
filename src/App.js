@@ -1,4 +1,4 @@
-import { BRIDGE_TOKENS, NATIVE_TOKEN } from "./constants.js";
+import { BRIDGE_TOKENS, NATIVE_TOKEN, PROD } from "./constants.js";
 import { default as React, useEffect, useState } from "react";
 
 import Actions from "./Actions";
@@ -20,6 +20,8 @@ import { useLocalStorage } from "./helpers";
 
 export default function App() {
   const [blockHash, setBlockHash] = useState();
+  const [web3, setWeb3] = useState();
+  const [ethBlockNumber, setEthBlockNumber] = useState();
   const [publicKey, setPublicKey] = useState();
   const [ellipticoin, setEllipticoin] = useState();
   const [signer, setSigner] = useState();
@@ -30,31 +32,49 @@ export default function App() {
     return Array.from(keyPair.secretKey);
   });
   React.useEffect(() => {
-    let source;
+    (async () => {
+      let ethereum = window.ethereum;
+      if (!ethereum) return;
+      ethereum.autoRefreshOnNetworkChange = false;
 
-    source = new EventSource("https://davenport.ellipticoin.org/");
-    source.addEventListener("block", async (event) => {
-      setBlockHash(event.data);
-    });
+      await ethereum.enable();
+
+      setWeb3(window.web3);
+    })();
+  }, []);
+  useEffect(() => {
+    if (!ellipticoin) return
+    ellipticoin.addBlockListener((blockHash) => {
+       setBlockHash(blockHash) 
+    })
+    return () => ellipticoin.close();
+  }, [ellipticoin]);
+
+  React.useEffect(() => {
+    if (!web3) return;
+    (async () => {
+      let provider = new ethers.providers.Web3Provider(web3.currentProvider);
+      provider.on("block", (blockNumber) => {
+        setEthBlockNumber(blockNumber);
+      });
+    })();
+  }, [web3]);
+
+  React.useEffect(() => {
     if (secretKey) {
       setEllipticoin(
-        process.env.NODE_ENV === "production"
+        PROD
           ? new ECClient({
-              networkId: 3750925312,
-              bootnodes: ["https://davenport.ellipticoin.org"],
               privateKey: Uint8Array.from(secretKey),
             })
           : new ECClient({
-              networkId: 3750925312,
               privateKey: Uint8Array.from(secretKey),
-              bootnodes: ["https://davenport.ellipticoin.org"],
-              // bootnodes: ["http://52.73.131.11:80"],
+              bootnodes: ["http://127.0.0.1:8080"],
             })
       );
     }
   }, [secretKey]);
 
-  React.useEffect(() => {}, [blockHash]);
   React.useEffect(() => {
     if (secretKey) {
       let keyPair = nacl.sign.keyPair.fromSecretKey(Buffer.from(secretKey));
@@ -64,21 +84,14 @@ export default function App() {
 
   React.useEffect(() => {
     (async () => {
-      let ethereum = window.ethereum;
-      if (!ethereum) return;
-      ethereum.autoRefreshOnNetworkChange = false;
-
-      await ethereum.enable();
-
-      let provider = new ethers.providers.Web3Provider(
-        window.web3.currentProvider
-      );
+      if (!web3) return;
+      let provider = new ethers.providers.Web3Provider(web3.currentProvider);
       setSigner(await provider.getSigner());
       window.ethereum.on("accountsChanged", async (accounts) => {
         setSigner(await provider.getSigner());
       });
     })();
-  }, [setSigner]);
+  }, [web3]);
 
   useEffect(() => {
     (async () => {
@@ -127,6 +140,7 @@ export default function App() {
       <PendingTransactions
         pendingTransactions={pendingTransactions}
         setPendingTransactions={setPendingTransactions}
+        ethBlockNumber={ethBlockNumber}
       />
       <Send
         setShow={(show) => (show ? setShowModal("send") : setShowModal(null))}
@@ -137,7 +151,6 @@ export default function App() {
             ...tokens[0],
             balance,
           };
-          console.log(tokens[0]);
           setTokens(tokens);
         }}
       />
@@ -155,7 +168,6 @@ export default function App() {
             ...tokens[0],
             balance,
           };
-          console.log(tokens[0]);
           setTokens(tokens);
         }}
         tokens={tokens}

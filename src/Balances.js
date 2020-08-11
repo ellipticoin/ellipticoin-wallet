@@ -23,16 +23,18 @@ export default function Balances(props) {
               </tr>
             </thead>
             <tbody>
-              {tokens.map((token) => (
-                <tr key={token.name}>
-                  <th scope="row">{token.name}</th>
-                  <td>{(token.balance / 10000).toFixed(6)}</td>
-                  <td>{formatCurrency(token.price)}</td>
-                  <td className="text-right text-primary">
-                    {formatCurrency((token.balance * token.price) / 10000)}
-                  </td>
-                </tr>
-              ))}
+              {tokens
+                .filter((token) => token.balance > 0)
+                .map((token) => (
+                  <tr key={token.name}>
+                    <th scope="row">{token.name}</th>
+                    <td>{(token.balance / 10000).toFixed(6)}</td>
+                    <td>{formatCurrency(token.price)}</td>
+                    <td className="text-right text-primary">
+                      {formatCurrency((token.balance * token.price) / 10000)}
+                    </td>
+                  </tr>
+                ))}
               <tr>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
