@@ -2727,7 +2727,7 @@ bootstrap@^4.5.0:
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-4.5.0.tgz#97d9dbcb5a8972f8722c9962483543b907d9b9ec"
   integrity sha512-Z93QoXvodoVslA+PWNdk23Hze4RBYIkpb5h8I2HY2Tu2h7A0LpAgLcyrhrSUyo2/Oxm2l1fRZPs1e5hnxnliXA==
 
-borc@^2.1.1:
+borc@^2.1.1, borc@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/borc/-/borc-2.1.2.tgz#6ce75e7da5ce711b963755117dd1b187f6f8cf19"
   integrity sha512-Sy9eoUi4OiKzq7VovMn246iTo17kzuyHJKomCfpWMlI6RpfN1gk95w7d7gH264nApVLg0HZfcpz62/g4VH1Y4w==
@@ -4280,10 +4280,13 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-"ec-client@file:../js-ec-client":
-  version "0.0.19"
+ec-client@^.0.0.21:
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/ec-client/-/ec-client-0.0.21.tgz#8964f22c8f9e3c97539cbe30325a4660c855e2d0"
+  integrity sha512-23Det0KTjzp6aSAe3WnEdiuQk4UfuTeF7XtvWdIbJUOYP8jlt5y1xg9Rv6dzsywzjItYCcdDJDuH3WbaQderew==
   dependencies:
     "@types/node" "^12.12.37"
+    base64url "^3.0.1"
     borc "^2.1.1"
     buffer "^5.6.0"
     cbor "^5.0.1"
