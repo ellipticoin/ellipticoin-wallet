@@ -9,13 +9,13 @@ import { tokenToString } from "./helpers";
 export default function Send(props) {
   const { show, setShow, ellipticoin, setBalance } = props;
   const [sendAmount, setSendAmount] = React.useState(
-    "1"
-    // ""
+    // "1"
+    ""
   );
   const [toAddress, setToAddress] = React.useState(
     // "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
-    "JZoYzwPNn_k82INoA-auebXqRvZwBWiqYUKLMWUpXCQ"
-    // ""
+    // "JZoYzwPNn_k82INoA-auebXqRvZwBWiqYUKLMWUpXCQ"
+    ""
   );
   const [token, setToken] = React.useState(TOKENS[0]);
   const clearForm = () => {

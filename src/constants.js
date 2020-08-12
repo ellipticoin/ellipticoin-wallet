@@ -3,7 +3,7 @@ import { ethTokenId, tokenId } from "./helpers";
 import { SYSTEM_ADDRESS } from "ec-client";
 import base64url from "base64url";
 
-export const PROD = true//process.env.NODE_ENV === "production";
+export const PROD = process.env.NODE_ENV === "production";
 export const ETH_BRIDGE_ADDRESS = PROD
   ? "0x529264cc9847aa6502b426f2731a8097d99f3c6e"
   : "0xBc95C422Df85a5DF2C211D32d55d8E22b34226B7";
