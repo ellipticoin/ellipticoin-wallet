@@ -1,20 +1,25 @@
 import { ethTokenId, tokenId } from "./helpers";
 
-import { SYSTEM_ADDRESS } from "ec-client";
+import { SYSTEM_ADDRESS, Address } from "ec-client";
 import base64url from "base64url";
 
+export const BASE_FACTOR = 1000000;
 export const PROD = process.env.NODE_ENV === "production";
 export const ETH_BRIDGE_ADDRESS = PROD
   ? "0x529264cc9847aa6502b426f2731a8097d99f3c6e"
   : "0xBc95C422Df85a5DF2C211D32d55d8E22b34226B7";
-export const BRIDGE_ADDRESS = Array.from(
+export const BRIDGE_ADDRESS = Address.newPublicKey(
   base64url.toBuffer("OaKmwCWrUhdCCsIMN_ViVcu1uBF0VM3FW3Mi1z_VTNs")
+);
+export const ELLIPTICOIN_CONTRACT = Address.newContract(
+  SYSTEM_ADDRESS,
+  "Ellipticoin"
 );
 export const NATIVE_TOKEN = {
   ticker: "ELC",
   name: "Ellipticoin",
-  price: 500000,
-  issuer: [SYSTEM_ADDRESS, Buffer.from("Ellipticoin")],
+  price: 0.5 * BASE_FACTOR,
+  issuer: ELLIPTICOIN_CONTRACT,
   id: tokenId("ELC"),
 };
 export const BRIDGE_TOKENS = PROD
@@ -100,6 +105,22 @@ export const BRIDGE_TOKENS = PROD
         price: 1000000,
         issuer: BRIDGE_ADDRESS,
         id: ethTokenId("4748b2e6DB310512Ff9085E533b6C4151ff10746"),
+      },
+      {
+        ticker: "FBTC",
+        name: "Fake Bitcoin",
+        address: "0xd617a7861A15372fEb23C40A155806671918c870",
+        price: 11354900000,
+        issuer: BRIDGE_ADDRESS,
+        id: ethTokenId("d617a7861A15372fEb23C40A155806671918c870"),
+      },
+      {
+        ticker: "FETH",
+        name: "Fake Ethereum",
+        address: "0x59a9eec95f353212444136355ad0bf7e7677b8cd",
+        price: 380830000,
+        issuer: BRIDGE_ADDRESS,
+        id: ethTokenId("59a9eec95f353212444136355ad0bf7e7677b8cd"),
       },
     ];
 export const TOKENS = [NATIVE_TOKEN, ...BRIDGE_TOKENS];

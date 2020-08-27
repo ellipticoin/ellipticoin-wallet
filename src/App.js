@@ -1,7 +1,8 @@
 import { BRIDGE_TOKENS, NATIVE_TOKEN, PROD } from "./constants.js";
-import { default as React, useEffect, useState } from "react";
+import { default as React, useEffect, useMemo, useState } from "react";
 
 import Actions from "./Actions";
+import { BASE_FACTOR } from "./constants";
 import Balances from "./Balances";
 import Bridge from "./Bridge";
 import { Buffer } from "buffer/";
@@ -11,11 +12,14 @@ import Loader from "./Loader";
 import PendingTransactions from "./PendingTransactions";
 import Rewards from "./Rewards";
 import Send from "./Send";
+import ProvideLiquidity from "./ProvideLiquidity";
 import Sidebar from "./Sidebar";
 import { Token } from "ec-client";
+import Total from "./Total";
 import YourAddress from "./YourAddress";
 import { default as ethers } from "ethers";
 import nacl from "tweetnacl";
+import { sumBy } from "lodash";
 import { useLocalStorage } from "./helpers";
 
 export default function App() {
@@ -43,10 +47,10 @@ export default function App() {
     })();
   }, []);
   useEffect(() => {
-    if (!ellipticoin) return
+    if (!ellipticoin) return;
     ellipticoin.addBlockListener((blockHash) => {
-       setBlockHash(blockHash) 
-    })
+      setBlockHash(blockHash);
+    });
     return () => ellipticoin.close();
   }, [ellipticoin]);
 
@@ -116,6 +120,10 @@ export default function App() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showModal, setShowModal] = useState();
   const [pendingTransactions, setPendingTransactions] = useState([]);
+  const total = useMemo(
+    () => sumBy(tokens, (token) => token.balance * (token.price / BASE_FACTOR)),
+    [tokens]
+  );
 
   if (!publicKey) return null;
   return (
@@ -127,15 +135,15 @@ export default function App() {
         setSecretKey={setSecretKey}
       />
       <div id="appCapsule">
-        <Actions
-          balance={
-            tokens.length ? tokens[0].balance * (tokens[0].price / 10000) : 0
-          }
-          setShowModal={setShowModal}
-        />
+        <div className="section wallet-card-section pt-1">
+          <div className="wallet-card">
+            <Total total={total} />
+            <Actions setShowModal={setShowModal} />
+          </div>
+        </div>
         <YourAddress publicKey={publicKey} />
         <Rewards />
-        <Balances tokens={tokens} />
+        <Balances tokens={tokens} total={total} />
       </div>
       <PendingTransactions
         pendingTransactions={pendingTransactions}
@@ -145,6 +153,21 @@ export default function App() {
       <Send
         setShow={(show) => (show ? setShowModal("send") : setShowModal(null))}
         show={showModal === "send"}
+        ellipticoin={ellipticoin}
+        setBalance={(balance) => {
+          tokens[0] = {
+            ...tokens[0],
+            balance,
+          };
+          setTokens(tokens);
+        }}
+      />
+      <ProvideLiquidity
+        setShow={(show) =>
+          show ? setShowModal("provideLiquidty") : setShowModal(null)
+        }
+        show={showModal === "provideLiquidty"}
+        blockHash={blockHash}
         ellipticoin={ellipticoin}
         setBalance={(balance) => {
           tokens[0] = {

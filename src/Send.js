@@ -1,7 +1,7 @@
 import { Button, Form, Modal } from "react-bootstrap";
 
 import React from "react";
-import { TOKENS } from "./constants";
+import { TOKENS, BASE_FACTOR } from "./constants";
 import { Token } from "ec-client";
 import base64url from "base64url";
 import { tokenToString } from "./helpers";
@@ -31,7 +31,7 @@ export default function Send(props) {
     const tokenContract = new Token(ellipticoin, token.issuer, token.id);
     const response = await tokenContract.transfer(
       Array.from(base64url.toBuffer(toAddress)),
-      Math.floor(parseFloat(sendAmount) * 10000)
+      Math.floor(parseFloat(sendAmount) * BASE_FACTOR)
     );
     if (response.return_value.Ok) {
       setBalance(response.return_value.Ok);

@@ -1,3 +1,4 @@
+import { BASE_FACTOR } from "./constants";
 import ethers from "ethers";
 import { useState } from "react";
 
@@ -21,15 +22,15 @@ export function ethTokenId(address) {
 }
 
 export function tokenToString({ issuer, id }) {
-  if (issuer.length === 32) {
-    return `${Buffer.from(issuer).toString("base64")}:${Buffer.from(
-      id
-    ).toString("base64")}`;
-  } else {
+  if (issuer.length === 2) {
     return `${Buffer.concat([
-      Buffer.from(issuer[0]),
+      issuer[0].toBuffer(),
       Buffer.from(issuer[1]),
     ]).toString("base64")}:${Buffer.from(id).toString("base64")}`;
+  } else {
+    return `${issuer.toBuffer().toString("base64")}:${Buffer.from(id).toString(
+      "base64"
+    )}`;
   }
 }
 
@@ -47,7 +48,15 @@ export function formatCurrency(amount) {
     minimumFractionDigits: 2,
     currencyDisplay: "symbol",
   })
-    .format(amount / 1000000)
+    .format(amount / BASE_FACTOR)
+    .replace(/^(\D+)/, "$1 ");
+}
+
+export function formatTokenBalance(amount) {
+  return new Intl.NumberFormat("en", {
+    minimumFractionDigits: 6,
+  })
+    .format(amount / BASE_FACTOR)
     .replace(/^(\D+)/, "$1 ");
 }
 

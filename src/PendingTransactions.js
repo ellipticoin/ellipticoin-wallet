@@ -40,7 +40,11 @@ export default function PendingTransactions(props) {
           <div>
             <Spinner size="sm" animation="border" />
             Confirmations{" "}
-            {Math.max(ethBlockNumber - pendingTransaction.blockNumber, 0)}/6: <a
+            {Math.max(
+              ethBlockNumber - pendingTransaction.blockNumber,
+              0
+            )}/6:{" "}
+            <a
               target="_blank"
               rel="noopener noreferrer"
               href={`https://etherscan.io/tx/${
