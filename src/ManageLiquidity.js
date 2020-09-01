@@ -1,11 +1,11 @@
-import { Button, Form, Modal, InputGroup } from "react-bootstrap";
+import { BASE_FACTOR, TOKENS } from "./constants";
+import { Button, Form, InputGroup, Modal } from "react-bootstrap";
 
-import React from "react";
-import { TOKENS, BASE_FACTOR } from "./constants";
 import { Pool } from "ec-client";
+import React from "react";
 import { tokenToString } from "./helpers";
 
-export default function Send(props) {
+export default function ManageLiquidity(props) {
   const { show, setShow, ellipticoin, setBalance, blockHash } = props;
   const [reserveAmount, setReserveAmount] = React.useState("");
   const [initialPrice, setInitialPrice] = React.useState("");
@@ -25,8 +25,28 @@ export default function Send(props) {
     const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
   };
-  const createPool = async (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
+    console.log(pool.exists());
+    if (pool.exists()) {
+      await addLiquidity();
+    } else {
+      await createPool();
+    }
+  };
+
+  const addLiquidity = async () => {
+    const response = await pool.addLiquidity(
+      Math.floor(parseFloat(reserveAmount) * BASE_FACTOR)
+    );
+    if (response.return_value.Ok) {
+      setBalance(response.return_value.Ok);
+    }
+    setPool(await ellipticoin.getPool(token));
+    setShow(false);
+    clearForm();
+  };
+  const createPool = async () => {
     const response = await pool.create(
       Math.floor(parseFloat(reserveAmount) * BASE_FACTOR),
       Math.floor(parseFloat(initialPrice) * BASE_FACTOR)
@@ -34,6 +54,7 @@ export default function Send(props) {
     if (response.return_value.Ok) {
       setBalance(response.return_value.Ok);
     }
+    setPool(await ellipticoin.getPool(token));
     setShow(false);
     clearForm();
   };
@@ -49,7 +70,7 @@ export default function Send(props) {
               <Form
                 noValidate
                 autoComplete="off"
-                onSubmit={(evt) => createPool(evt)}
+                onSubmit={(evt) => handleSubmit(evt)}
               >
                 <Form.Group className="basic">
                   <Form.Label>Token</Form.Label>
@@ -99,7 +120,7 @@ export default function Send(props) {
                         <InputGroup.Append>
                           <InputGroup.Text id="basic-addon2">
                             x {reserveAmount} = {reserveAmount * initialPrice}{" "}
-                            DAI
+                            USD
                           </InputGroup.Text>
                         </InputGroup.Append>
                       </InputGroup>

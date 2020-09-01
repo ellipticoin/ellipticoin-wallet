@@ -1,7 +1,7 @@
+import { BASE_FACTOR, TOKENS } from "./constants";
 import { Button, Form, Modal } from "react-bootstrap";
 
 import React from "react";
-import { TOKENS, BASE_FACTOR } from "./constants";
 import { Token } from "ec-client";
 import base64url from "base64url";
 import { tokenToString } from "./helpers";

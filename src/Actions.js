@@ -15,7 +15,7 @@ export default function Actions(props) {
         </button>
       </div>
       <div className="item">
-        <button>
+        <button onClick={() => setShowModal("exchange")}>
           <div className="icon-wrapper bg-warning">
             <Repeat />
           </div>
@@ -31,11 +31,11 @@ export default function Actions(props) {
         </button>
       </div>
       <div className="item">
-        <button onClick={() => setShowModal("provideLiquidty")}>
+        <button onClick={() => setShowModal("manageLiquidity")}>
           <div className="icon-wrapper">
             <Droplet className="filled" />
           </div>
-          <strong>Provide Liquidity</strong>
+          <strong>Manage Liquidity</strong>
         </button>
       </div>
     </div>

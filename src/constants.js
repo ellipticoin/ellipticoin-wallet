@@ -1,6 +1,6 @@
+import { Address, SYSTEM_ADDRESS } from "ec-client";
 import { ethTokenId, tokenId } from "./helpers";
 
-import { SYSTEM_ADDRESS, Address } from "ec-client";
 import base64url from "base64url";
 
 export const BASE_FACTOR = 1000000;
@@ -22,7 +22,7 @@ export const NATIVE_TOKEN = {
   issuer: ELLIPTICOIN_CONTRACT,
   id: tokenId("ELC"),
 };
-export const BRIDGE_TOKENS = PROD
+export const BRIDGE_TOKENS = false //PROD
   ? [
       {
         ticker: "DAI",
