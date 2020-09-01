@@ -99,24 +99,24 @@ export const BRIDGE_TOKENS = false //PROD
     ]
   : [
       {
-        ticker: "FDAI",
-        name: "Fake DAI",
+        ticker: "USD",
+        name: "US Dollars",
         address: "0x4748b2e6DB310512Ff9085E533b6C4151ff10746",
         price: 1000000,
         issuer: BRIDGE_ADDRESS,
         id: ethTokenId("4748b2e6DB310512Ff9085E533b6C4151ff10746"),
       },
       {
-        ticker: "FBTC",
-        name: "Fake Bitcoin",
+        ticker: "BTC",
+        name: "Bitcoin",
         address: "0xd617a7861A15372fEb23C40A155806671918c870",
         price: 11354900000,
         issuer: BRIDGE_ADDRESS,
         id: ethTokenId("d617a7861A15372fEb23C40A155806671918c870"),
       },
       {
-        ticker: "FETH",
-        name: "Fake Ethereum",
+        ticker: "ETH",
+        name: "Ethereum",
         address: "0x59a9eec95f353212444136355ad0bf7e7677b8cd",
         price: 380830000,
         issuer: BRIDGE_ADDRESS,

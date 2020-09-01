@@ -4280,10 +4280,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-ec-client@^.0.0.23:
-  version "0.0.23"
-  resolved "https://registry.yarnpkg.com/ec-client/-/ec-client-0.0.23.tgz#3fdb8328e1774407d76c077ecb1a56d714f6673e"
-  integrity sha512-HHKOFCi+0p6K9Y1d4K0ZT2y1C28LH2iTbE5DovK1iayP2MlcnX6Ah4InzRP9UFNO1KGW8NoyDhz/kzrNkUAGAA==
+ec-client@^.0.0.24:
+  version "0.0.24"
+  resolved "https://registry.yarnpkg.com/ec-client/-/ec-client-0.0.24.tgz#2d1474a4585a426734026cbcda1b70bf9877712b"
+  integrity sha512-4IZxCMrmV5wlLQ21xkNWGPI+vhu25UUq2sy/Ji5xT6PR5ygxG9uDM//bTJep66NeofaAwxvpl/Xx7X5D4XuHLg==
   dependencies:
     "@types/node" "^12.12.37"
     base64url "^3.0.1"
