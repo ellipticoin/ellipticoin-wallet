@@ -3,10 +3,19 @@ import { Button, Form, InputGroup, Modal } from "react-bootstrap";
 
 import { Pool } from "ec-client";
 import React from "react";
+import { fetchTokens } from "./App.js";
 import { tokenToString } from "./helpers";
 
 export default function ManageLiquidity(props) {
-  const { show, setShow, ellipticoin, setBalance, blockHash } = props;
+  const {
+    show,
+    setShow,
+    ellipticoin,
+    setBalance,
+    blockHash,
+    setTokens,
+    publicKey,
+  } = props;
   const [reserveAmount, setReserveAmount] = React.useState("");
   const [initialPrice, setInitialPrice] = React.useState("");
   const [token, setToken] = React.useState(TOKENS[0]);
@@ -51,8 +60,8 @@ export default function ManageLiquidity(props) {
       Math.floor(parseFloat(reserveAmount) * BASE_FACTOR),
       Math.floor(parseFloat(initialPrice) * BASE_FACTOR)
     );
-    if (response.return_value.Ok) {
-      setBalance(response.return_value.Ok);
+    if (response.return_value.hasOwnProperty("Ok")) {
+      setTokens(await fetchTokens(ellipticoin, publicKey));
     }
     setPool(await ellipticoin.getPool(token));
     setShow(false);

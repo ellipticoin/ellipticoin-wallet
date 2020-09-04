@@ -100,7 +100,7 @@ export const BRIDGE_TOKENS = false //PROD
   : [
       {
         ticker: "USD",
-        name: "US Dollars",
+        name: "USD",
         address: "0x4748b2e6DB310512Ff9085E533b6C4151ff10746",
         price: 1000000,
         issuer: BRIDGE_ADDRESS,

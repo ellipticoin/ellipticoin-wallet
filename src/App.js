@@ -24,9 +24,23 @@ import nacl from "tweetnacl";
 import { sumBy } from "lodash";
 import { useLocalStorage } from "./helpers";
 
+export async function fetchTokens(ellipticoin, publicKey) {
+  return (
+    await Promise.all(
+      [NATIVE_TOKEN, ...BRIDGE_TOKENS].map(async (token) => {
+        const tokenContract = new Token(ellipticoin, token.issuer, token.id);
+        const balance = await tokenContract.getBalance(publicKey);
+        return {
+          balance,
+          ...token,
+        };
+      })
+    )
+  ).filter((token) => token.balance !== 0);
+}
 export default function App() {
   const [blockHash, setBlockHash] = useState();
-  const [web3, setWeb3] = useState();
+  const [web3] = useState();
   const [ethBlockNumber, setEthBlockNumber] = useState();
   const [publicKey, setPublicKey] = useState();
   const [ellipticoin, setEllipticoin] = useState();
@@ -44,9 +58,10 @@ export default function App() {
       if (!ethereum) return;
       ethereum.autoRefreshOnNetworkChange = false;
 
-      await ethereum.enable();
-
-      setWeb3(window.web3);
+      ethereum.request({
+        method: "eth_requestAccounts",
+        params: [],
+      });
     })();
   }, []);
   useEffect(() => {
@@ -105,24 +120,7 @@ export default function App() {
       if (!publicKey || !ellipticoin) {
         return;
       }
-      let tokens = (
-        await Promise.all(
-          [NATIVE_TOKEN, ...BRIDGE_TOKENS].map(async (token) => {
-            const tokenContract = new Token(
-              ellipticoin,
-              token.issuer,
-              token.id
-            );
-            const balance = await tokenContract.getBalance(publicKey);
-            return {
-              balance,
-              ...token,
-            };
-          })
-        )
-      ).filter((token) => token.balance !== 0);
-      setTokens(tokens);
-      setLoading(false);
+      setTokens(await fetchTokens(ellipticoin, publicKey));
     })();
   }, [publicKey, ellipticoin, blockHash]);
   useEffect(() => {
@@ -161,7 +159,6 @@ export default function App() {
     totalTokenValue,
     totalLiquidityValue,
   ]);
-
   if (!publicKey) return null;
   return (
     <>
@@ -206,6 +203,8 @@ export default function App() {
         }
         show={showModal === "manageLiquidity"}
         blockHash={blockHash}
+        setTokens={setTokens}
+        publicKey={publicKey}
         ellipticoin={ellipticoin}
         setBalance={(balance) => {
           tokens[0] = {
