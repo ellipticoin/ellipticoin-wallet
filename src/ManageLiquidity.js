@@ -1,31 +1,32 @@
 import { BASE_FACTOR, TOKENS } from "./constants";
 import { Button, Form, InputGroup, Modal } from "react-bootstrap";
+import { fetchPools, fetchTokens } from "./App.js";
 
 import { Pool } from "ec-client";
 import React from "react";
-import { fetchTokens } from "./App.js";
 import { tokenToString } from "./helpers";
 
 export default function ManageLiquidity(props) {
   const {
     show,
     setShow,
-    ellipticoin,
+    ec,
     setBalance,
     blockHash,
     setTokens,
+    setPools,
     publicKey,
   } = props;
   const [reserveAmount, setReserveAmount] = React.useState("");
   const [initialPrice, setInitialPrice] = React.useState("");
   const [token, setToken] = React.useState(TOKENS[0]);
-  const [pool, setPool] = React.useState(new Pool(ellipticoin));
+  const [pool, setPool] = React.useState(new Pool(ec));
   React.useEffect(() => {
     (async () => {
-      const pool = await ellipticoin.getPool(token);
+      const pool = await ec.getPool(token);
       setPool(pool);
     })();
-  }, [ellipticoin, token, blockHash]);
+  }, [ec, token, blockHash]);
   const clearForm = () => {
     setReserveAmount("");
     setInitialPrice("");
@@ -36,7 +37,6 @@ export default function ManageLiquidity(props) {
   };
   const handleSubmit = async (evt) => {
     evt.preventDefault();
-    console.log(pool.exists());
     if (pool.exists()) {
       await addLiquidity();
     } else {
@@ -51,19 +51,22 @@ export default function ManageLiquidity(props) {
     if (response.return_value.Ok) {
       setBalance(response.return_value.Ok);
     }
-    setPool(await ellipticoin.getPool(token));
+    setPool(await ec.getPool(token));
     setShow(false);
     clearForm();
   };
   const createPool = async () => {
+    console.log(reserveAmount);
+    console.log(initialPrice);
     const response = await pool.create(
       Math.floor(parseFloat(reserveAmount) * BASE_FACTOR),
       Math.floor(parseFloat(initialPrice) * BASE_FACTOR)
     );
     if (response.return_value.hasOwnProperty("Ok")) {
-      setTokens(await fetchTokens(ellipticoin, publicKey));
+      setTokens(await fetchTokens(ec, publicKey));
+      setPools(await fetchPools(ec, publicKey));
     }
-    setPool(await ellipticoin.getPool(token));
+    setPool(await ec.getPool(token));
     setShow(false);
     clearForm();
   };

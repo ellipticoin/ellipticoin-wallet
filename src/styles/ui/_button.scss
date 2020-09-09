@@ -18,17 +18,22 @@ button {
       fill: #fff;
     }
   }
-  &:hover,
-  &:active,
-  &.active {
-    .icon-wrapper {
-      svg {
-        &.filled {
-          fill: darken(#fff, 5%);
-        }
-        color: darken(#fff, 5%);
+  &:hover {
+    svg {
+      &.filled {
+        fill: darken(#fff, 5%);
       }
     }
+    color: darken(#fff, 5%);
+  }
+  &:active {
+    svg {
+      &.filled {
+        fill: darken(#fff, 10%) !important;
+      }
+      color: darken(#fff, 10%) !important;
+    }
+    color: darken(#fff, 10%) !important;
   }
 }
 
@@ -97,31 +102,6 @@ button {
     text-align: center;
     margin: 0 !important;
   }
-}
-
-.btn-facebook {
-  color: #fff !important;
-  background: #39579b;
-}
-.btn-twitter {
-  color: #fff !important;
-  background: #049ff6;
-}
-.btn-instagram {
-  color: #fff !important;
-  background: #df237b;
-}
-.btn-linkedin {
-  color: #fff !important;
-  background: #0075aa;
-}
-.btn-twitch {
-  color: #fff !important;
-  background: #923cff;
-}
-.btn-whatsapp {
-  color: #fff !important;
-  background: #0ad561;
 }
 
 @mixin buttonStyle($color) {

@@ -4280,10 +4280,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-ec-client@^.0.0.24:
-  version "0.0.24"
-  resolved "https://registry.yarnpkg.com/ec-client/-/ec-client-0.0.24.tgz#2d1474a4585a426734026cbcda1b70bf9877712b"
-  integrity sha512-4IZxCMrmV5wlLQ21xkNWGPI+vhu25UUq2sy/Ji5xT6PR5ygxG9uDM//bTJep66NeofaAwxvpl/Xx7X5D4XuHLg==
+ec-client@^.0.0.25:
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/ec-client/-/ec-client-0.0.25.tgz#a1b95569a4082320eda7a37c0c8f031cc3c0e215"
+  integrity sha512-5TVmsgJ3N9eEJ2/hfogwudPhK5PR23F7Hm56CtzVcNbWJOvcQBbjh8RZtB97oSkfTu1c//ih3sL0FH2dvTR2Yw==
   dependencies:
     "@types/node" "^12.12.37"
     base64url "^3.0.1"
@@ -5781,6 +5781,11 @@ hosted-git-info@^2.1.4:
   version "2.8.8"
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.8.tgz#7539bd4bc1e0e0a895815a2e0262420b12858488"
   integrity sha512-f/wzC2QaWBs7t9IYqB4T3sR1xviIViXJRJTWBlx2Gf3g0Xi5vI7Yy4koXQ1c9OYDGHN9sBy1DQ2AB8fqZBWhUg==
+
+howler@^2.1.3:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/howler/-/howler-2.2.0.tgz#0e2c780997ae65ab9a1a186333031beac1c63c6b"
+  integrity sha512-sGPkrAQy7jh5mNDbkRNG0F82R2HFDYNsQXBcX4smXQT0y0F4UMsa/+jXaGwWvcrajWr2tDB7JUkH7G5qSnuIyQ==
 
 hpack.js@^2.1.6:
   version "2.1.6"
@@ -11887,6 +11892,13 @@ url@^0.11.0:
   dependencies:
     punycode "1.3.2"
     querystring "0.2.0"
+
+use-sound@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/use-sound/-/use-sound-1.0.2.tgz#1a867d284268012b6fbd8610e0594d3f750e2788"
+  integrity sha512-Nj8fsyYYz/09njAumAR04y1YfEf88D8/aicCZjWr7TSb+ekR/qGM+4wLCk0dHZBTiDQSGC+HpoVb3zlgopfkNQ==
+  dependencies:
+    howler "^2.1.3"
 
 use@^3.1.0:
   version "3.1.1"

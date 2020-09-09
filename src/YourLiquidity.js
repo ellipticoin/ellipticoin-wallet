@@ -4,7 +4,7 @@ import { BASE_FACTOR } from "./constants";
 import { default as React } from "react";
 
 export default function YourLiquidity(props) {
-  const { pools, total } = props;
+  const { pools, total, elcPrice } = props;
 
   if (pools.length === 0) return <></>;
 
@@ -21,6 +21,7 @@ export default function YourLiquidity(props) {
                 <th scope="col">Token</th>
                 <th scope="col">Number of Shares</th>
                 <th scope="col">Value per Share</th>
+                <th scope="col">Issuance per Share</th>
                 <th scope="col" className="text-right">
                   Value
                 </th>
@@ -31,9 +32,14 @@ export default function YourLiquidity(props) {
                 <tr key={pool.name}>
                   <th scope="row">{pool.name}</th>
                   <td>{formatTokenBalance(pool.balance)}</td>
-                  <td>{formatTokenBalance(pool.balance)}</td>
+                  <td>{formatCurrency(pool.price * 2)}</td>
+                  <td>{formatCurrency(pool.issuancePerShare * elcPrice)}</td>
                   <td className="text-right text-primary">
-                    {formatCurrency(pool.balance * (pool.price / BASE_FACTOR))}
+                    {formatCurrency(
+                      pool.balance *
+                        ((pool.issuancePerShare * elcPrice + pool.price * 2) /
+                          BASE_FACTOR)
+                    )}
                   </td>
                 </tr>
               ))}

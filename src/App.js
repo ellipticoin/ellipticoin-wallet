@@ -1,4 +1,5 @@
 import { BRIDGE_TOKENS, NATIVE_TOKEN, PROD } from "./constants.js";
+import { Client as ECClient, Ellipticoin } from "ec-client";
 import { default as React, useEffect, useMemo, useState } from "react";
 
 import Actions from "./Actions";
@@ -6,7 +7,6 @@ import { BASE_FACTOR } from "./constants";
 import Balances from "./Balances";
 import Bridge from "./Bridge";
 import { Buffer } from "buffer/";
-import { Client as ECClient } from "ec-client";
 import Exchange from "./Exchange";
 import Header from "./Header";
 import Loader from "./Loader";
@@ -24,30 +24,56 @@ import nacl from "tweetnacl";
 import { sumBy } from "lodash";
 import { useLocalStorage } from "./helpers";
 
-export async function fetchTokens(ellipticoin, publicKey) {
+export async function fetchTokens(ec, publicKey) {
   return (
     await Promise.all(
       [NATIVE_TOKEN, ...BRIDGE_TOKENS].map(async (token) => {
-        const tokenContract = new Token(ellipticoin, token.issuer, token.id);
+        const tokenContract = new Token(ec, token.issuer, token.id);
         const balance = await tokenContract.getBalance(publicKey);
+        const pool = await ec.getPool(token);
         return {
           balance,
           ...token,
+          price: pool.price() * BASE_FACTOR,
         };
       })
     )
   ).filter((token) => token.balance !== 0);
 }
+
+export async function fetchPools(ec, publicKey) {
+  return (
+    await Promise.all(
+      [NATIVE_TOKEN, ...BRIDGE_TOKENS].map(async (token) => {
+        const pool = await ec.getPool(token);
+        const balance = await pool.getBalance(publicKey);
+        return {
+          balance,
+          ...token,
+          price: pool.price() * BASE_FACTOR,
+          issuancePerShare: pool.issuancePerShare(),
+        };
+      })
+    )
+  ).filter((pool) => pool.balance !== 0);
+}
+
+export async function fetchIssuanceRewards(ec, publicKey) {
+  const ellipticoin = new Ellipticoin(ec);
+  return ellipticoin.getIssuanceRewards(publicKey);
+}
 export default function App() {
   const [blockHash, setBlockHash] = useState();
+  const [blockNumber, setBlockNumber] = useState(0);
   const [web3] = useState();
   const [ethBlockNumber, setEthBlockNumber] = useState();
+  const [issuanceRewards, setIssuanceRewards] = useState();
   const [publicKey, setPublicKey] = useState();
-  const [ellipticoin, setEllipticoin] = useState();
+  const [ec, setEc] = useState();
   const [signer, setSigner] = useState();
   const [tokens, setTokens] = useState([]);
   const [pools, setPools] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [secretKey, setSecretKey] = useLocalStorage("secretKey", () => {
     const keyPair = nacl.sign.keyPair();
     return Array.from(keyPair.secretKey);
@@ -65,12 +91,27 @@ export default function App() {
     })();
   }, []);
   useEffect(() => {
-    if (!ellipticoin) return;
-    ellipticoin.addBlockListener((blockHash) => {
+    if (!ec) return;
+    ec.addBlockListener((blockHash) => {
       setBlockHash(blockHash);
     });
-    return () => ellipticoin.close();
-  }, [ellipticoin]);
+    return () => ec.close();
+  }, [ec]);
+
+  useEffect(() => {
+    if (!blockHash || !ec) return;
+    (async () => {
+      const block = await ec.getBlock(blockHash);
+      setBlockNumber(block.number);
+    })();
+  }, [blockHash, ec]);
+
+  useEffect(() => {
+    if (!blockHash || !ec) return;
+    (async () => {
+      setIssuanceRewards(await fetchIssuanceRewards(ec, publicKey));
+    })();
+  }, [blockHash, ec, publicKey]);
 
   React.useEffect(() => {
     if (!web3) return;
@@ -84,7 +125,7 @@ export default function App() {
 
   React.useEffect(() => {
     if (secretKey) {
-      setEllipticoin(
+      setEc(
         PROD
           ? new ECClient({
               privateKey: Uint8Array.from(secretKey),
@@ -117,48 +158,44 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      if (!publicKey || !ellipticoin) {
+      if (!publicKey || !ec) {
         return;
       }
-      setTokens(await fetchTokens(ellipticoin, publicKey));
+      setTokens(await fetchTokens(ec, publicKey));
     })();
-  }, [publicKey, ellipticoin, blockHash]);
+  }, [publicKey, ec, blockHash]);
   useEffect(() => {
     (async () => {
-      if (!publicKey || !ellipticoin) {
+      if (!publicKey || !ec) {
         return;
       }
-      let pools = (
-        await Promise.all(
-          [NATIVE_TOKEN, ...BRIDGE_TOKENS].map(async (token) => {
-            const pool = await ellipticoin.getPool(token);
-            return {
-              balance: pool.reserves || 0,
-              ...token,
-            };
-          })
-        )
-      ).filter((pool) => pool.balance !== 0);
-      setPools(pools);
-      setLoading(false);
+      setPools(await fetchPools(ec, publicKey));
     })();
-  }, [publicKey, ellipticoin, blockHash]);
+  }, [publicKey, ec, blockHash]);
 
   const [showSidebar, setShowSidebar] = useState(false);
   const [showModal, setShowModal] = useState();
   const [pendingTransactions, setPendingTransactions] = useState([]);
+  const elcPrice = useMemo(() => (tokens[0] ? tokens[0].price : 0), [tokens]);
   const totalTokenValue = useMemo(
     () => sumBy(tokens, (token) => token.balance * (token.price / BASE_FACTOR)),
     [tokens]
   );
   const totalLiquidityValue = useMemo(
-    () => sumBy(pools, (pool) => pool.balance * (pool.price / BASE_FACTOR)),
-    [pools]
+    () =>
+      sumBy(
+        pools,
+        (pool) =>
+          pool.balance *
+          ((pool.issuancePerShare * elcPrice + pool.price * 2) / BASE_FACTOR)
+      ),
+    [pools, elcPrice]
   );
-  const total = useMemo(() => totalTokenValue + totalLiquidityValue, [
-    totalTokenValue,
-    totalLiquidityValue,
-  ]);
+  console.log(issuanceRewards);
+  const loading = useMemo(
+    () => !(pools && tokens && issuanceRewards !== undefined),
+    [pools, tokens, issuanceRewards]
+  );
   if (!publicKey) return null;
   return (
     <>
@@ -171,14 +208,28 @@ export default function App() {
       <div id="appCapsule">
         <div className="section wallet-card-section pt-1">
           <div className="wallet-card">
-            <Total total={total} />
+            <Total total={totalTokenValue} />
             <Actions setShowModal={setShowModal} />
           </div>
         </div>
         <YourAddress publicKey={publicKey} />
-        <Rewards />
+        <Rewards
+          setPools={setPools}
+          setTokens={setTokens}
+          publicKey={publicKey}
+          elcPrice={elcPrice}
+          ec={ec}
+          setIssuanceRewards={setIssuanceRewards}
+          blockNumber={blockNumber}
+          issuanceRewards={issuanceRewards}
+          pools={pools}
+        />
         <Balances tokens={tokens} total={totalTokenValue} />
-        <YourLiquidity pools={pools} total={totalLiquidityValue} />
+        <YourLiquidity
+          pools={pools}
+          elcPrice={elcPrice}
+          total={totalLiquidityValue}
+        />
       </div>
       <PendingTransactions
         pendingTransactions={pendingTransactions}
@@ -188,7 +239,7 @@ export default function App() {
       <Send
         setShow={(show) => (show ? setShowModal("send") : setShowModal(null))}
         show={showModal === "send"}
-        ellipticoin={ellipticoin}
+        ec={ec}
         setBalance={(balance) => {
           tokens[0] = {
             ...tokens[0],
@@ -204,8 +255,9 @@ export default function App() {
         show={showModal === "manageLiquidity"}
         blockHash={blockHash}
         setTokens={setTokens}
+        setPools={setPools}
         publicKey={publicKey}
-        ellipticoin={ellipticoin}
+        ec={ec}
         setBalance={(balance) => {
           tokens[0] = {
             ...tokens[0],
@@ -220,7 +272,7 @@ export default function App() {
         }
         show={showModal === "exchange"}
         blockHash={blockHash}
-        ellipticoin={ellipticoin}
+        ec={ec}
         setBalance={(balance) => {
           tokens[0] = {
             ...tokens[0],
@@ -232,7 +284,7 @@ export default function App() {
       <Bridge
         show={showModal === "bridge"}
         onHide={() => setShowModal(null)}
-        ellipticoin={ellipticoin}
+        ec={ec}
         signer={signer}
         pushPendingTransation={(tx) =>
           setPendingTransactions([...pendingTransactions, tx])
