@@ -27,15 +27,7 @@ export default function Rewards(props) {
     setPools(await fetchPools(ec, publicKey));
     setIssuanceRewards(await fetchIssuanceRewards(ec, publicKey));
 
-    // console.log(pools);
-    // for (let pool of pools) {
-    //   // console.log(pool)
-    //   const token = { issuer: pool.issuer, id: pool.id };
-    //   pool = await ellipticoin.getPool(token);
-    //   pool.takeProfits();
-    // }
   };
-
   return (
     <div className="section">
       <div className="row mt-2">

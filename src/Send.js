@@ -7,7 +7,7 @@ import base64url from "base64url";
 import { tokenToString } from "./helpers";
 
 export default function Send(props) {
-  const { show, setShow, ellipticoin, setBalance } = props;
+  const { show, setShow, ec, setBalance } = props;
   const [sendAmount, setSendAmount] = React.useState(
     // "1"
     ""
@@ -28,7 +28,7 @@ export default function Send(props) {
   };
   const send = async (evt) => {
     evt.preventDefault();
-    const tokenContract = new Token(ellipticoin, token.issuer, token.id);
+    const tokenContract = new Token(ec, token.issuer, token.id);
     const response = await tokenContract.transfer(
       Array.from(base64url.toBuffer(toAddress)),
       Math.floor(parseFloat(sendAmount) * BASE_FACTOR)

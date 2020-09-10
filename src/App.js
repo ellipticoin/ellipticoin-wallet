@@ -191,7 +191,6 @@ export default function App() {
       ),
     [pools, elcPrice]
   );
-  console.log(issuanceRewards);
   const loading = useMemo(
     () => !(pools && tokens && issuanceRewards !== undefined),
     [pools, tokens, issuanceRewards]
