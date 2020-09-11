@@ -2,11 +2,12 @@ import { BASE_FACTOR, TOKENS } from "./constants";
 import { Button, Form, Modal } from "react-bootstrap";
 
 import { Exchange } from "ec-client";
+import { fetchTokens, fetchPools } from "./App";
 import React from "react";
 import { tokenToString } from "./helpers";
 
 export default function ManageLiquidity(props) {
-  const { show, setShow, ellipticoin } = props;
+  const { show, setShow, ec, setTokens, setPools, publicKey } = props;
   const [inputAmount, setInputAmount] = React.useState("");
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[0]);
@@ -27,19 +28,16 @@ export default function ManageLiquidity(props) {
   };
   const exchange = async (evt) => {
     evt.preventDefault();
-    const exchange = new Exchange(ellipticoin);
-    await exchange.swap(
+    const exchange = new Exchange(ec);
+    const response = await exchange.swap(
       inputToken,
       outputToken,
       Math.floor(parseFloat(inputAmount) * BASE_FACTOR)
     );
-    // const response = await pool.create(
-    //   Math.floor(parseFloat(inputAmount) * BASE_FACTOR),
-    //   Math.floor(parseFloat(initialPrice) * BASE_FACTOR)
-    // );
-    // if (response.return_value.Ok) {
-    //   setBalance(response.return_value.Ok);
-    // }
+    if (response.return_value.hasOwnProperty("Ok")) {
+      setTokens(await fetchTokens(ec, publicKey));
+      setPools(await fetchPools(ec, publicKey));
+    }
     setShow(false);
     clearForm();
   };

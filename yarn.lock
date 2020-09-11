@@ -3076,9 +3076,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001020, caniuse-lite@^1.0.30001035:
-  version "1.0.30001035"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001035.tgz#2bb53b8aa4716b2ed08e088d4dc816a5fe089a1e"
-  integrity sha512-C1ZxgkuA4/bUEdMbU5WrGY4+UhMFFiXrgNAfxiMIqWgFTWfv/xsZCS2xEHT2LMq7xAZfuAnu6mcqyDl0ZR6wLQ==
+  version "1.0.30001131"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001131.tgz"
+  integrity sha512-4QYi6Mal4MMfQMSqGIRPGbKIbZygeN83QsWq1ixpUwvtfgAZot5BrCKzGygvZaV+CnELdTwD0S4cqUNozq7/Cw==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -4280,10 +4280,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-ec-client@^.0.0.25:
-  version "0.0.25"
-  resolved "https://registry.yarnpkg.com/ec-client/-/ec-client-0.0.25.tgz#a1b95569a4082320eda7a37c0c8f031cc3c0e215"
-  integrity sha512-5TVmsgJ3N9eEJ2/hfogwudPhK5PR23F7Hm56CtzVcNbWJOvcQBbjh8RZtB97oSkfTu1c//ih3sL0FH2dvTR2Yw==
+ec-client@^0.0.27:
+  version "0.0.27"
+  resolved "https://registry.yarnpkg.com/ec-client/-/ec-client-0.0.27.tgz#4e24f94b06142a1cc568a6fdd80f4b620d6129f8"
+  integrity sha512-PhK+EJWYMH8C6q6fyIe9IILM60RTiogEV9ycrWPFGLjVUnZ1KRKdhboD5xFGfbGcle/HJI/ckEIzLqGlK1h+IQ==
   dependencies:
     "@types/node" "^12.12.37"
     base64url "^3.0.1"

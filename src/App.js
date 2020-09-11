@@ -1,6 +1,7 @@
 import { BRIDGE_TOKENS, NATIVE_TOKEN, PROD } from "./constants.js";
 import { Client as ECClient, Ellipticoin } from "ec-client";
 import { default as React, useEffect, useMemo, useState } from "react";
+import { animated, useTransition } from "react-spring";
 
 import Actions from "./Actions";
 import { BASE_FACTOR } from "./constants";
@@ -65,7 +66,6 @@ export async function fetchIssuanceRewards(ec, publicKey) {
 export default function App() {
   const [blockHash, setBlockHash] = useState();
   const [blockNumber, setBlockNumber] = useState(0);
-  const [web3] = useState();
   const [ethBlockNumber, setEthBlockNumber] = useState();
   const [issuanceRewards, setIssuanceRewards] = useState();
   const [publicKey, setPublicKey] = useState();
@@ -73,7 +73,6 @@ export default function App() {
   const [signer, setSigner] = useState();
   const [tokens, setTokens] = useState([]);
   const [pools, setPools] = useState([]);
-  // const [loading, setLoading] = useState(true);
   const [secretKey, setSecretKey] = useLocalStorage("secretKey", () => {
     const keyPair = nacl.sign.keyPair();
     return Array.from(keyPair.secretKey);
@@ -83,13 +82,17 @@ export default function App() {
       let ethereum = window.ethereum;
       if (!ethereum) return;
       ethereum.autoRefreshOnNetworkChange = false;
-
-      ethereum.request({
-        method: "eth_requestAccounts",
-        params: [],
-      });
+      const onAccountsChanged = async (accounts) => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        if ((await provider.listAccounts()).length === 0) return;
+        setSigner(signer);
+      };
+      window.ethereum.on("accountsChanged", onAccountsChanged);
+      await onAccountsChanged([]);
     })();
   }, []);
+
   useEffect(() => {
     if (!ec) return;
     ec.addBlockListener((blockHash) => {
@@ -114,14 +117,13 @@ export default function App() {
   }, [blockHash, ec, publicKey]);
 
   React.useEffect(() => {
-    if (!web3) return;
+    if (!signer) return;
     (async () => {
-      let provider = new ethers.providers.Web3Provider(web3.currentProvider);
-      provider.on("block", (blockNumber) => {
+      signer.provider.on("block", (blockNumber) => {
         setEthBlockNumber(blockNumber);
       });
     })();
-  }, [web3]);
+  }, [signer]);
 
   React.useEffect(() => {
     if (secretKey) {
@@ -145,16 +147,16 @@ export default function App() {
     }
   }, [secretKey]);
 
-  React.useEffect(() => {
-    (async () => {
-      if (!web3) return;
-      let provider = new ethers.providers.Web3Provider(web3.currentProvider);
-      setSigner(await provider.getSigner());
-      window.ethereum.on("accountsChanged", async (accounts) => {
-        setSigner(await provider.getSigner());
-      });
-    })();
-  }, [web3]);
+  // React.useEffect(() => {
+  //   (async () => {
+  //     if (!web3) return;
+  //     let provider = new ethers.providers.Web3Provider(web3.currentProvider);
+  //     setSigner(await provider.getSigner());
+  //     window.ethereum.on("accountsChanged", async (accounts) => {
+  //       setSigner(await provider.getSigner());
+  //     });
+  //   })();
+  // }, [web3]);
 
   useEffect(() => {
     (async () => {
@@ -174,7 +176,8 @@ export default function App() {
   }, [publicKey, ec, blockHash]);
 
   const [showSidebar, setShowSidebar] = useState(false);
-  const [showModal, setShowModal] = useState();
+  const [showModal, setShowModal] = useState("bridge");
+  const [showPage, setShowPage] = useState();
   const [pendingTransactions, setPendingTransactions] = useState([]);
   const elcPrice = useMemo(() => (tokens[0] ? tokens[0].price : 0), [tokens]);
   const totalTokenValue = useMemo(
@@ -195,10 +198,50 @@ export default function App() {
     () => !(pools && tokens && issuanceRewards !== undefined),
     [pools, tokens, issuanceRewards]
   );
+  const transitions = useTransition(showPage, null, {
+    enter: { transform: "translate3d(0,0,0)" },
+    from: { transform: "translate3d(-100%,0,0)" },
+    leave: { transform: "translate3d(-100%,0,0)" },
+  });
   if (!publicKey) return null;
+
   return (
     <>
       <Loader loading={loading} />
+      {transitions.map(({ item, key, props }) =>
+        item === "bridge" ? (
+          <animated.div
+            style={{
+              zIndex: 10000,
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              background: "white",
+              ...props,
+            }}
+            key="1"
+          >
+            <Bridge
+              show={showModal === "bridge"}
+              onHide={() => setShowPage(null)}
+              ec={ec}
+              signer={signer}
+              pushPendingTransation={(tx) => {
+                setPendingTransactions([...pendingTransactions, tx])
+              }}
+              publicKey={publicKey}
+              setBalance={(balance) => {
+                tokens[0] = {
+                  ...tokens[0],
+                  balance,
+                };
+                setTokens(tokens);
+              }}
+              tokens={tokens}
+            />
+          </animated.div>
+        ) : null
+      )}
       <Header
         setShowSidebar={setShowSidebar}
         publicKey={publicKey}
@@ -208,7 +251,7 @@ export default function App() {
         <div className="section wallet-card-section pt-1">
           <div className="wallet-card">
             <Total total={totalTokenValue} />
-            <Actions setShowModal={setShowModal} />
+            <Actions setShowModal={setShowModal} setShowPage={setShowPage} />
           </div>
         </div>
         <YourAddress publicKey={publicKey} />
@@ -271,24 +314,10 @@ export default function App() {
         }
         show={showModal === "exchange"}
         blockHash={blockHash}
-        ec={ec}
-        setBalance={(balance) => {
-          tokens[0] = {
-            ...tokens[0],
-            balance,
-          };
-          setTokens(tokens);
-        }}
-      />
-      <Bridge
-        show={showModal === "bridge"}
-        onHide={() => setShowModal(null)}
-        ec={ec}
-        signer={signer}
-        pushPendingTransation={(tx) =>
-          setPendingTransactions([...pendingTransactions, tx])
-        }
+        setTokens={setTokens}
+        setPools={setPools}
         publicKey={publicKey}
+        ec={ec}
         setBalance={(balance) => {
           tokens[0] = {
             ...tokens[0],
@@ -296,7 +325,6 @@ export default function App() {
           };
           setTokens(tokens);
         }}
-        tokens={tokens}
       />
       <Sidebar
         setShowSidebar={setShowSidebar}

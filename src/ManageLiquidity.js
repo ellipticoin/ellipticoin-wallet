@@ -1,5 +1,5 @@
 import { BASE_FACTOR, TOKENS } from "./constants";
-import { Button, Form, InputGroup, Modal } from "react-bootstrap";
+import { Button, Form, InputGroup, Modal, Tab, Tabs } from "react-bootstrap";
 import { fetchPools, fetchTokens } from "./App.js";
 
 import { Pool } from "ec-client";
@@ -11,62 +11,93 @@ export default function ManageLiquidity(props) {
     show,
     setShow,
     ec,
-    setBalance,
     blockHash,
     setTokens,
     setPools,
     publicKey,
   } = props;
-  const [reserveAmount, setReserveAmount] = React.useState("");
+  const [provideAmount, setProvideAmount] = React.useState("");
+  const [removeAmount, setRemoveAmount] = React.useState("");
   const [initialPrice, setInitialPrice] = React.useState("");
-  const [token, setToken] = React.useState(TOKENS[0]);
-  const [pool, setPool] = React.useState(new Pool(ec));
+  const [provideToken, setProvideToken] = React.useState(TOKENS[0]);
+  const [removeToken, setRemoveToken] = React.useState(TOKENS[0]);
+  const [providePool, setProvidePool] = React.useState(new Pool(ec));
+  const [removePool, setRemovePool] = React.useState(new Pool(ec));
   React.useEffect(() => {
     (async () => {
-      const pool = await ec.getPool(token);
-      setPool(pool);
+      const providePool = await ec.getPool(provideToken);
+      setProvidePool(providePool);
     })();
-  }, [ec, token, blockHash]);
+  }, [ec, provideToken, blockHash]);
+  React.useEffect(() => {
+    (async () => {
+      const removePool = await ec.getPool(removeToken);
+      setRemovePool(removePool);
+    })();
+  }, [ec, removeToken, blockHash]);
   const clearForm = () => {
-    setReserveAmount("");
+    setProvideAmount("");
     setInitialPrice("");
   };
-  const handleTokenChange = (tokenString) => {
-    const token = TOKENS.find((token) => tokenToString(token) === tokenString);
-    setToken(token);
+  const handleProvideTokenChange = (provideTokenString) => {
+    const provideToken = TOKENS.find((provideToken) => tokenToString(provideToken) === provideTokenString);
+    setProvideToken(provideToken);
   };
-  const handleSubmit = async (evt) => {
+  const handleRemoveTokenChange = (removeTokenString) => {
+    const removeToken = TOKENS.find((removeToken) => tokenToString(removeToken) === removeTokenString);
+    setRemoveToken(removeToken);
+  };
+  const handleProvideSubmit = async (evt) => {
     evt.preventDefault();
-    if (pool.exists()) {
+    if (providePool.exists()) {
       await addLiquidity();
     } else {
       await createPool();
     }
   };
 
+  const handleRemoveSubmit = async (evt) => {
+    evt.preventDefault();
+    await removeLiquidity();
+  };
+
+
   const addLiquidity = async () => {
-    const response = await pool.addLiquidity(
-      Math.floor(parseFloat(reserveAmount) * BASE_FACTOR)
+    const response = await providePool.addLiquidity(
+      Math.floor(parseFloat(provideAmount) * BASE_FACTOR)
     );
-    if (response.return_value.Ok) {
-      setBalance(response.return_value.Ok);
+    if (response.return_value.hasOwnProperty("Ok")) {
+      setTokens(await fetchTokens(ec, publicKey));
+      setPools(await fetchPools(ec, publicKey));
     }
-    setPool(await ec.getPool(token));
+    setProvidePool(await ec.getPool(provideToken));
+    setShow(false);
+    clearForm();
+  };
+  const removeLiquidity = async () => {
+    const response = await removePool.removeLiquidity(
+      Math.floor(parseFloat(removeAmount) * BASE_FACTOR)
+    );
+    if (response.return_value.hasOwnProperty("Ok")) {
+      setTokens(await fetchTokens(ec, publicKey));
+      setPools(await fetchPools(ec, publicKey));
+    } else {
+        console.error(response.return_value)
+    }
+    setProvidePool(await ec.getPool(provideToken));
     setShow(false);
     clearForm();
   };
   const createPool = async () => {
-    console.log(reserveAmount);
-    console.log(initialPrice);
-    const response = await pool.create(
-      Math.floor(parseFloat(reserveAmount) * BASE_FACTOR),
+    const response = await providePool.create(
+      Math.floor(parseFloat(provideAmount) * BASE_FACTOR),
       Math.floor(parseFloat(initialPrice) * BASE_FACTOR)
     );
     if (response.return_value.hasOwnProperty("Ok")) {
       setTokens(await fetchTokens(ec, publicKey));
       setPools(await fetchPools(ec, publicKey));
     }
-    setPool(await ec.getPool(token));
+    setProvidePool(await ec.getPool(provideToken));
     setShow(false);
     clearForm();
   };
@@ -75,28 +106,29 @@ export default function ManageLiquidity(props) {
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">Provide Liquidity</h5>
+            <h5 className="modal-title">Manage Liquidity</h5>
           </div>
-          <div className="modal-body">
-            <div className="action-sheet-content">
+            <Tabs defaultActiveKey="provideLiquidity" className="nav-tabs lined">
+            <Tab eventKey="provideLiquidity" title="Provide Liquidity">
               <Form
                 noValidate
+                className="p-2"
                 autoComplete="off"
-                onSubmit={(evt) => handleSubmit(evt)}
+                onSubmit={(evt) => handleProvideSubmit(evt)}
               >
                 <Form.Group className="basic">
                   <Form.Label>Token</Form.Label>
                   <Form.Control
                     as="select"
                     onChange={(event) => {
-                      handleTokenChange(event.target.value);
+                      handleProvideTokenChange(event.target.value);
                     }}
-                    value={tokenToString(token)}
+                    value={tokenToString(provideToken)}
                     custom
                   >
-                    {TOKENS.map((token) => (
-                      <option key={token.name} value={tokenToString(token)}>
-                        {token.name}
+                    {TOKENS.map((provideToken) => (
+                      <option key={provideToken.name} value={tokenToString(provideToken)}>
+                        {provideToken.name}
                       </option>
                     ))}
                   </Form.Control>
@@ -104,15 +136,15 @@ export default function ManageLiquidity(props) {
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
                   <Form.Control
-                    onChange={(event) => setReserveAmount(event.target.value)}
-                    value={reserveAmount}
+                    onChange={(event) => setProvideAmount(event.target.value)}
+                    value={provideAmount}
                     placeholder="Amount"
                   />
                 </Form.Group>
-                {pool.exists() ? null : (
+                {providePool.exists() ? null : (
                   <Form.Group className="basic">
                     <Form.Label>Initial Price</Form.Label>
-                    {pool.exists() ? (
+                    {providePool.exists() ? (
                       <Form.Control
                         onChange={(event) =>
                           setInitialPrice(event.target.value)
@@ -131,7 +163,7 @@ export default function ManageLiquidity(props) {
                         />
                         <InputGroup.Append>
                           <InputGroup.Text id="basic-addon2">
-                            x {reserveAmount} = {reserveAmount * initialPrice}{" "}
+                            x {provideAmount} = {provideAmount * initialPrice}{" "}
                             USD
                           </InputGroup.Text>
                         </InputGroup.Append>
@@ -139,10 +171,10 @@ export default function ManageLiquidity(props) {
                     )}
                   </Form.Group>
                 )}
-                {pool.exists() ? (
+                {providePool.exists() ? (
                   <Button
                     type="submit"
-                    className="btn btn-lg btn-block btn-primary mr-1 mb-1"
+                    className="btn btn-lg btn-block btn-primary"
                     variant="contained"
                     color="primary"
                   >
@@ -151,7 +183,7 @@ export default function ManageLiquidity(props) {
                 ) : (
                   <Button
                     type="submit"
-                    className="btn btn-lg btn-block btn-primary mr-1 mb-1"
+                    className="btn btn-lg btn-block btn-primary m-1"
                     variant="contained"
                     color="primary"
                   >
@@ -159,10 +191,53 @@ export default function ManageLiquidity(props) {
                   </Button>
                 )}
               </Form>
+            </Tab>
+            <Tab eventKey="removeLiquidity" title="Remove Liquidity">
+              <Form
+                noValidate
+                className="p-2"
+                autoComplete="off"
+                onSubmit={(evt) => handleRemoveSubmit(evt)}
+              >
+                <Form.Group className="basic">
+                  <Form.Label>Token</Form.Label>
+                  <Form.Control
+                    as="select"
+                    onChange={(event) => {
+                      handleRemoveTokenChange(event.target.value);
+                    }}
+                    value={tokenToString(removeToken)}
+                    custom
+                  >
+                    {TOKENS.map((token) => (
+                      <option key={token.name} value={tokenToString(token)}>
+                        {token.name}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+                <Form.Group className="basic">
+                  <Form.Label>Amount</Form.Label>
+                  <Form.Control
+                    onChange={(event) => setRemoveAmount(event.target.value)}
+                    value={removeAmount}
+                    placeholder="Amount"
+                  />
+                </Form.Group>
+                  <Button
+                    type="submit"
+                    disabled={!removePool.exists()}
+                    className="btn btn-lg btn-block btn-primary"
+                    variant="contained"
+                    color="primary"
+                  >
+                    Remove Liquidity
+                  </Button>
+              </Form>
+            </Tab>
+            </Tabs>
             </div>
           </div>
-        </div>
-      </div>
     </Modal>
   );
 }

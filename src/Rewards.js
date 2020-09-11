@@ -26,7 +26,6 @@ export default function Rewards(props) {
     setTokens(await fetchTokens(ec, publicKey));
     setPools(await fetchPools(ec, publicKey));
     setIssuanceRewards(await fetchIssuanceRewards(ec, publicKey));
-
   };
   return (
     <div className="section">

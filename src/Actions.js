@@ -3,7 +3,7 @@ import { Droplet, Link, Repeat, Send } from "react-feather";
 import React from "react";
 
 export default function Actions(props) {
-  const { setShowModal } = props;
+  const { setShowModal, setShowPage } = props;
   return (
     <div className="wallet-footer">
       <div className="item">
@@ -23,7 +23,7 @@ export default function Actions(props) {
         </button>
       </div>
       <div className="item">
-        <button onClick={() => setShowModal("bridge")}>
+        <button onClick={() => setShowPage("bridge")}>
           <div className="icon-wrapper bg-danger">
             <Link />
           </div>
