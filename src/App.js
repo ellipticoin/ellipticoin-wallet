@@ -281,6 +281,9 @@ export default function App() {
       <Send
         setShow={(show) => (show ? setShowModal("send") : setShowModal(null))}
         show={showModal === "send"}
+        setPools={setPools}
+        setTokens={setTokens}
+        publicKey={publicKey}
         ec={ec}
         setBalance={(balance) => {
           tokens[0] = {

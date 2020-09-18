@@ -3,11 +3,12 @@ import { Button, Form, Modal } from "react-bootstrap";
 
 import React from "react";
 import { Token } from "ec-client";
+import { fetchPools, fetchTokens } from "./App.js";
 import base64url from "base64url";
 import { tokenToString } from "./helpers";
 
 export default function Send(props) {
-  const { show, setShow, ec, setBalance } = props;
+  const { show, setShow, ec, setTokens, setPools, publicKey } = props;
   const [sendAmount, setSendAmount] = React.useState(
     // "1"
     ""
@@ -30,11 +31,12 @@ export default function Send(props) {
     evt.preventDefault();
     const tokenContract = new Token(ec, token.issuer, token.id);
     const response = await tokenContract.transfer(
-      Array.from(base64url.toBuffer(toAddress)),
+      base64url.toBuffer(toAddress),
       Math.floor(parseFloat(sendAmount) * BASE_FACTOR)
     );
-    if (response.return_value.Ok) {
-      setBalance(response.return_value.Ok);
+    if (response.return_value.hasOwnProperty("Ok")) {
+      setTokens(await fetchTokens(ec, publicKey));
+      setPools(await fetchPools(ec, publicKey));
     }
     setShow(false);
     clearForm();

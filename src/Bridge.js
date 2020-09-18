@@ -1,4 +1,4 @@
-import { BRIDGE_CONTRACT, ETH_BRIDGE_ADDRESS, WETH, TOKENS } from "./constants";
+import { ETH_BRIDGE_ADDRESS, WETH, TOKENS } from "./constants";
 
 import { ArrowDown } from "react-feather";
 import { BRIDGE_TOKENS } from "./constants";
@@ -72,7 +72,7 @@ export default function Bridge(props) {
 
   const release = async (event) => {
     event.preventDefault();
-    const bridge = new EcBridge(ec, BRIDGE_CONTRACT, token.id);
+    const bridge = new EcBridge(ec, "Bridge", token.id);
     const response = await bridge.release(
       ethers.utils.arrayify(await signer.getAddress()),
       Math.floor(parseFloat(amount) * BASE_FACTOR)

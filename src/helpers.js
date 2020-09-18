@@ -28,7 +28,7 @@ export function tokenToString({ issuer, id }) {
       Buffer.from(issuer[1]),
     ]).toString("base64")}:${Buffer.from(id).toString("base64")}`;
   } else {
-    return `${issuer.toBuffer().toString("base64")}:${Buffer.from(id).toString(
+    return `${issuer}:${Buffer.from(id).toString(
       "base64"
     )}`;
   }
