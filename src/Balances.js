@@ -1,4 +1,4 @@
-import { formatCurrency, formatTokenBalance } from "./helpers";
+import { formatCurrency, formatTokenBalance, tokenName } from "./helpers";
 
 import { BASE_FACTOR } from "./constants";
 import { default as React } from "react";
@@ -28,8 +28,8 @@ export default function Balances(props) {
             </thead>
             <tbody>
               {tokens.map((token) => (
-                <tr key={token.name}>
-                  <th scope="row">{token.name}</th>
+                <tr key={token.id}>
+                  <th scope="row">{tokenName(token)}</th>
                   <td>{formatTokenBalance(token.balance)}</td>
                   <td>{formatCurrency(token.price)}</td>
                   <td className="text-right text-primary">

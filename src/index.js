@@ -2,13 +2,15 @@ import "./styles/style.scss";
 
 import * as serviceWorker from "./serviceWorker";
 
-import App from "./App";
+import ApolloWrapper from "./ApolloWrapper";
 import React from "react";
 import ReactDOM from "react-dom";
 
-ReactDOM.render(<App />, document.getElementById("root"));
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
+if (
+  localStorage.getItem("secretKey") &&
+  localStorage.getItem("secretKey").startsWith("[")
+) {
+  localStorage.clear();
+}
+ReactDOM.render(<ApolloWrapper />, document.getElementById("root"));
 serviceWorker.unregister();

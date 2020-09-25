@@ -2,12 +2,11 @@ import { BASE_FACTOR, TOKENS } from "./constants";
 import { Button, Form, Modal } from "react-bootstrap";
 
 import { Exchange } from "ec-client";
-import { fetchTokens, fetchPools } from "./App";
 import React from "react";
 import { tokenToString } from "./helpers";
 
 export default function ManageLiquidity(props) {
-  const { show, setShow, ec, setTokens, setPools, publicKey } = props;
+  const { show, setShow, ec } = props;
   const [inputAmount, setInputAmount] = React.useState("");
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[0]);
@@ -35,8 +34,6 @@ export default function ManageLiquidity(props) {
       Math.floor(parseFloat(inputAmount) * BASE_FACTOR)
     );
     if (response.return_value.hasOwnProperty("Ok")) {
-      setTokens(await fetchTokens(ec, publicKey));
-      setPools(await fetchPools(ec, publicKey));
     }
     setShow(false);
     clearForm();

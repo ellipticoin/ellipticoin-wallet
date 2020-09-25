@@ -2,13 +2,12 @@ import { BASE_FACTOR, TOKENS } from "./constants";
 import { Button, Form, Modal } from "react-bootstrap";
 
 import React from "react";
-import { Token } from "ec-client";
-import { fetchPools, fetchTokens } from "./App.js";
 import base64url from "base64url";
 import { tokenToString } from "./helpers";
+import { usePostTransaction } from "./mutations";
 
 export default function Send(props) {
-  const { show, setShow, ec, setTokens, setPools, publicKey } = props;
+  const { show, setShow, setHost } = props;
   const [sendAmount, setSendAmount] = React.useState(
     // "1"
     ""
@@ -27,20 +26,24 @@ export default function Send(props) {
     const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
   };
-  const send = async (evt) => {
-    evt.preventDefault();
-    const tokenContract = new Token(ec, token.issuer, token.id);
-    const response = await tokenContract.transfer(
+  const send = async (event) => {
+    event.preventDefault();
+    postTransfer(
+      [{ Contract: token.issuer }, Array.from(Buffer.from(token.id, "base64"))],
       base64url.toBuffer(toAddress),
       Math.floor(parseFloat(sendAmount) * BASE_FACTOR)
     );
-    if (response.return_value.hasOwnProperty("Ok")) {
-      setTokens(await fetchTokens(ec, publicKey));
-      setPools(await fetchPools(ec, publicKey));
-    }
     setShow(false);
     clearForm();
   };
+
+  const [postTransfer] = usePostTransaction(
+    {
+      contract: "Token",
+      functionName: "transfer",
+    },
+    setHost
+  );
   return (
     <Modal show={show} className="action-sheet" onHide={() => setShow(false)}>
       <div className="modal-dialog" role="document">

@@ -1,40 +1,55 @@
-import {  Exchange } from "ec-client";
+import { BigInt } from "jsbi";
 import base64url from "base64url";
-export const BASE_FACTOR = 1000000;
+export const BASE_FACTOR = BigInt(1000000);
+export const BLOCKS_PER_ERA = 8000000;
+export const NUMBER_OF_ERAS = 8;
 export const PROD = process.env.NODE_ENV === "production";
-export const ETH_BRIDGE_ADDRESS = "0x4085B42AB99A5c64D09d074b8315173FD32CCcDe";
-export const BRIDGE_ADDRESS = base64url.toBuffer("OaKmwCWrUhdCCsIMN_ViVcu1uBF0VM3FW3Mi1z_VTNs");
-export const NATIVE_TOKEN = {
+// export const ETH_BRIDGE_ADDRESS = "0xE56418fA10948244f475496fE5773c34A8734594";
+export const ETH_BRIDGE_ADDRESS = "0xcC2391849F2a226B0E75058D3Deb26296C80A00a";
+export const BRIDGE_ADDRESS = base64url.toBuffer(
+  "OaKmwCWrUhdCCsIMN_ViVcu1uBF0VM3FW3Mi1z_VTNs"
+);
+export const BOOTNODES = PROD
+  ? ["davenport.ellipticoin.org"]
+  : ["localhost:8080"];
+export const ELC = {
   ticker: "ELC",
   name: "Ellipticoin",
   issuer: "Ellipticoin",
-  id: Buffer.from("ELC", "utf8"),
+  id: Buffer.from("ELC", "utf8").toString("base64"),
 };
 export const WETH = {
-    ticker: "ETH",
-    ethName: "Ether",
-    name: "Ethereum",
-    address: "0xeb4c2781e4eba804ce9a9803c67d0893436bb27d",
-    issuer: "Bridge",
-    id: Exchange.ethTokenId("eb4c2781e4eba804ce9a9803c67d0893436bb27d"),
-}
-export const BRIDGE_TOKENS = [
-  {
-    ticker: "USD",
-    name: "USD",
-    ethName: "DAI",
-    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    issuer: "Bridge",
-    id: Exchange.ethTokenId("6b175474e89094c44da98b954eedeac495271d0f"),
-  },
-  {
-    ticker: "BTC",
-    name: "Bitcoin",
-    ethName: "renBTC",
-    address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-    issuer: "Bridge",
-    id: Exchange.ethTokenId("c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
-  },
-  WETH,
-];
-export const TOKENS = [NATIVE_TOKEN, ...BRIDGE_TOKENS];
+  ticker: "ETH",
+  ethName: "Ether",
+  name: "Ethereum",
+  // address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+  address: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
+  issuer: "Bridge",
+  // id: Buffer.from("c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", "hex").toString(
+    id: Buffer.from("d0a1e359811322d97991e03f863a0c30c2cf029c", "hex").toString(
+    "base64"
+  ),
+};
+export const BTC = {
+  ticker: "BTC",
+  name: "Bitcoin",
+  ethName: "renBTC",
+  address: "0xeb4c2781e4eba804ce9a9803c67d0893436bb27d",
+  issuer: "Bridge",
+  id: Buffer.from("eb4c2781e4eba804ce9a9803c67d0893436bb27d", "hex").toString(
+    "base64"
+  ),
+};
+export const USD = {
+  ticker: "USD",
+  name: "USD",
+  ethName: "DAI",
+  address: "0x6b175474e89094c44da98b954eedeac495271d0f",
+  issuer: "Bridge",
+  id: Buffer.from("6b175474e89094c44da98b954eedeac495271d0f", "hex").toString(
+    "base64"
+  ),
+};
+export const LIQUIDITY_TOKENS = [BTC, ELC, USD, WETH];
+export const BRIDGE_TOKENS = [WETH, BTC, USD];
+export const TOKENS = [ELC, WETH, BTC, USD];

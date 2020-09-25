@@ -10,6 +10,8 @@ export default function WalletMenu(props) {
   const { setShowSidebar, publicKey } = props;
   const [showWarning, setShowWarning] = useLocalStorage("showWarning", true);
 
+  // <span style={{fontSize: "32px", lineHeight: "64px", paddingRight: "10px", verticalAlign: "middle"}}>🌕</span>
+  // Luna Wallet
   return (
     <>
       {showWarning ? (
@@ -19,7 +21,7 @@ export default function WalletMenu(props) {
               <div className="in">
                 <h3 className="subtitle">
                   WARNING: Ellipticoin hasn't been audited please don't purchase
-                  more tokens than you'd be happy to loose.
+                  more tokens than you'd be happy to lose.
                 </h3>
               </div>
               <button

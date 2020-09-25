@@ -1,31 +1,23 @@
-import { BASE_FACTOR, BLOCK_TIME, Ellipticoin, blockReward } from "ec-client";
-import { fetchIssuanceRewards, fetchPools, fetchTokens } from "./App.js";
+import { BASE_FACTOR, BLOCK_TIME, blockReward } from "ec-client";
 
-import { ArrowRight } from "react-feather";
 import React from "react";
 import { formatTokenBalance } from "./helpers";
-import useSound from "use-sound";
+import { useGetIssuanceRewards } from "./queries";
+import { usePostTransaction } from "./mutations";
 
 const SECONDS_PER_DAY = 86400;
 
 export default function Rewards(props) {
-  const {
-    blockNumber,
-    issuanceRewards,
-    setTokens,
-    setPools,
-    publicKey,
-    setIssuanceRewards,
-    ec,
-  } = props;
-  const [playChaChing] = useSound("/chaching.wav");
-  const harvest = async function () {
-    playChaChing();
-    let ellipticoin = new Ellipticoin(ec);
-    await ellipticoin.harvest();
-    setTokens(await fetchTokens(ec, publicKey));
-    setPools(await fetchPools(ec, publicKey));
-    setIssuanceRewards(await fetchIssuanceRewards(ec, publicKey));
+  const { blockNumber } = props;
+  const { data: { issuanceRewards } = 0 } = useGetIssuanceRewards();
+  const [harvest] = usePostTransaction({
+    contract: "Ellipticoin",
+    functionName: "harvest",
+  });
+  const handleHarvest = async function () {
+    const chaChing = new Audio("/chaching.wav");
+    chaChing.play();
+    await harvest();
   };
   return (
     <div className="section">
@@ -34,12 +26,11 @@ export default function Rewards(props) {
           <div className="stat-box">
             <button
               type="button"
-              onClick={() => harvest()}
+              onClick={() => handleHarvest()}
               style={{ float: "right" }}
               className="btn btn-success btn-lg mr-1"
             >
               Harvest
-              <ArrowRight size={18} className="ml-1" />
             </button>
             <div className="title">Mature Liquidity Rewards</div>
             <div className="value text-success">

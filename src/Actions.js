@@ -23,7 +23,7 @@ export default function Actions(props) {
         </button>
       </div>
       <div className="item">
-        <button onClick={() => setShowPage("bridge")}>
+        <button onClick={() => setShowPage("Bridge")}>
           <div className="icon-wrapper bg-danger">
             <Link />
           </div>
@@ -31,7 +31,7 @@ export default function Actions(props) {
         </button>
       </div>
       <div className="item">
-        <button onClick={() => setShowModal("manageLiquidity")}>
+        <button onClick={() => setShowPage("ManageLiquidity")}>
           <div className="icon-wrapper">
             <Droplet className="filled" />
           </div>

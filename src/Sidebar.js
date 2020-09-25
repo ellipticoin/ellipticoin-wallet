@@ -26,12 +26,15 @@ export default function Sidebar(props) {
     inputEl.current.click();
   };
   const handleFileUpload = (event) => {
+    event.preventDefault();
     let input = event.target;
     if (!input.files[0]) return undefined;
     let file = input.files[0];
     let fr = new FileReader();
     fr.onload = (event) => {
-      setSecretKey(Array.from(Buffer.from(event.target.result, "base64")));
+      event.preventDefault();
+      console.log(event.target.result);
+      setSecretKey(Buffer.from(event.target.result, "base64"));
     };
     fr.readAsText(file);
   };
