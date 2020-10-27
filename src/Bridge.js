@@ -120,9 +120,9 @@ export default function Bridge(props) {
             await tx.wait();
           })
         );
-        onHide();
         clearForm();
         setTransactionPending(false);
+        onHide();
       }
     })();
   }, [
