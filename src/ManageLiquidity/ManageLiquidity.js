@@ -22,12 +22,21 @@ export default function ManageLiquidity(props) {
   const [provideLiquidityToken, setProvideLiquidityToken] = useState(
     liquidityTokens[0]
   );
+  const [removeLiquidityToken, setRemoveLiquidityToken] = useState(
+    liquidityTokens[0]
+  );
   React.useEffect(() => {
     const provideLiquidityToken = liquidityTokens.find(
       (liquidityToken) => liquidityToken.id === provideToken.id
     );
     setProvideLiquidityToken(provideLiquidityToken);
   }, [provideToken, liquidityTokens]);
+  React.useEffect(() => {
+    const removeLiquidityToken = liquidityTokens.find(
+      (liquidityToken) => liquidityToken.id === removeToken.id
+    );
+    setRemoveLiquidityToken(removeLiquidityToken);
+  }, [removeToken, liquidityTokens]);
   const [createPool] = usePostTransaction({
     contract: "Exchange",
     functionName: "create_pool",
@@ -36,9 +45,17 @@ export default function ManageLiquidity(props) {
     contract: "Exchange",
     functionName: "add_liqidity",
   });
+  const [removeLiqidity] = usePostTransaction({
+    contract: "Exchange",
+    functionName: "remove_liqidity",
+  });
   const providePoolExists = useMemo(
     () => parseInt(provideLiquidityToken.balance) > 0,
     [provideLiquidityToken]
+  );
+  const removePoolExists = useMemo(
+    () => parseInt(removeLiquidityToken.balance) > 0,
+    [removeLiquidityToken]
   );
   const providePrice = useMemo(() => {
     return providePoolExists ? provideLiquidityToken.price : initialPrice;
@@ -68,6 +85,11 @@ export default function ManageLiquidity(props) {
   };
   const handleCreatePool = async () => {
     await createPool(encodeToken(provideToken), provideAmount, initialPrice);
+    onHide();
+  };
+  const handleRemoveLiquidity = async (evt) => {
+    evt.preventDefault();
+    await removeLiqidity(encodeToken(removeToken), removeAmount);
     onHide();
   };
 
@@ -171,7 +193,7 @@ export default function ManageLiquidity(props) {
               noValidate
               className="p-2"
               autoComplete="off"
-              onSubmit={(evt) => null}
+              onSubmit={(evt) => handleRemoveLiquidity(evt)}
             >
               <Form.Group className="basic">
                 <Form.Label>Token</Form.Label>
@@ -192,15 +214,15 @@ export default function ManageLiquidity(props) {
               </Form.Group>
               <Form.Group className="basic">
                 <Form.Label>Amount</Form.Label>
-                <Form.Control
-                  onChange={(event) => setRemoveAmount(event.target.value)}
+                <TokenAmountInput
+                  onChange={(value) => setRemoveAmount(value)}
                   value={removeAmount}
                   placeholder="Amount"
                 />
               </Form.Group>
               <Button
                 type="submit"
-                disabled={true}
+                disabled={!removePoolExists || !removeAmount}
                 className="btn btn-lg btn-block btn-primary"
                 variant="contained"
                 color="primary"

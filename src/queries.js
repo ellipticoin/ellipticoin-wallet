@@ -10,8 +10,9 @@ export const GET_TOKENS = gql`
     tokens(tokenIds: $tokenIds, address: $address) {
       id
       issuer
-      price
       balance
+      price
+      totalSupply
     }
   }
 `;

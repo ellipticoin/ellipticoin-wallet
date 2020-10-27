@@ -1,14 +1,10 @@
-import { BASE_FACTOR, BLOCK_TIME, blockReward } from "ec-client";
-
 import React from "react";
-import { formatTokenBalance } from "./helpers";
+import { formatCurrency, formatTokenBalance } from "./helpers";
 import { useGetIssuanceRewards } from "./queries";
 import { usePostTransaction } from "./mutations";
 
-const SECONDS_PER_DAY = 86400;
-
 export default function Rewards(props) {
-  const { blockNumber } = props;
+  const { totalLockedValue } = props;
   const { data: { issuanceRewards } = 0 } = useGetIssuanceRewards();
   const [harvest] = usePostTransaction({
     contract: "Ellipticoin",
@@ -34,18 +30,16 @@ export default function Rewards(props) {
             </button>
             <div className="title">Mature Liquidity Rewards</div>
             <div className="value text-success">
-              {formatTokenBalance(issuanceRewards)} ELC
+              {formatTokenBalance(issuanceRewards)}
             </div>
           </div>
         </div>
         <div className="col-6">
           <div className="stat-box">
-            <div className="title">Total Network Issuance per Day</div>
+            <div className="title">Total Locked Value</div>
             <div className="value text-success">
-              {formatTokenBalance(
-                blockReward(blockNumber) *
-                  (SECONDS_PER_DAY / BLOCK_TIME) *
-                  BASE_FACTOR
+              {formatCurrency(
+                totalLockedValue
               )}{" "}
               ELC
             </div>

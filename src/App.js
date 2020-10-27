@@ -42,6 +42,7 @@ function App(props) {
     () => Buffer.from(nacl.sign.keyPair.fromSecretKey(secretKey).publicKey),
     [secretKey]
   );
+
   React.useEffect(() => {
     (async () => {
       let ethereum = window.ethereum;
@@ -89,7 +90,11 @@ function App(props) {
     () => compact([tokenError, currentBlockError, liquidityTokenError]),
     [tokenError, currentBlockError, liquidityTokenError]
   );
-  const pools = [];
+  const totalLockedValue = useMemo(
+    () => sumBy(tokens, (token) => {
+        return (((parseInt(token.totalSupply) * parseInt(token.price))||0)/BASE_FACTOR)}),
+    [tokens]
+  );
   const pageTransition = useTransition(showPage, null, {
     enter: { transform: "translate3d(0,0,0)" },
     from: { transform: "translate3d(-100%,0,0)" },
@@ -179,8 +184,8 @@ function App(props) {
             publicKey={publicKey}
             setIssuanceRewards={setIssuanceRewards}
             issuanceRewards={issuanceRewards}
+            totalLockedValue={totalLockedValue}
             blockNumber={currentBlock.number}
-            pools={pools}
           />
           <Balances tokens={tokens} total={totalTokenValue} />
           <LiquidityBalances
