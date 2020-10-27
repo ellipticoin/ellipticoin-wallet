@@ -36,12 +36,11 @@ export default function Rewards(props) {
         </div>
         <div className="col-6">
           <div className="stat-box">
-            <div className="title">Total Locked Value</div>
+            <div className="title">Network Total Locked Value</div>
             <div className="value text-success">
               {formatCurrency(
                 totalLockedValue
-              )}{" "}
-              ELC
+              )}
             </div>
           </div>
         </div>
