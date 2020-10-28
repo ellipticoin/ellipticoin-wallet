@@ -91,8 +91,13 @@ function App(props) {
     [tokenError, currentBlockError, liquidityTokenError]
   );
   const totalLockedValue = useMemo(
-    () => sumBy(tokens, (token) => {
-        return (((parseInt(token.totalSupply) * parseInt(token.price))||0)/BASE_FACTOR)}),
+    () =>
+      sumBy(tokens, (token) => {
+        return (
+          (parseInt(token.totalSupply) * parseInt(token.price) || 0) /
+          BASE_FACTOR
+        );
+      }),
     [tokens]
   );
   const pageTransition = useTransition(showPage, null, {

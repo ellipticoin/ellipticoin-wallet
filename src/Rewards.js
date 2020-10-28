@@ -38,9 +38,7 @@ export default function Rewards(props) {
           <div className="stat-box">
             <div className="title">Network Total Locked Value</div>
             <div className="value text-success">
-              {formatCurrency(
-                totalLockedValue
-              )}
+              {formatCurrency(totalLockedValue)}
             </div>
           </div>
         </div>

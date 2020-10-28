@@ -1,7 +1,7 @@
 import { default as React } from "react";
 import { Form } from "react-bootstrap";
 export default function TokenSelect(props) {
-  const { onChange, token, tokens } = props;
+  const { onChange, token, tokens, nameProperty } = props;
   const handleTokenChange = (tokenId) => {
     const token = tokens.find((token) => token.id === tokenId);
     onChange(token);
@@ -17,7 +17,7 @@ export default function TokenSelect(props) {
     >
       {tokens.map((token) => (
         <option key={token.name} value={token.id}>
-          {token.name}
+          {nameProperty === "ethName" ? token.ethName : token.name}
         </option>
       ))}
     </Form.Control>

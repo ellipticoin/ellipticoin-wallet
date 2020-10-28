@@ -1,10 +1,11 @@
-import { ETH_BRIDGE_ADDRESS, TOKENS, WETH } from "./constants";
+import { ETH_BRIDGE_ADDRESS, WETH } from "./constants";
 
 import { ArrowDown } from "react-feather";
 import { BASE_FACTOR } from "./constants";
 import { BRIDGE_TOKENS } from "./constants";
 import BridgeJSON from "./Bridge.json";
 import Button from "react-bootstrap/Button";
+import TokenSelect from "./Inputs/TokenSelect.js";
 import { ChevronLeft } from "react-feather";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
 import Form from "react-bootstrap/Form";
@@ -18,7 +19,7 @@ import { stringToEthers } from "./helpers";
 import { usePostTransaction } from "./mutations";
 
 const { MaxUint256 } = ethers.constants;
-const { hexlify, arrayify } = ethers.utils;
+const { hexlify, arrayify, parseUnits } = ethers.utils;
 
 async function getSignature(transactionId) {
   return Buffer.from(
@@ -28,6 +29,11 @@ async function getSignature(transactionId) {
     ).then((response) => response.arrayBuffer())
   );
 }
+
+function erc20FromAddress(address, signer) {
+  return new ethers.Contract(address, ERC20JSON.abi, signer);
+}
+
 export default function Bridge(props) {
   const {
     onHide,
@@ -39,11 +45,11 @@ export default function Bridge(props) {
   } = props;
   const [amount, setAmount] = React.useState("");
   const [bridge, setBridge] = React.useState();
-  const [ETHToken, setETHToken] = React.useState();
   const [isApproved, setIsApproved] = React.useState();
   const [transactionPending, setTransactionPending] = React.useState(false);
   const [allowance, setAllowance] = React.useState();
-  const [token, setToken] = React.useState(BRIDGE_TOKENS[0]);
+  const [inboundToken, setInboundToken] = React.useState(BRIDGE_TOKENS[0]);
+  const [outboundToken, setOutboundToken] = React.useState(BRIDGE_TOKENS[0]);
   const [ethAccount, setEthAccount] = React.useState(ethAccounts[0]);
   let [pendingTransactions, setPendingTransactions] = React.useState([]);
   React.useEffect(() => {
@@ -62,28 +68,26 @@ export default function Bridge(props) {
   }, [signer]);
 
   React.useEffect(() => {
-    if (!signer) {
-      return;
-    }
-    let ETHToken = new ethers.Contract(token.address, ERC20JSON.abi, signer);
-    setETHToken(ETHToken);
-  }, [token, signer]);
-  React.useEffect(() => {
     if (!allowance) return;
     setIsApproved(stringToEthers(amount).lt(allowance));
   }, [amount, allowance]);
 
   React.useEffect(() => {
-    if (!signer || !token.address) {
+    if (!signer || !inboundToken.address) {
       return;
     }
     (async () => {
-      const erc20 = new ethers.Contract(token.address, ERC20JSON.abi, signer);
-      setAllowance(
-        await erc20.allowance(await signer.getAddress(), ETH_BRIDGE_ADDRESS)
+      const inboundTokenContract = erc20FromAddress(
+        inboundToken.address,
+        signer
       );
+      const allowance = await inboundTokenContract.allowance(
+        await signer.getAddress(),
+        ETH_BRIDGE_ADDRESS
+      );
+      setAllowance(allowance);
     })();
-  }, [signer, token, setAllowance]);
+  }, [signer, inboundToken, setAllowance]);
   React.useEffect(() => {
     (async () => {
       const stillPendingTransactions = pendingTransactions.filter(
@@ -101,7 +105,7 @@ export default function Bridge(props) {
           confirmedTransactions.map(async (transaction) => {
             const signature = await getSignature(transaction.id);
             let tx;
-            if (token.address === WETH.address) {
+            if (inboundToken.address === WETH.address) {
               tx = await bridge.releaseWETH(
                 ethAccount,
                 stringToEthers(amount),
@@ -110,7 +114,7 @@ export default function Bridge(props) {
               );
             } else {
               tx = await bridge.release(
-                token.address,
+                inboundToken.address,
                 ethAccount,
                 stringToEthers(amount),
                 parseInt(transaction.id),
@@ -133,7 +137,7 @@ export default function Bridge(props) {
     amount,
     bridge,
     publicKey,
-    token,
+    inboundToken,
   ]);
 
   const [postRelease] = usePostTransaction({
@@ -145,7 +149,7 @@ export default function Bridge(props) {
     setTransactionPending(true);
     try {
       const result = await postRelease(
-        Buffer.from(token.id, "base64"),
+        Buffer.from(inboundToken.id, "base64"),
         arrayify(ethAccount),
         Math.floor(parseFloat(amount) * BASE_FACTOR)
       );
@@ -157,7 +161,8 @@ export default function Bridge(props) {
 
   const approve = async (evt) => {
     evt.preventDefault();
-    let tx = await ETHToken.approve(ETH_BRIDGE_ADDRESS, MaxUint256);
+    const inboundTokenContract = erc20FromAddress(inboundToken.address, signer);
+    let tx = await inboundTokenContract.approve(ETH_BRIDGE_ADDRESS, MaxUint256);
     setTransactionPending(true);
     await tx.wait();
     setTransactionPending(false);
@@ -166,11 +171,7 @@ export default function Bridge(props) {
 
   const clearForm = () => {
     setAmount("");
-    setToken(BRIDGE_TOKENS[0]);
-  };
-  const handleTokenChange = (address) => {
-    const token = TOKENS.find((token) => token.address === address);
-    setToken(token);
+    setInboundToken(BRIDGE_TOKENS[0]);
   };
   const handleEthAccountChange = (ethAccount) => {
     setEthAccount(ethAccount);
@@ -179,15 +180,22 @@ export default function Bridge(props) {
   const mint = async (evt) => {
     evt.preventDefault();
     let tx;
-    if (token.address === WETH.address) {
+    if (inboundToken.address === WETH.address) {
       tx = await bridge.mintWETH(hexlify(publicKey), {
         value: stringToEthers(amount),
       });
     } else {
+      const inboundTokenContract = erc20FromAddress(
+        inboundToken.address,
+        signer
+      );
+      const decimals = await inboundTokenContract.decimals();
+      console.log(decimals);
+      console.log(parseUnits(amount, decimals).toNumber());
       tx = await bridge.mint(
-        token.address,
+        inboundToken.address,
         hexlify(publicKey),
-        stringToEthers(amount)
+        parseUnits(amount, decimals)
       );
     }
     setTransactionPending(true);
@@ -225,20 +233,12 @@ export default function Bridge(props) {
               >
                 <Form.Group className="basic">
                   <Form.Label>Token</Form.Label>
-                  <Form.Control
-                    onChange={(event) => {
-                      handleTokenChange(event.target.value);
-                    }}
-                    as="select"
-                    value={token.address}
-                    custom
-                  >
-                    {BRIDGE_TOKENS.map((token) => (
-                      <option key={token.name} value={token.address}>
-                        {token.ethName}
-                      </option>
-                    ))}
-                  </Form.Control>
+                  <TokenSelect
+                    tokens={BRIDGE_TOKENS}
+                    nameProperty={"ethName"}
+                    onChange={(token) => setInboundToken(token)}
+                    token={inboundToken}
+                  />
                 </Form.Group>
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
@@ -254,7 +254,7 @@ export default function Bridge(props) {
                 </div>
                 <Form.Group className="basic">
                   <Form.Label>Token</Form.Label>
-                  <div className="mt-1">{token.name}</div>
+                  <div className="mt-1">{inboundToken.name}</div>
                   <hr className="mt-0" />
                 </Form.Group>
                 <Form.Group className="basic">
@@ -302,21 +302,12 @@ export default function Bridge(props) {
               >
                 <Form.Group className="basic">
                   <Form.Label>Token</Form.Label>
-                  <Form.Control
-                    disabled={transactionPending}
-                    onChange={(event) => {
-                      handleTokenChange(event.target.value);
-                    }}
-                    as="select"
-                    value={token.address}
-                    custom
-                  >
-                    {BRIDGE_TOKENS.map((token) => (
-                      <option key={token.name} value={token.address}>
-                        {token.name}
-                      </option>
-                    ))}
-                  </Form.Control>
+
+                  <TokenSelect
+                    tokens={BRIDGE_TOKENS}
+                    onChange={(token) => setOutboundToken(token)}
+                    token={outboundToken}
+                  />
                 </Form.Group>
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
@@ -331,7 +322,7 @@ export default function Bridge(props) {
                 </div>
                 <Form.Group className="basic">
                   <Form.Label>Token</Form.Label>
-                  <div className="mt-1">{token.ethName}</div>
+                  <div className="mt-1">{outboundToken.ethName}</div>
                   <hr className="mt-0" />
                 </Form.Group>
                 <Form.Group className="basic">
