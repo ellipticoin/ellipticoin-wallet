@@ -15,11 +15,11 @@ import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import { differenceBy } from "lodash";
 import { default as ethers } from "ethers";
-import { stringToEthers } from "./helpers";
 import { usePostTransaction } from "./mutations";
+import { parseUnits } from "./helpers";
 
 const { MaxUint256 } = ethers.constants;
-const { hexlify, arrayify, parseUnits } = ethers.utils;
+const { hexlify, arrayify } = ethers.utils;
 
 async function getSignature(transactionId) {
   return Buffer.from(
@@ -68,8 +68,8 @@ export default function Bridge(props) {
   }, [signer]);
 
   React.useEffect(() => {
-    if (!allowance) return;
-    setIsApproved(stringToEthers(amount).lt(allowance));
+    if (!allowance || amount === "") return;
+    setIsApproved(parseUnits(amount).lt(allowance));
   }, [amount, allowance]);
 
   React.useEffect(() => {
@@ -105,18 +105,23 @@ export default function Bridge(props) {
           confirmedTransactions.map(async (transaction) => {
             const signature = await getSignature(transaction.id);
             let tx;
-            if (inboundToken.address === WETH.address) {
+              const outboundTokenContract = erc20FromAddress(
+                outboundToken.address,
+                signer
+              );
+              const decimals = await outboundTokenContract.decimals();
+            if (outboundToken.address === WETH.address) {
               tx = await bridge.releaseWETH(
                 ethAccount,
-                stringToEthers(amount),
+                parseUnits(amount, decimals),
                 parseInt(transaction.id),
                 hexlify(signature)
               );
             } else {
               tx = await bridge.release(
-                inboundToken.address,
+                outboundToken.address,
                 ethAccount,
-                stringToEthers(amount),
+                parseUnits(amount, decimals),
                 parseInt(transaction.id),
                 hexlify(signature)
               );
@@ -132,12 +137,13 @@ export default function Bridge(props) {
   }, [
     ethAccount,
     onHide,
+    signer,
     blockNumber,
     pendingTransactions,
     amount,
     bridge,
     publicKey,
-    inboundToken,
+    outboundToken,
   ]);
 
   const [postRelease] = usePostTransaction({
@@ -182,7 +188,7 @@ export default function Bridge(props) {
     let tx;
     if (inboundToken.address === WETH.address) {
       tx = await bridge.mintWETH(hexlify(publicKey), {
-        value: stringToEthers(amount),
+        value: parseUnits(amount),
       });
     } else {
       const inboundTokenContract = erc20FromAddress(
@@ -190,8 +196,6 @@ export default function Bridge(props) {
         signer
       );
       const decimals = await inboundTokenContract.decimals();
-      console.log(decimals);
-      console.log(parseUnits(amount, decimals).toNumber());
       tx = await bridge.mint(
         inboundToken.address,
         hexlify(publicKey),

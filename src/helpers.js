@@ -14,10 +14,13 @@ import ethers from "ethers";
 import nacl from "tweetnacl";
 import { useState } from "react";
 
-export function stringToEthers(string) {
-  return parseEther((parseFloat(string) || 0).toString());
+export function parseUnits(value, units) {
+    try {
+        return ethers.utils.parseUnits(value, units)
+    } catch {
+        return ethers.utils.parseUnits("0")
+    }
 }
-
 export function blockReward(blockNumber) {
   if (blockNumber > BLOCKS_PER_ERA * NUMBER_OF_ERAS) {
     return 0;
@@ -143,5 +146,3 @@ export function useLocalStorage(key, initialValue) {
 
   return [storedValue, setValue];
 }
-
-const { parseEther } = ethers.utils;
