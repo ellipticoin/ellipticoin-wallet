@@ -2,12 +2,11 @@ import { BASE_FACTOR, TOKENS } from "./constants";
 import { Button, Form, Modal } from "react-bootstrap";
 import { encodeToken, tokenToString } from "./helpers";
 
-import { Exchange } from "ec-client";
 import React from "react";
 import { usePostTransaction } from "./mutations";
 
 export default function ManageLiquidity(props) {
-  const { show, setShow, ec } = props;
+  const { show, setShow } = props;
   const [inputAmount, setInputAmount] = React.useState("");
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[0]);
