@@ -15,11 +15,11 @@ import nacl from "tweetnacl";
 import { useState } from "react";
 
 export function parseUnits(value, units) {
-    try {
-        return ethers.utils.parseUnits(value, units)
-    } catch {
-        return ethers.utils.parseUnits("0")
-    }
+  try {
+    return ethers.utils.parseUnits(value, units);
+  } catch {
+    return ethers.utils.parseUnits("0");
+  }
 }
 export function blockReward(blockNumber) {
   if (blockNumber > BLOCKS_PER_ERA * NUMBER_OF_ERAS) {

@@ -1,5 +1,6 @@
-import React from "react";
 import { formatCurrency, formatTokenBalance } from "./helpers";
+
+import React from "react";
 import { useGetIssuanceRewards } from "./queries";
 import { usePostTransaction } from "./mutations";
 

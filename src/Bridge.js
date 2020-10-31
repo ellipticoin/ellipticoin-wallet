@@ -5,7 +5,6 @@ import { BASE_FACTOR } from "./constants";
 import { BRIDGE_TOKENS } from "./constants";
 import BridgeJSON from "./Bridge.json";
 import Button from "react-bootstrap/Button";
-import TokenSelect from "./Inputs/TokenSelect.js";
 import { ChevronLeft } from "react-feather";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
 import Form from "react-bootstrap/Form";
@@ -13,10 +12,11 @@ import { default as React } from "react";
 import Spinner from "react-bootstrap/Spinner";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
+import TokenSelect from "./Inputs/TokenSelect.js";
 import { differenceBy } from "lodash";
 import { default as ethers } from "ethers";
-import { usePostTransaction } from "./mutations";
 import { parseUnits } from "./helpers";
+import { usePostTransaction } from "./mutations";
 
 const { MaxUint256 } = ethers.constants;
 const { hexlify, arrayify } = ethers.utils;
@@ -105,11 +105,11 @@ export default function Bridge(props) {
           confirmedTransactions.map(async (transaction) => {
             const signature = await getSignature(transaction.id);
             let tx;
-              const outboundTokenContract = erc20FromAddress(
-                outboundToken.address,
-                signer
-              );
-              const decimals = await outboundTokenContract.decimals();
+            const outboundTokenContract = erc20FromAddress(
+              outboundToken.address,
+              signer
+            );
+            const decimals = await outboundTokenContract.decimals();
             if (outboundToken.address === WETH.address) {
               tx = await bridge.releaseWETH(
                 ethAccount,
@@ -155,7 +155,7 @@ export default function Bridge(props) {
     setTransactionPending(true);
     try {
       const result = await postRelease(
-        Buffer.from(inboundToken.id, "base64"),
+        Buffer.from(outboundToken.id, "base64"),
         arrayify(ethAccount),
         Math.floor(parseFloat(amount) * BASE_FACTOR)
       );

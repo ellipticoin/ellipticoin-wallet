@@ -3,7 +3,7 @@ import base64url from "base64url";
 export const BASE_FACTOR = BigInt(1000000);
 export const BLOCKS_PER_ERA = 8000000;
 export const NUMBER_OF_ERAS = 8;
-export const PROD = true; //process.env.NODE_ENV === "production";
+export const PROD = process.env.NODE_ENV === "production";
 export const ETH_BRIDGE_ADDRESS = "0xE56418fA10948244f475496fE5773c34A8734594";
 //export const ETH_BRIDGE_ADDRESS = "0x30CB2293C7b138aF8C9A45589D4577C2Faf91732";
 export const BRIDGE_ADDRESS = base64url.toBuffer(

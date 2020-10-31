@@ -1,6 +1,6 @@
+import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
 import { gql, useQuery } from "@apollo/client";
 
-import { TOKENS, LIQUIDITY_TOKENS } from "./constants.js";
 import nacl from "tweetnacl";
 import { useLocalStorage } from "./helpers";
 import { useMemo } from "react";

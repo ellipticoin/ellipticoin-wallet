@@ -1,3 +1,4 @@
+import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
 import { default as React, useMemo, useState } from "react";
 import { animated, useTransition } from "react-spring";
 import {
@@ -19,7 +20,6 @@ import PendingTransactions from "./PendingTransactions";
 import Rewards from "./Rewards";
 import Send from "./Send";
 import Sidebar from "./Sidebar";
-import { TOKENS, LIQUIDITY_TOKENS } from "./constants.js";
 import Total from "./Total";
 import YourAddress from "./YourAddress";
 import { compact } from "lodash";

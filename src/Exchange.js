@@ -1,15 +1,20 @@
 import { BASE_FACTOR, TOKENS } from "./constants";
 import { Button, Form, Modal } from "react-bootstrap";
+import { encodeToken, tokenToString } from "./helpers";
 
 import { Exchange } from "ec-client";
 import React from "react";
-import { tokenToString } from "./helpers";
+import { usePostTransaction } from "./mutations";
 
 export default function ManageLiquidity(props) {
   const { show, setShow, ec } = props;
   const [inputAmount, setInputAmount] = React.useState("");
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[0]);
+  const [swap] = usePostTransaction({
+    contract: "Exchange",
+    functionName: "swap",
+  });
   const clearForm = () => {
     setInputAmount("");
   };
@@ -25,16 +30,15 @@ export default function ManageLiquidity(props) {
     );
     setOutputToken(outputToken);
   };
-  const exchange = async (evt) => {
+  const handleSwap = async (evt) => {
     evt.preventDefault();
-    const exchange = new Exchange(ec);
-    const response = await exchange.swap(
-      inputToken,
-      outputToken,
+    console.log(inputToken);
+    const response = await swap(
+      encodeToken(inputToken),
+      encodeToken(outputToken),
       Math.floor(parseFloat(inputAmount) * BASE_FACTOR)
     );
-    if (response.return_value.hasOwnProperty("Ok")) {
-    }
+    console.log(response);
     setShow(false);
     clearForm();
   };
@@ -50,7 +54,7 @@ export default function ManageLiquidity(props) {
               <Form
                 noValidate
                 autoComplete="off"
-                onSubmit={(evt) => exchange(evt)}
+                onSubmit={(evt) => handleSwap(evt)}
               >
                 <Form.Group className="basic">
                   <Form.Label>Input Token</Form.Label>

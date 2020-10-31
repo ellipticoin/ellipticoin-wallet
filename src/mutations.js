@@ -1,12 +1,12 @@
 import { gql, useMutation } from "@apollo/client";
 import { signTransaction, useLocalStorage } from "./helpers";
-import { useGetNextNonce } from "./queries";
 import { useContext, useMemo } from "react";
 
 import CurrentMinerContext from "./CurrentMinerContext";
 import HostContext from "./HostContext";
 import cbor from "cbor";
 import nacl from "tweetnacl";
+import { useGetNextNonce } from "./queries";
 
 const POST_TRASACTION = gql`
   mutation($transaction: Bytes!) {
