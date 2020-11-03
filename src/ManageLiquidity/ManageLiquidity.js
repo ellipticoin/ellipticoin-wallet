@@ -50,11 +50,11 @@ export default function ManageLiquidity(props) {
     functionName: "remove_liqidity",
   });
   const providePoolExists = useMemo(
-    () => parseInt(provideLiquidityToken.balance) > 0,
+    () => parseInt(provideLiquidityToken.totalSupply) > 0,
     [provideLiquidityToken]
   );
   const removePoolExists = useMemo(
-    () => parseInt(removeLiquidityToken.balance) > 0,
+    () => parseInt(removeLiquidityToken.totalSupply) > 0,
     [removeLiquidityToken]
   );
   const providePrice = useMemo(() => {
@@ -80,16 +80,20 @@ export default function ManageLiquidity(props) {
     }
   };
   const handleAddLiquidity = async () => {
-    await addLiqidity(encodeToken(provideToken), provideAmount);
+    await addLiqidity(encodeToken(provideToken), Number(provideAmount));
     onHide();
   };
   const handleCreatePool = async () => {
-    await createPool(encodeToken(provideToken), provideAmount, initialPrice);
+    await createPool(
+      encodeToken(provideToken),
+      Number(provideAmount),
+      Number(initialPrice)
+    );
     onHide();
   };
   const handleRemoveLiquidity = async (evt) => {
     evt.preventDefault();
-    await removeLiqidity(encodeToken(removeToken), removeAmount);
+    await removeLiqidity(encodeToken(removeToken), Number(removeAmount));
     onHide();
   };
 

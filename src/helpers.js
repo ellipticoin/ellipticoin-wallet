@@ -113,7 +113,7 @@ export function formatTokenBalance(amount) {
   return new Intl.NumberFormat("en", {
     minimumFractionDigits: 6,
   })
-    .format(BigInt(amount) / BASE_FACTOR)
+    .format(BigInt(Math.round(amount)) / BASE_FACTOR)
     .replace(/^(\D+)/, "$1 ");
 }
 

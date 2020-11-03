@@ -1,4 +1,5 @@
 import { default as React, useState } from "react";
+import { BigInt } from "jsbi";
 import { BASE_FACTOR } from "../constants";
 import { Form } from "react-bootstrap";
 export default function TokenAmountInput(props) {
@@ -17,7 +18,7 @@ export default function TokenAmountInput(props) {
     if (isNaN(total)) {
       onChange(null);
     } else {
-      onChange(total);
+      onChange(new BigInt(total));
     }
     const numberFormat =
       currency === "USD"

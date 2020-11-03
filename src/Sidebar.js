@@ -1,5 +1,4 @@
-import { Download, Settings, Unlock, Upload, X } from "react-feather";
-
+import { Download, Upload, X } from "react-feather";
 import Identicon from "react-identicons";
 import { Modal } from "react-bootstrap";
 import React from "react";
@@ -33,7 +32,6 @@ export default function Sidebar(props) {
     let fr = new FileReader();
     fr.onload = (event) => {
       event.preventDefault();
-      console.log(event.target.result);
       setSecretKey(Buffer.from(event.target.result, "base64"));
     };
     fr.readAsText(file);
@@ -65,7 +63,7 @@ export default function Sidebar(props) {
               </div>
               <div className="in">
                 <strong>{base64url.encode(publicKey).slice(0, 20)}...</strong>
-                <div className="text-muted">test-test-123</div>
+                <div className="text-muted"></div>
               </div>
               <button
                 className="sidebar-close"
@@ -90,22 +88,6 @@ export default function Sidebar(props) {
                   </div>
                   <div className="in">Load Private Key</div>
                 </button>
-              </li>
-              <li>
-                <button className="item">
-                  <div className="icon-box">
-                    <Settings color="#333" />
-                  </div>
-                  <div className="in">Settings</div>
-                </button>
-              </li>
-              <li>
-                <a href="app-index.html" className="item">
-                  <div className="icon-box">
-                    <Unlock color="#333" />
-                  </div>
-                  <div className="in">Unlock Ether</div>
-                </a>
               </li>
             </ul>
           </div>

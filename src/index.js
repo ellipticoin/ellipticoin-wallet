@@ -1,7 +1,4 @@
 import "./styles/style.scss";
-
-import * as serviceWorker from "./serviceWorker";
-
 import ApolloWrapper from "./ApolloWrapper";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -13,4 +10,3 @@ if (
   localStorage.clear();
 }
 ReactDOM.render(<ApolloWrapper />, document.getElementById("root"));
-serviceWorker.unregister();

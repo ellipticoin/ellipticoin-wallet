@@ -38,9 +38,3 @@ async function sign(publicKey) {
   });
   return assertion.response.signature;
 }
-async function run() {
-  const publicKey = await createPublicKey();
-  console.log(`created wallet ${Buffer.from(publicKey).toString("base64")}`);
-  const signature = await sign(publicKey);
-  console.log(`signature: ${Buffer.from(signature).toString("base64")}`);
-}

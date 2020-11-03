@@ -6,6 +6,7 @@ export const NUMBER_OF_ERAS = 8;
 export const PROD = process.env.NODE_ENV === "production";
 export const ETH_BRIDGE_ADDRESS = "0xE56418fA10948244f475496fE5773c34A8734594";
 //export const ETH_BRIDGE_ADDRESS = "0x30CB2293C7b138aF8C9A45589D4577C2Faf91732";
+export const LIQUIDITY_FEE = BigInt(3000);
 export const BRIDGE_ADDRESS = base64url.toBuffer(
   "OaKmwCWrUhdCCsIMN_ViVcu1uBF0VM3FW3Mi1z_VTNs"
 );

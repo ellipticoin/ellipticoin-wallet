@@ -121,6 +121,14 @@ function App(props) {
             tokens={tokens}
           />
         );
+      case "Exchange":
+        return (
+          <Exchange
+            liquidityTokens={liquidityTokens}
+            onHide={() => setShowPage(null)}
+            publicKey={publicKey}
+          />
+        );
       case "ManageLiquidity":
         return (
           <ManageLiquidity
@@ -208,13 +216,6 @@ function App(props) {
           setShow={(show) => (show ? setShowModal("send") : setShowModal(null))}
           show={showModal === "send"}
           setHost={setHost}
-          publicKey={publicKey}
-        />
-        <Exchange
-          setShow={(show) =>
-            show ? setShowModal("exchange") : setShowModal(null)
-          }
-          show={showModal === "exchange"}
           publicKey={publicKey}
         />
         <Sidebar

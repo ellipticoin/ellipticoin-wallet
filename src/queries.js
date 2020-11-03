@@ -24,6 +24,7 @@ export const GET_LIQUIDITY_TOKENS = gql`
       price
       balance
       shareOfPool
+      totalSupply
     }
   }
 `;

@@ -10,8 +10,6 @@ export default function WalletMenu(props) {
   const { setShowSidebar, publicKey } = props;
   const [showWarning, setShowWarning] = useLocalStorage("showWarning", true);
 
-  // <span style={{fontSize: "32px", lineHeight: "64px", paddingRight: "10px", verticalAlign: "middle"}}>🌕</span>
-  // Luna Wallet
   return (
     <>
       {showWarning ? (
@@ -49,13 +47,7 @@ export default function WalletMenu(props) {
           Ellipticoin Wallet
         </div>
         <div className="right">
-          <a href="app-settings.html" className="headerButton">
-            <Identicon
-              bg="#fff"
-              size="32"
-              string={base64url.encode(publicKey)}
-            />
-          </a>
+          <Identicon bg="#fff" size="32" string={base64url.encode(publicKey)} />
         </div>
       </div>
     </>

@@ -7,6 +7,7 @@
     "@openzeppelin/contracts": "^3.1.0",
     "apollo-client": "^2.6.10",
     "base64url": "^3.0.1",
+    "bignumber.js": "^9.0.1",
     "bootstrap": "^4.5.0",
     "buffer": "^5.6.0",
     "cbor": "5.1.0",
@@ -55,5 +56,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^1.2.0"
   }
 }
