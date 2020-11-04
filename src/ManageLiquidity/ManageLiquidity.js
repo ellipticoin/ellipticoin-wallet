@@ -35,10 +35,7 @@ export default function ManageLiquidity(props) {
     setProvideLiquidityToken(find(liquidityTokens, ["id", provideToken.id]));
   }, [provideToken, liquidityTokens]);
   useEffect(() => {
-    const removeLiquidityToken = liquidityTokens.find(
-      (liquidityToken) => liquidityToken.id === removeToken.id
-    );
-    setRemoveLiquidityToken(removeLiquidityToken);
+    setRemoveLiquidityToken(find(liquidityTokens, ["id", removeToken.id]));
   }, [removeToken, liquidityTokens]);
   const [createPool] = usePostTransaction({
     contract: "Exchange",
@@ -100,25 +97,34 @@ export default function ManageLiquidity(props) {
     onHide();
   };
 
-  const validationError = useMemo(() => {
-    if (
-      provideAmount &&
-      greaterThan(provideAmount, BigInt(provideToken.balance))
-    ) {
+  const usdAmount = useMemo(() => {
+    if (!initialPrice) return 0;
+    return divide(multiply(provideAmount, initialPrice), BASE_FACTOR);
+  }, [provideAmount, initialPrice]);
+  const usdBalance = useMemo(
+    () => BigInt(find(tokens, ["id", USD.id]).balance),
+    [tokens]
+  );
+  const provideValidationError = useMemo(() => {
+    if (!provideAmount) return;
+    if (greaterThan(provideAmount || BigInt(0), BigInt(provideToken.balance))) {
       return `Insufficient ${tokenName(provideToken)} balance`;
     } else if (
-      initialPrice &&
       provideAmount &&
-      greaterThan(
-        divide(multiply(provideAmount, initialPrice), BASE_FACTOR),
-        BigInt(find(tokens, ["id", USD.id]).balance)
-      )
+      initialPrice &&
+      greaterThan(usdAmount, usdBalance)
     ) {
       return `Insufficient USD balance`;
     } else {
       return null;
     }
-  }, [provideAmount, provideToken, initialPrice, tokens]);
+  }, [
+    provideAmount,
+    provideToken,
+    initialPrice,
+    usdAmount,
+    usdBalance,
+  ]);
 
   return (
     <>
@@ -183,10 +189,10 @@ export default function ManageLiquidity(props) {
                   type="submit"
                   className="btn btn-lg btn-block btn-primary mb-1"
                   variant="contained"
-                  disabled={validationError}
+                  disabled={provideValidationError}
                   color="primary"
                 >
-                  {validationError || "Create Pool"}
+                  {provideValidationError || "Create Pool"}
                 </Button>
               )}
               <div className="mt-2">
@@ -235,7 +241,7 @@ export default function ManageLiquidity(props) {
                 >
                   {tokens.map((token) => (
                     <option key={token.id} value={tokenToString(token)}>
-                      {token.name}
+                      {tokenName(token)}
                     </option>
                   ))}
                 </Form.Control>
