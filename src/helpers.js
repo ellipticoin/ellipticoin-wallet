@@ -4,6 +4,7 @@ import {
   BRIDGE_TOKENS,
   ELC,
   NUMBER_OF_ERAS,
+  NETWORK_ID,
 } from "./constants";
 import { find, get } from "lodash";
 
@@ -30,7 +31,10 @@ export function blockReward(blockNumber) {
 }
 
 export function signTransaction(transaction, secretKey) {
-  return sign(cbor.encode({ ...transaction, network_id: 0 }), secretKey);
+  return sign(
+    cbor.encode({ ...transaction, network_id: NETWORK_ID }),
+    secretKey
+  );
 }
 export function sign(message, secretKey) {
   const { publicKey } = nacl.sign.keyPair.fromSecretKey(secretKey);
