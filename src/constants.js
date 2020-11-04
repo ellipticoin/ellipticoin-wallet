@@ -5,7 +5,7 @@ export const BLOCKS_PER_ERA = 8000000;
 export const NUMBER_OF_ERAS = 8;
 export const NETWORK_ID = 1793045504; // hello-world-0
 export const PROD = process.env.NODE_ENV === "production";
-export const ETH_BRIDGE_ADDRESS = "0x10248Cd8cED4341AF27695f7D5FC7B66371a43f6";
+export const ETH_BRIDGE_ADDRESS = "0x861B3289E2432138324aB593090E0805f9337DAe";
 //export const ETH_BRIDGE_ADDRESS = "0x30CB2293C7b138aF8C9A45589D4577C2Faf91732";
 export const LIQUIDITY_FEE = BigInt(3000);
 export const BRIDGE_ADDRESS = base64url.toBuffer(

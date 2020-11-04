@@ -134,6 +134,7 @@ function App(props) {
           <ManageLiquidity
             onHide={() => setShowPage(null)}
             liquidityTokens={liquidityTokens}
+            tokens={tokens}
             setShow={(show) =>
               show ? setShowPage("ManageLiquidity") : setShowModal(null)
             }

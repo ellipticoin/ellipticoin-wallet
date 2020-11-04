@@ -1,5 +1,6 @@
 import { default as React } from "react";
 import { Form } from "react-bootstrap";
+import { tokenName } from "../helpers";
 export default function TokenSelect(props) {
   const { onChange, token, tokens, nameProperty } = props;
   const handleTokenChange = (tokenId) => {
@@ -16,8 +17,8 @@ export default function TokenSelect(props) {
       custom
     >
       {tokens.map((token) => (
-        <option key={token.name} value={token.id}>
-          {nameProperty === "ethName" ? token.ethName : token.name}
+        <option key={token.id} value={token.id}>
+          {nameProperty === "ethName" ? token.ethName : tokenName(token)}
         </option>
       ))}
     </Form.Control>

@@ -1,37 +1,40 @@
-import { BASE_FACTOR, TOKENS, LIQUIDITY_TOKENS } from "../constants";
+import { BASE_FACTOR, USD } from "../constants";
 import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
 import {
   encodeToken,
   tokenToString,
   formatCurrency,
   formatTokenBalance,
+  tokenName,
 } from "../helpers";
+import { find } from "lodash";
+import { BigInt, greaterThan, multiply, divide } from "jsbi";
 import { ChevronLeft } from "react-feather";
-import { default as React, useMemo, useState } from "react";
+import { default as React, useMemo, useState, useEffect } from "react";
 import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
 import { usePostTransaction } from "../mutations";
 
 export default function ManageLiquidity(props) {
-  const { onHide, liquidityTokens } = props;
+  const { onHide, liquidityTokens, tokens } = props;
   const [provideAmount, setProvideAmount] = useState();
   const [removeAmount, setRemoveAmount] = useState("");
   const [initialPrice, setInitialPrice] = useState("");
-  const [provideToken, setProvideToken] = useState(TOKENS[0]);
-  const [removeToken, setRemoveToken] = useState(TOKENS[0]);
+  const [provideToken, setProvideToken] = useState(tokens[0]);
+  const [removeToken, setRemoveToken] = useState(tokens[0]);
   const [provideLiquidityToken, setProvideLiquidityToken] = useState(
     liquidityTokens[0]
   );
   const [removeLiquidityToken, setRemoveLiquidityToken] = useState(
     liquidityTokens[0]
   );
-  React.useEffect(() => {
-    const provideLiquidityToken = liquidityTokens.find(
-      (liquidityToken) => liquidityToken.id === provideToken.id
-    );
-    setProvideLiquidityToken(provideLiquidityToken);
+  useEffect(() => {
+    setProvideToken(find(tokens, ["id", provideToken.id]));
+  }, [provideToken, tokens]);
+  useEffect(() => {
+    setProvideLiquidityToken(find(liquidityTokens, ["id", provideToken.id]));
   }, [provideToken, liquidityTokens]);
-  React.useEffect(() => {
+  useEffect(() => {
     const removeLiquidityToken = liquidityTokens.find(
       (liquidityToken) => liquidityToken.id === removeToken.id
     );
@@ -66,7 +69,7 @@ export default function ManageLiquidity(props) {
   );
 
   const handleRemoveTokenChange = (removeTokenString) => {
-    const removeToken = TOKENS.find(
+    const removeToken = tokens.find(
       (removeToken) => tokenToString(removeToken) === removeTokenString
     );
     setRemoveToken(removeToken);
@@ -97,6 +100,26 @@ export default function ManageLiquidity(props) {
     onHide();
   };
 
+  const validationError = useMemo(() => {
+    if (
+      provideAmount &&
+      greaterThan(provideAmount, BigInt(provideToken.balance))
+    ) {
+      return `Insufficient ${tokenName(provideToken)} balance`;
+    } else if (
+      initialPrice &&
+      provideAmount &&
+      greaterThan(
+        divide(multiply(provideAmount, initialPrice), BASE_FACTOR),
+        BigInt(find(tokens, ["id", USD.id]).balance)
+      )
+    ) {
+      return `Insufficient USD balance`;
+    } else {
+      return null;
+    }
+  }, [provideAmount, provideToken, initialPrice, tokens]);
+
   return (
     <>
       <div className="appHeader">
@@ -119,7 +142,7 @@ export default function ManageLiquidity(props) {
               <Form.Group className="basic">
                 <Form.Label>Token</Form.Label>
                 <TokenSelect
-                  tokens={LIQUIDITY_TOKENS}
+                  tokens={tokens}
                   onChange={(token) => setProvideToken(token)}
                   token={provideToken}
                 />
@@ -160,15 +183,16 @@ export default function ManageLiquidity(props) {
                   type="submit"
                   className="btn btn-lg btn-block btn-primary mb-1"
                   variant="contained"
+                  disabled={validationError}
                   color="primary"
                 >
-                  Create Pool
+                  {validationError || "Create Pool"}
                 </Button>
               )}
               <div className="mt-2">
                 <strong>Depositing</strong>
                 <div>
-                  {provideToken.name}:{" "}
+                  {tokenName(provideToken)}:{" "}
                   {provideAmount ? formatTokenBalance(provideAmount) : ""}
                 </div>
                 <div>
@@ -209,8 +233,8 @@ export default function ManageLiquidity(props) {
                   value={tokenToString(removeToken)}
                   custom
                 >
-                  {TOKENS.map((token) => (
-                    <option key={token.name} value={tokenToString(token)}>
+                  {tokens.map((token) => (
+                    <option key={token.id} value={tokenToString(token)}>
                       {token.name}
                     </option>
                   ))}
