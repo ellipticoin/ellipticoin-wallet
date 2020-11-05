@@ -88,6 +88,22 @@ export function formatCurrency(amount) {
     .replace(/^(\D+)/, "$1 ");
 }
 
+export function formatTokenAmount(amount, maxPlaces = 10, sigFigs = 3) {
+  if (!amount) return 0;
+
+  if (amount - Math.floor(amount) === 0) {
+    const figs = amount.toString().length;
+    return figs >= sigFigs ? amount : amount.toFixed(sigFigs - figs);
+  }
+  let places = 0;
+  let tempAmount = amount;
+  while (tempAmount < 1) {
+    tempAmount *= 10;
+    places++;
+  }
+  return amount.toFixed(places === 0 ? 2 : Math.min(maxPlaces, places + sigFigs - 1));
+}
+
 export function tokenName(token) {
   return get(
     find(

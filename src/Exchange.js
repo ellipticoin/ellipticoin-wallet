@@ -1,59 +1,71 @@
 import { BASE_FACTOR, LIQUIDITY_FEE, TOKENS } from "./constants";
 import { Button, Form } from "react-bootstrap";
-import { encodeToken, tokenToString, formatTokenBalance } from "./helpers";
+import {encodeToken, tokenToString, formatTokenBalance, formatTokenAmount} from "./helpers";
 
 import { ArrowDown } from "react-feather";
 import { ChevronLeft } from "react-feather";
 import { BigInt, add, subtract, multiply, divide } from "jsbi";
 import { find } from "lodash";
-import { default as React, useMemo } from "react";
+import {default as React, useMemo, useState} from "react";
 import { usePostTransaction } from "./mutations";
 import { TokenAmountInput, TokenSelect } from "./Inputs";
 
 export default function Exchange(props) {
   const { onHide, liquidityTokens } = props;
   const [inputAmount, setInputAmount] = React.useState();
-  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState();
+  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState("0");
+  const [exchangeRate, setExchangeRate] = React.useState();
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[3]);
   const [inputLiquidityToken, setInputLiquidityToken] = React.useState(
     liquidityTokens
   );
-  const [error, setError] = React.useState('')
+  const [outputLiquidityToken, setOutputLiquidityToken] = React.useState(
+    liquidityTokens
+  );
+  const [error, setError] = React.useState("")
+
   React.useEffect(() => {
-    setInputLiquidityToken(find(liquidityTokens, ["id", inputToken.id]));
+    const token = find(liquidityTokens, ["id", inputToken.id]);
+    setInputLiquidityToken(token);
   }, [inputToken, liquidityTokens]);
+  React.useEffect(() => {
+    const token = find(liquidityTokens, ["id", outputToken.id]);
+    setOutputLiquidityToken(token);
+  }, [outputToken, liquidityTokens]);
+  React.useEffect(() => {
+      let rate = 'N/A';
+      let outputTokenPrice = outputToken.ticker === 'USD' ? 1 : outputLiquidityToken.price || 0;
+      let inputTokenPrice = inputToken.ticker === 'USD' ? 1 : inputLiquidityToken.price || 0;
+      if (outputTokenPrice !== 0) {
+        rate = formatTokenAmount(inputTokenPrice / outputTokenPrice);
+
+      setExchangeRate(`1 ${inputToken.ticker} = ${rate} ${outputToken.ticker}`);
+    }
+  }, [inputLiquidityToken, outputLiquidityToken]);
+
   const fee = useMemo(() => {
     return (LIQUIDITY_FEE * inputAmount) / BASE_FACTOR;
   }, [inputAmount]);
-  React.useEffect(() => {
-    calculateMinimumOutputTokenAmount()
-    setMinimumOutputAmount()
-  }, [inputToken, liquidityTokens, fee])
   const [exchange] = usePostTransaction({
     contract: "Exchange",
     functionName: "exchange",
   });
   const clearForm = () => {
     setInputAmount("");
-    setMinimumOutputAmount("");
     setError("");
+    setMinimumOutputAmount("0");
   };
-  const calculateMinimumOutputTokenAmount = () => {
-    return "0";
-  };
+
   const handleOutputTokenChange = (tokenString) => {
     const outputToken = TOKENS.find(
       (token) => tokenToString(token) === tokenString
     );
     setOutputToken(outputToken);
-    // TODO: Update this on change
-    // setMinimumOutputAmount(calculateMinimumOutputTokenAmount(/* Args here */));
-    setMinimumOutputAmount(calculateMinimumOutputTokenAmount(/* Args here */));
   };
   const handleSwap = async (evt) => {
     evt.preventDefault();
-    console.log(`Exchanging ${inputAmount} ${inputToken} for at least ${minimumOutputAmount} ${outputToken}`)
+    console.log(`Exchanging ${inputAmount} ${JSON.stringify(inputToken)} for at least ${minimumOutputAmount} ${JSON.stringify(outputToken)}`)
     let res = await exchange(
       encodeToken(inputToken),
       encodeToken(outputToken),
@@ -61,7 +73,6 @@ export default function Exchange(props) {
       Number(minimumOutputAmount)
     );
 
-    console.log(`result: ${JSON.stringify(res)}`);
     if (!res.returnValue) {
       clearForm();
       onHide();
@@ -148,8 +159,16 @@ export default function Exchange(props) {
             <TokenAmountInput
               onChange={(value) => setMinimumOutputAmount(value)}
               value={minimumOutputAmount}
-              placeholder="Amount"
+              placeholder="Output Token Amount"
             />
+          </Form.Group>
+          <Form.Group className="basic">
+            <Form.Label>Current Rate</Form.Label>
+            <span>{exchangeRate}</span>
+          </Form.Group>
+          <Form.Group className="basic">
+            <Form.Label>Available Liquidity</Form.Label>
+            <span>{formatTokenAmount(outputLiquidityToken.balance / 1.0e6 )}</span>
           </Form.Group>
           <ul className="listview flush transparent simple-listview no-space mt-3">
             <li>
