@@ -13,40 +13,62 @@ import { TokenAmountInput, TokenSelect } from "./Inputs";
 export default function Exchange(props) {
   const { onHide, liquidityTokens } = props;
   const [inputAmount, setInputAmount] = React.useState();
+  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState();
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[3]);
   const [inputLiquidityToken, setInputLiquidityToken] = React.useState(
     liquidityTokens
   );
+  const [error, setError] = React.useState('')
   React.useEffect(() => {
     setInputLiquidityToken(find(liquidityTokens, ["id", inputToken.id]));
   }, [inputToken, liquidityTokens]);
+  const fee = useMemo(() => {
+    return (LIQUIDITY_FEE * inputAmount) / BASE_FACTOR;
+  }, [inputAmount]);
+  React.useEffect(() => {
+    calculateMinimumOutputTokenAmount()
+    setMinimumOutputAmount()
+  }, [inputToken, liquidityTokens, fee])
   const [exchange] = usePostTransaction({
     contract: "Exchange",
     functionName: "exchange",
   });
   const clearForm = () => {
     setInputAmount("");
+    setMinimumOutputAmount("");
+    setError("");
+  };
+  const calculateMinimumOutputTokenAmount = () => {
+    return "0";
   };
   const handleOutputTokenChange = (tokenString) => {
     const outputToken = TOKENS.find(
       (token) => tokenToString(token) === tokenString
     );
     setOutputToken(outputToken);
+    // TODO: Update this on change
+    // setMinimumOutputAmount(calculateMinimumOutputTokenAmount(/* Args here */));
+    setMinimumOutputAmount(calculateMinimumOutputTokenAmount(/* Args here */));
   };
   const handleSwap = async (evt) => {
     evt.preventDefault();
-    await exchange(
+    console.log(`Exchanging ${inputAmount} ${inputToken} for at least ${minimumOutputAmount} ${outputToken}`)
+    let res = await exchange(
       encodeToken(inputToken),
       encodeToken(outputToken),
-      Number(inputAmount)
+      Number(inputAmount),
+      Number(minimumOutputAmount)
     );
-    clearForm();
-    onHide();
+
+    console.log(`result: ${JSON.stringify(res)}`);
+    if (!res.returnValue) {
+      clearForm();
+      onHide();
+    } else {
+      setError(res.returnValue.Err.message);
+    }
   };
-  const fee = useMemo(() => {
-    return (LIQUIDITY_FEE * inputAmount) / BASE_FACTOR;
-  }, [inputAmount]);
   const outputAmount = useMemo(() => {
     if (!inputAmount || !inputLiquidityToken.totalSupply) return;
     const elcPool = BigInt(inputLiquidityToken.totalSupply);
@@ -57,15 +79,22 @@ export default function Exchange(props) {
       ),
       BASE_FACTOR
     );
-    const invarient = multiply(elcPool, usdPool);
+    const invariant = multiply(elcPool, usdPool);
     const newElcPool = subtract(add(elcPool, inputAmount), fee);
-    const newUsdPool = divide(invarient, newElcPool);
+    const newUsdPool = divide(invariant, newElcPool);
     const outputAmount = subtract(usdPool, newUsdPool);
     console.log(outputToken.name);
     if (outputToken.name === "USD") {
       return outputAmount;
     }
   }, [fee, inputAmount, inputLiquidityToken, outputToken]);
+
+  const ErrorMessage = () => (
+    <div id="error-message">
+      <span className="text-danger"><strong>Error: {error}</strong></span>
+    </div>
+  );
+
   return (
     <>
       <div className="appHeader">
@@ -114,6 +143,14 @@ export default function Exchange(props) {
               ))}
             </Form.Control>
           </Form.Group>
+          <Form.Group className="basic">
+            <Form.Label>Minimum Output Token Amount (slippage protection)</Form.Label>
+            <TokenAmountInput
+              onChange={(value) => setMinimumOutputAmount(value)}
+              value={minimumOutputAmount}
+              placeholder="Amount"
+            />
+          </Form.Group>
           <ul className="listview flush transparent simple-listview no-space mt-3">
             <li>
               <strong>Transaction Fee</strong>
@@ -135,6 +172,7 @@ export default function Exchange(props) {
               </h3>
             </li>
           </ul>
+          { error ? <ErrorMessage /> : null }
           <Button
             type="submit"
             className="btn btn-lg btn-block btn-primary m-1"
