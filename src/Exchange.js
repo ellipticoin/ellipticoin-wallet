@@ -168,7 +168,7 @@ export default function Exchange(props) {
           </Form.Group>
           <Form.Group className="basic">
             <Form.Label>Available Liquidity</Form.Label>
-            <span>{formatTokenAmount(outputLiquidityToken.balance / 1.0e6 )}</span>
+            <span>{formatTokenAmount(outputLiquidityToken.balance / BASE_FACTOR )}</span>
           </Form.Group>
           <ul className="listview flush transparent simple-listview no-space mt-3">
             <li>
