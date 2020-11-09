@@ -281,7 +281,7 @@ export default function Exchange(props) {
           {error?<div id="error-message">
             <span className="text-danger"><strong>Error: {error}</strong></span>
           </div>:null}
-          <Button
+          {!!outputAmount && outputAmount > 0 && !!inputAmount && inputAmount > 0 ? <Button
             type="submit"
             className="btn btn-lg btn-block btn-primary m-1"
             variant="contained"
@@ -289,6 +289,18 @@ export default function Exchange(props) {
           >
             Exchange
           </Button>
+          :
+          <Button
+            type="submit"
+            className="btn btn-lg btn-block btn-primary m-1"
+            variant="contained"
+            color="primary"
+            disabled
+          >
+            Exchange
+          </Button>
+          }
+
         </Form>
       </div>
     </>
