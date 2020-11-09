@@ -1,16 +1,16 @@
+import TokenAmountInput from "../Inputs/TokenAmountInput";
+import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, TOKENS, LIQUIDITY_TOKENS } from "../constants";
-import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
 import {
   encodeToken,
   tokenToString,
   formatCurrency,
   formatTokenBalance,
 } from "../helpers";
-import { ChevronLeft } from "react-feather";
-import { default as React, useMemo, useState } from "react";
-import TokenAmountInput from "../Inputs/TokenAmountInput";
-import TokenSelect from "../Inputs/TokenSelect";
 import { usePostTransaction } from "../mutations";
+import { default as React, useMemo, useState } from "react";
+import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
+import { ChevronLeft } from "react-feather";
 
 export default function ManageLiquidity(props) {
   const { onHide, liquidityTokens } = props;

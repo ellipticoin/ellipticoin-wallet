@@ -1,12 +1,13 @@
-import { default as React, useState } from "react";
-import { BigInt } from "jsbi";
 import { BASE_FACTOR } from "../constants";
+import { BigInt } from "jsbi";
+import { default as React, useState } from "react";
 import { Form } from "react-bootstrap";
+
 export default function TokenAmountInput(props) {
   const { onChange, currency, value } = props;
   const [textValue, setTextValue] = useState(value || "");
   const handleOnChange = ({ target }) => {
-    console.log(`Received new target value ${target.value}`)
+    console.log(`Received new target value ${target.value}`);
     let { groups } = /\$?(?<number>[\d,]*)?(?<decimal>\.\d{0,6})?/.exec(
       target.value
     );
