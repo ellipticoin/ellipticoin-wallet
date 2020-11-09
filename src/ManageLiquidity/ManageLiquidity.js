@@ -2,6 +2,7 @@ import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, TOKENS, LIQUIDITY_TOKENS } from "../constants";
 import {
+  excludeUsd,
   encodeToken,
   tokenToString,
   formatCurrency,
@@ -119,7 +120,7 @@ export default function ManageLiquidity(props) {
               <Form.Group className="basic">
                 <Form.Label>Token</Form.Label>
                 <TokenSelect
-                  tokens={LIQUIDITY_TOKENS}
+                  tokens={excludeUsd(LIQUIDITY_TOKENS)}
                   onChange={(token) => setProvideToken(token)}
                   token={provideToken}
                 />

@@ -116,6 +116,10 @@ export function tokenName(token) {
   );
 }
 
+export function excludeUsd(liquidityTokens) {
+  return liquidityTokens.filter(t => tokenName(t) !== "USD");
+}
+
 export function encodeAddress(address) {
   if (typeof address === "string") {
     return {
