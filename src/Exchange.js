@@ -7,7 +7,7 @@ import {
   formatTokenExchangeRate,
 } from "./helpers";
 import { usePostTransaction } from "./mutations";
-import { BigInt, add, subtract, multiply, divide, equal } from "jsbi";
+import { BigInt, add, subtract, multiply, divide } from "jsbi";
 import { find } from "lodash";
 import { default as React, useMemo } from "react";
 import { Button, Form } from "react-bootstrap";
@@ -66,7 +66,7 @@ export default function Exchange(props) {
   const calculateAvailableQuantity = (inputLiquidityToken, outputLiquidityToken, outputTokenName) => {
     const quantity = outputTokenName === 'USD'
       ? inputLiquidityToken.totalSupply / inputLiquidityToken.price * BASE_FACTOR
-      : outputLiquidityToken.totalSupply;
+      : outputLiquidityToken.totalSupply / BASE_FACTOR;
 
     setAvailableQuantity(isNaN(quantity) ? new BigInt(0) : quantity);
   };
@@ -114,15 +114,14 @@ export default function Exchange(props) {
 
 
   React.useEffect(() => {
-    const token = find(liquidityTokens, ["id", inputToken.id]);
-    setInputLiquidityToken(token);
-    calculateAvailableQuantity(token, outputLiquidityToken, outputToken.name);
-  }, [inputToken, liquidityTokens]);
-  React.useEffect(() => {
-    const token = find(liquidityTokens, ["id", outputToken.id]);
-    setOutputLiquidityToken(token);
-    calculateAvailableQuantity(inputLiquidityToken, token, outputToken.name);
-  }, [outputToken, liquidityTokens]);
+    const _inputLiquidityToken = find(liquidityTokens, ["id", inputToken.id]);
+    setInputLiquidityToken(_inputLiquidityToken);
+
+    const _outputLiquidityToken = find(liquidityTokens, ["id", outputToken.id]);
+    setOutputLiquidityToken(_outputLiquidityToken);
+
+    calculateAvailableQuantity(inputLiquidityToken, outputLiquidityToken, outputToken.name);
+  }, [inputToken, outputToken, inputLiquidityToken, outputLiquidityToken, liquidityTokens]);
 
 
   const exchangeRate = useMemo(() => {
@@ -139,7 +138,7 @@ export default function Exchange(props) {
     } else {
       return null;
     }
-  }, [inputLiquidityToken, outputLiquidityToken]);
+  }, [inputToken, outputToken, inputLiquidityToken, outputLiquidityToken]);
 
   const outputAmount = useMemo(() => {
     if (!inputAmount || !inputLiquidityToken.totalSupply) {
@@ -250,7 +249,7 @@ export default function Exchange(props) {
           </Form.Group>
           <Form.Group className="basic">
             <Form.Label>Available Quantity</Form.Label>
-              <span>{formatTokenBalance(availableQuantity)}</span>
+              <span>{formatTokenBalance(availableQuantity * BASE_FACTOR)}</span>
           </Form.Group>
           <ul className="listview flush transparent simple-listview no-space mt-3">
             <li>
