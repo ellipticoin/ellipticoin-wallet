@@ -1,6 +1,7 @@
 import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
-import { BASE_FACTOR, TOKENS, LIQUIDITY_TOKENS } from "../constants";
+import { BASE_FACTOR, TOKENS, USD } from "../constants";
+import { LIQUIDITY_TOKENS } from "../constants";
 import {
   excludeUsd,
   encodeToken,
@@ -8,9 +9,11 @@ import {
   tokenToString,
   formatCurrency,
   formatTokenBalance,
+  Z,
 } from "../helpers";
 import { usePostTransaction } from "../mutations";
 import { BigInt } from "jsbi";
+import { find } from "lodash";
 import { default as React, useMemo, useState } from "react";
 import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
 import { ChevronLeft } from "react-feather";
@@ -41,10 +44,7 @@ export default function ManageLiquidity(props) {
     setProvideLiquidityToken(provideLiquidityToken);
   }, [provideToken, liquidityTokens]);
   React.useEffect(() => {
-    const removeLiquidityToken = liquidityTokens.find(
-      (liquidityToken) => liquidityToken.id === removeToken.id
-    );
-    setRemoveLiquidityToken(removeLiquidityToken);
+    setRemoveLiquidityToken(find(liquidityTokens, ["id", removeToken.id]));
   }, [removeToken, liquidityTokens]);
 
   const [createPool] = usePostTransaction({
@@ -85,7 +85,7 @@ export default function ManageLiquidity(props) {
   }, [removeToken, liquidityTokens]);
 
   const handleRemoveTokenChange = (removeTokenString) => {
-    const removeToken = TOKENS.find(
+    const removeToken = userTokens.find(
       (removeToken) => tokenToString(removeToken) === removeTokenString
     );
     setRemoveToken(removeToken);
@@ -270,9 +270,9 @@ export default function ManageLiquidity(props) {
                   value={tokenToString(removeToken)}
                   custom
                 >
-                  {TOKENS.map((token) => (
-                    <option key={token.name} value={tokenToString(token)}>
-                      {token.name}
+                  {userTokens.map((token) => (
+                    <option key={token.id} value={tokenToString(token)}>
+                      {tokenName(token)}
                     </option>
                   ))}
                 </Form.Control>

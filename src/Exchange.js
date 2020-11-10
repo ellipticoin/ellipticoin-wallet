@@ -18,7 +18,9 @@ export default function Exchange(props) {
   const { onHide, liquidityTokens } = props;
   const [inputAmount, setInputAmount] = React.useState();
   const [fee, setFee] = React.useState(new BigInt(0));
-  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState(new BigInt(0));
+  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState(
+    new BigInt(0)
+  );
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[3]);
   const [inputLiquidityToken, setInputLiquidityToken] = React.useState(
@@ -28,7 +30,9 @@ export default function Exchange(props) {
     liquidityTokens
   );
   const [error, setError] = React.useState("");
-  const [availableQuantity, setAvailableQuantity] = React.useState(new BigInt(0));
+  const [availableQuantity, setAvailableQuantity] = React.useState(
+    new BigInt(0)
+  );
 
   const handleOutputTokenChange = (tokenString) => {
     const outputToken = TOKENS.find(
@@ -63,55 +67,42 @@ export default function Exchange(props) {
     setMinimumOutputAmount("0");
   };
 
-  const calculateAvailableQuantity = (inputLiquidityToken, outputLiquidityToken, outputTokenName) => {
-    const quantity = outputTokenName === 'USD'
-      ? inputLiquidityToken.totalSupply / inputLiquidityToken.price * BASE_FACTOR
-      : outputLiquidityToken.totalSupply / BASE_FACTOR;
+  const calculateAvailableQuantity = (
+    inputLiquidityToken,
+    outputLiquidityToken,
+    outputTokenName
+  ) => {
+    const quantity =
+      outputTokenName === "USD"
+        ? (inputLiquidityToken.totalSupply / inputLiquidityToken.price) *
+          BASE_FACTOR
+        : outputLiquidityToken.totalSupply / BASE_FACTOR;
 
     setAvailableQuantity(isNaN(quantity) ? new BigInt(0) : quantity);
   };
 
-  const setFeeInInputToken = (feeInBaseToken, priceInBaseToken, inputTokenName) => {
-    setFee(inputTokenName === "USD" ? feeInBaseToken : feeInBaseToken / priceInBaseToken);
-  }
+  const setFeeInInputToken = (
+    feeInBaseToken,
+    priceInBaseToken,
+    inputTokenName
+  ) => {
+    setFee(
+      inputTokenName === "USD"
+        ? feeInBaseToken
+        : feeInBaseToken / priceInBaseToken
+    );
+  };
 
   const applyFee = (amount) => {
     return subtract(
       amount,
-      divide(
-        multiply(
-          amount,
-          LIQUIDITY_FEE
-        ),
-        BASE_FACTOR
-      )
+      divide(multiply(amount, LIQUIDITY_FEE), BASE_FACTOR)
     );
   };
 
   const getBaseTokenReserves = (totalSupply, price) => {
-    return divide(
-      multiply(
-        totalSupply,
-        price
-      ),
-      BASE_FACTOR
-    );
+    return divide(multiply(totalSupply, price), BASE_FACTOR);
   };
-
-  const calculateInputAmountInBaseToken = (amount, totalSupply, price) => {
-    const baseTokenReserves = getBaseTokenReserves(totalSupply, price);
-    const invariant = multiply(baseTokenReserves, totalSupply);
-    const newBaseTokenReserves = divide(invariant, add(totalSupply, amount));
-    return baseTokenReserves - newBaseTokenReserves;
-  };
-
-  const calculateAmountInOutputToken = (amountInBaseToken, totalSupply, price) => {
-    const baseTokenReserves = getBaseTokenReserves(totalSupply, price);
-    const invariant = multiply(baseTokenReserves, totalSupply);
-    const newTokenReserves = divide(invariant, add(baseTokenReserves, amountInBaseToken));
-    return subtract(totalSupply, newTokenReserves);
-  };
-
 
   React.useEffect(() => {
     const _inputLiquidityToken = find(liquidityTokens, ["id", inputToken.id]);
@@ -120,9 +111,18 @@ export default function Exchange(props) {
     const _outputLiquidityToken = find(liquidityTokens, ["id", outputToken.id]);
     setOutputLiquidityToken(_outputLiquidityToken);
 
-    calculateAvailableQuantity(inputLiquidityToken, outputLiquidityToken, outputToken.name);
-  }, [inputToken, outputToken, inputLiquidityToken, outputLiquidityToken, liquidityTokens]);
-
+    calculateAvailableQuantity(
+      inputLiquidityToken,
+      outputLiquidityToken,
+      outputToken.name
+    );
+  }, [
+    inputToken,
+    outputToken,
+    inputLiquidityToken,
+    outputLiquidityToken,
+    liquidityTokens,
+  ]);
 
   const exchangeRate = useMemo(() => {
     if (inputToken.ticker === outputToken.ticker) {
@@ -130,9 +130,13 @@ export default function Exchange(props) {
     }
 
     let outputTokenPrice =
-      outputToken.ticker === "USD" ? BASE_FACTOR : outputLiquidityToken.price || 0;
+      outputToken.ticker === "USD"
+        ? BASE_FACTOR
+        : outputLiquidityToken.price || 0;
     let inputTokenPrice =
-      inputToken.ticker === "USD" ? BASE_FACTOR : inputLiquidityToken.price || 0;
+      inputToken.ticker === "USD"
+        ? BASE_FACTOR
+        : inputLiquidityToken.price || 0;
     if (outputTokenPrice !== 0) {
       return inputTokenPrice / outputTokenPrice;
     } else {
@@ -141,6 +145,26 @@ export default function Exchange(props) {
   }, [inputToken, outputToken, inputLiquidityToken, outputLiquidityToken]);
 
   const outputAmount = useMemo(() => {
+    const calculateInputAmountInBaseToken = (amount, totalSupply, price) => {
+      const baseTokenReserves = getBaseTokenReserves(totalSupply, price);
+      const invariant = multiply(baseTokenReserves, totalSupply);
+      const newBaseTokenReserves = divide(invariant, add(totalSupply, amount));
+      return baseTokenReserves - newBaseTokenReserves;
+    };
+
+    const calculateAmountInOutputToken = (
+      amountInBaseToken,
+      totalSupply,
+      price
+    ) => {
+      const baseTokenReserves = getBaseTokenReserves(totalSupply, price);
+      const invariant = multiply(baseTokenReserves, totalSupply);
+      const newTokenReserves = divide(
+        invariant,
+        add(baseTokenReserves, amountInBaseToken)
+      );
+      return subtract(totalSupply, newTokenReserves);
+    };
     if (!inputAmount || !inputLiquidityToken.totalSupply) {
       setFee(new BigInt(0));
       return;
@@ -167,7 +191,11 @@ export default function Exchange(props) {
     }
 
     if (outputToken.name === "USD") {
-      setFeeInInputToken(feeInBaseToken, inputLiquidityToken.price, inputToken.name);
+      setFeeInInputToken(
+        feeInBaseToken,
+        inputLiquidityToken.price,
+        inputToken.name
+      );
       setMinimumOutputAmount(inputAmountInBaseToken);
       return inputAmountInBaseToken;
     }
@@ -175,15 +203,25 @@ export default function Exchange(props) {
     const fee = applyFee(inputAmountInBaseToken);
     feeInBaseToken += inputAmountInBaseToken - fee;
 
-    setFeeInInputToken(feeInBaseToken, inputLiquidityToken.price, inputToken.name);
+    setFeeInInputToken(
+      feeInBaseToken,
+      inputLiquidityToken.price,
+      inputToken.name
+    );
     const amount = calculateAmountInOutputToken(
       fee,
       new BigInt(outputLiquidityToken.totalSupply),
       new BigInt(outputLiquidityToken.price)
     );
     setMinimumOutputAmount(amount);
-    return amount
-  }, [inputAmount, inputToken, inputLiquidityToken, outputToken, outputLiquidityToken]);
+    return amount;
+  }, [
+    inputAmount,
+    inputToken,
+    inputLiquidityToken,
+    outputToken,
+    outputLiquidityToken,
+  ]);
 
   return (
     <>
@@ -245,11 +283,15 @@ export default function Exchange(props) {
           </Form.Group>
           <Form.Group className="basic">
             <Form.Label>Current Rate</Form.Label>
-            <span>{inputToken.ticker} = {exchangeRate? formatTokenExchangeRate(exchangeRate): "N/A"} {outputToken.ticker}</span>
+            <span>
+              {inputToken.ticker} ={" "}
+              {exchangeRate ? formatTokenExchangeRate(exchangeRate) : "N/A"}{" "}
+              {outputToken.ticker}
+            </span>
           </Form.Group>
           <Form.Group className="basic">
             <Form.Label>Available Quantity</Form.Label>
-              <span>{formatTokenBalance(availableQuantity * BASE_FACTOR)}</span>
+            <span>{formatTokenBalance(availableQuantity * BASE_FACTOR)}</span>
           </Form.Group>
           <ul className="listview flush transparent simple-listview no-space mt-3">
             <li>
@@ -259,15 +301,13 @@ export default function Exchange(props) {
             <li>
               <strong>Liquidity Fee</strong>
               <span>
-                {inputAmount ? formatTokenBalance(inputAmount) : 0} {" "} * {" "}
+                {inputAmount ? formatTokenBalance(inputAmount) : 0} *{" "}
                 {inputToken.ticker === outputToken.ticker
                   ? "0"
                   : inputToken.ticker !== "USD" && outputToken.ticker !== "USD"
-                    ? LIQUIDITY_FEE / BASE_FACTOR * 2
-                    : LIQUIDITY_FEE / BASE_FACTOR
-                }
-                {" "}={" "}
-                {fee ? Number(fee) / Number(BASE_FACTOR) : 0}{" "}
+                  ? (LIQUIDITY_FEE / BASE_FACTOR) * 2
+                  : LIQUIDITY_FEE / BASE_FACTOR}{" "}
+                = {fee ? Number(fee) / Number(BASE_FACTOR) : 0}{" "}
                 {inputToken.ticker}
               </span>
             </li>
@@ -278,9 +318,13 @@ export default function Exchange(props) {
               </h3>
             </li>
           </ul>
-          {error?<div id="error-message">
-            <span className="text-danger"><strong>Error: {error}</strong></span>
-          </div>:null}
+          {error ? (
+            <div id="error-message">
+              <span className="text-danger">
+                <strong>Error: {error}</strong>
+              </span>
+            </div>
+          ) : null}
           <Button
             type="submit"
             className="btn btn-lg btn-block btn-primary m-1"

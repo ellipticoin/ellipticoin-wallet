@@ -13,7 +13,7 @@ import Total from "./Total";
 import YourAddress from "./YourAddress";
 import { BASE_FACTOR } from "./constants";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
-import {useLocalStorage} from "./helpers";
+import { useLocalStorage } from "./helpers";
 import {
   useGetCurrentBlock,
   useGetLiquidityTokens,
