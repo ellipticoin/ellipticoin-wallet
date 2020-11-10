@@ -15,7 +15,7 @@ import { ArrowDown } from "react-feather";
 import { ChevronLeft } from "react-feather";
 
 export default function Exchange(props) {
-  const { onHide, liquidityTokens } = props;
+  const { onHide, liquidityTokens, userTokens } = props;
   const [inputAmount, setInputAmount] = React.useState();
   const [fee, setFee] = React.useState(new BigInt(0));
   const [minimumOutputAmount, setMinimumOutputAmount] = React.useState(
@@ -29,6 +29,7 @@ export default function Exchange(props) {
   const [outputLiquidityToken, setOutputLiquidityToken] = React.useState(
     liquidityTokens
   );
+  const [userTokenBalance, setUserTokenBalance] = React.useState();
   const [error, setError] = React.useState("");
   const [availableQuantity, setAvailableQuantity] = React.useState(
     new BigInt(0)
@@ -111,6 +112,9 @@ export default function Exchange(props) {
     const _outputLiquidityToken = find(liquidityTokens, ["id", outputToken.id]);
     setOutputLiquidityToken(_outputLiquidityToken);
 
+    const userToken = find(userTokens, ["id", inputToken.id]);
+    setUserTokenBalance(userToken.balance);
+
     calculateAvailableQuantity(
       inputLiquidityToken,
       outputLiquidityToken,
@@ -119,6 +123,7 @@ export default function Exchange(props) {
   }, [
     inputToken,
     outputToken,
+    userTokens,
     inputLiquidityToken,
     outputLiquidityToken,
     liquidityTokens,
@@ -251,6 +256,12 @@ export default function Exchange(props) {
               placeholder="Amount"
             />
           </Form.Group>
+          <Form.Group className="basic">
+            <Form.Label>Your Balance</Form.Label>
+            <span className={inputAmount / userTokenBalance > 1 ? "text-danger" : ""}>
+              {formatTokenBalance(userTokenBalance)}
+            </span>
+          </Form.Group>
           <div className="row justify-content-md-center mt-1">
             <ArrowDown />
           </div>
@@ -330,7 +341,7 @@ export default function Exchange(props) {
             className="btn btn-lg btn-block btn-primary m-1"
             variant="contained"
             color="primary"
-            disabled={!outputAmount || outputAmount < 0 || !inputAmount || inputAmount < 0 || inputToken.ticker === outputToken.ticker}
+            disabled={!outputAmount || outputAmount < 0 || !inputAmount || inputAmount < 0 || inputToken.ticker === outputToken.ticker ||  inputAmount / userTokenBalance > 1}
           >
             Exchange
           </Button>
