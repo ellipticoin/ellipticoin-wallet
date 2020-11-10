@@ -295,9 +295,9 @@ export default function Exchange(props) {
           <Form.Group className="basic">
             <Form.Label>Current Rate</Form.Label>
             <span>
-              {inputToken.ticker} ={" "}
               {exchangeRate ? formatTokenExchangeRate(exchangeRate) : "N/A"}{" "}
-              {outputToken.ticker}
+              {outputToken.ticker} {" "}/{" "} {inputToken.ticker}
+
             </span>
           </Form.Group>
           <Form.Group className="basic">
@@ -326,6 +326,7 @@ export default function Exchange(props) {
               <strong>Output Amount</strong>
               <h3 className="m-0">
                 {outputAmount ? formatTokenBalance(outputAmount) : null}
+                <small>{outputAmount ? ` @ ${formatTokenExchangeRate(outputAmount / inputAmount)} ${outputToken.ticker} / ${inputToken.ticker}` : ""}</small>
               </h3>
             </li>
           </ul>
