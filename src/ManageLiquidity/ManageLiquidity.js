@@ -1,7 +1,6 @@
-import { BASE_FACTOR, USD } from "../constants";
-import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
 import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
+import { BASE_FACTOR, USD } from "../constants";
 import { LIQUIDITY_TOKENS } from "../constants";
 import {
   excludeUsd,
@@ -11,11 +10,12 @@ import {
   formatTokenBalance,
   tokenName,
 } from "../helpers";
-import { find } from "lodash";
-import { BigInt, greaterThan, multiply, divide } from "jsbi";
-import { ChevronLeft } from "react-feather";
-import { default as React, useMemo, useState, useEffect } from "react";
 import { usePostTransaction } from "../mutations";
+import { BigInt, greaterThan, multiply, divide } from "jsbi";
+import { find } from "lodash";
+import { default as React, useMemo, useState, useEffect } from "react";
+import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
+import { ChevronLeft } from "react-feather";
 
 export default function ManageLiquidity(props) {
   const { onHide, liquidityTokens, tokens } = props;
@@ -120,13 +120,7 @@ export default function ManageLiquidity(props) {
     } else {
       return null;
     }
-  }, [
-    provideAmount,
-    provideToken,
-    initialPrice,
-    usdAmount,
-    usdBalance,
-  ]);
+  }, [provideAmount, provideToken, initialPrice, usdAmount, usdBalance]);
 
   return (
     <>

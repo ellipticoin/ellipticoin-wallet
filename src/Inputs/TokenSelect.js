@@ -1,6 +1,6 @@
+import { tokenName } from "../helpers";
 import { default as React } from "react";
 import { Form } from "react-bootstrap";
-import { tokenName } from "../helpers";
 
 export default function TokenSelect(props) {
   const { onChange, token, tokens, nameProperty } = props;
