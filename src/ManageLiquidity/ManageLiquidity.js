@@ -4,20 +4,22 @@ import { BASE_FACTOR, TOKENS, LIQUIDITY_TOKENS } from "../constants";
 import {
   excludeUsd,
   encodeToken,
+  tokenName,
   tokenToString,
   formatCurrency,
   formatTokenBalance,
 } from "../helpers";
 import { usePostTransaction } from "../mutations";
+import { BigInt } from "jsbi";
 import { default as React, useMemo, useState } from "react";
 import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
 import { ChevronLeft } from "react-feather";
 
 export default function ManageLiquidity(props) {
-  const { onHide, liquidityTokens } = props;
-  const [provideAmount, setProvideAmount] = useState();
-  const [removeAmount, setRemoveAmount] = useState("");
-  const [initialPrice, setInitialPrice] = useState("");
+  const { onHide, liquidityTokens, userTokens } = props;
+  const [provideAmount, setProvideAmount] = useState(new BigInt(0));
+  const [removeAmount, setRemoveAmount] = useState(new BigInt(0));
+  const [initialPrice, setInitialPrice] = useState(new BigInt(0));
   const [provideToken, setProvideToken] = useState(TOKENS[0]);
   const [removeToken, setRemoveToken] = useState(TOKENS[0]);
   const [provideLiquidityToken, setProvideLiquidityToken] = useState(
@@ -26,6 +28,11 @@ export default function ManageLiquidity(props) {
   const [removeLiquidityToken, setRemoveLiquidityToken] = useState(
     liquidityTokens[0]
   );
+
+  const userBaseTokenBalance = userTokens.filter(
+    (t) => tokenName(t) === "USD"
+  )[0].balance;
+
   React.useEffect(() => {
     const provideLiquidityToken = liquidityTokens.find(
       (liquidityToken) => liquidityToken.id === provideToken.id
@@ -38,6 +45,7 @@ export default function ManageLiquidity(props) {
     );
     setRemoveLiquidityToken(removeLiquidityToken);
   }, [removeToken, liquidityTokens]);
+
   const [createPool] = usePostTransaction({
     contract: "Exchange",
     functionName: "create_pool",
@@ -61,10 +69,19 @@ export default function ManageLiquidity(props) {
   const providePrice = useMemo(() => {
     return providePoolExists ? provideLiquidityToken.price : initialPrice;
   }, [provideLiquidityToken, providePoolExists, initialPrice]);
+  const removePrice = useMemo(() => {
+    return removeLiquidityToken.price;
+  }, [removeLiquidityToken]);
   const provideBaseTokenAmount = useMemo(
     () => (provideAmount * providePrice) / BASE_FACTOR,
     [provideAmount, providePrice]
   );
+  const userProvideTokenBalance = useMemo(() => {
+    return userTokens.filter((t) => t.id === provideToken.id)[0].balance;
+  }, [provideToken]);
+  const userRemoveTokenBalance = useMemo(() => {
+    return liquidityTokens.filter((t) => t.id === removeToken.id)[0].balance;
+  }, [removeToken, liquidityTokens]);
 
   const handleRemoveTokenChange = (removeTokenString) => {
     const removeToken = TOKENS.find(
@@ -79,6 +96,15 @@ export default function ManageLiquidity(props) {
     } else {
       await handleCreatePool();
     }
+  };
+  const userHasEnoughProvideToken = () => {
+    return provideAmount / userProvideTokenBalance <= 1;
+  };
+  const userHasEnoughRemoveToken = () => {
+    return removeAmount / userRemoveTokenBalance <= 1;
+  };
+  const userHasEnoughBaseToken = () => {
+    return (providePrice / BASE_FACTOR) * provideAmount <= userBaseTokenBalance;
   };
   const handleAddLiquidity = async () => {
     await addLiqidity(encodeToken(provideToken), Number(provideAmount));
@@ -147,36 +173,40 @@ export default function ManageLiquidity(props) {
                 </Form.Group>
               )}
               <div></div>
-              {providePoolExists ? (
-                <Button
-                  type="submit"
-                  className="btn btn-lg btn-block btn-primary"
-                  variant="contained"
-                  color="primary"
-                >
-                  Add Liquidity
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  className="btn btn-lg btn-block btn-primary mb-1"
-                  variant="contained"
-                  color="primary"
-                >
-                  Create Pool
-                </Button>
-              )}
+              <Button
+                type="submit"
+                className="btn btn-lg btn-block btn-primary mb-1"
+                variant="contained"
+                color="primary"
+                disabled={
+                  !userHasEnoughProvideToken() || !userHasEnoughBaseToken()
+                }
+              >
+                {providePoolExists ? "Add Liquidity" : "Create Pool"}
+              </Button>
               <div className="mt-2">
                 <strong>Depositing</strong>
                 <div>
                   {provideToken.name}:{" "}
-                  {provideAmount ? formatTokenBalance(provideAmount) : ""}
+                  <a class={userHasEnoughProvideToken() ? "" : "text-danger"}>
+                    {provideAmount ? formatTokenBalance(provideAmount) : "0"}
+                  </a>{" "}
+                  /{" "}
+                  {userProvideTokenBalance
+                    ? formatTokenBalance(userProvideTokenBalance)
+                    : "0"}
                 </div>
                 <div>
                   USD:{" "}
-                  {provideBaseTokenAmount === 0
-                    ? null
-                    : formatCurrency(provideBaseTokenAmount)}
+                  <a class={userHasEnoughBaseToken() ? "" : "text-danger"}>
+                    {!provideBaseTokenAmount
+                      ? "0"
+                      : formatCurrency(provideBaseTokenAmount)}
+                  </a>{" "}
+                  /{" "}
+                  {userBaseTokenBalance
+                    ? formatTokenBalance(userBaseTokenBalance)
+                    : "0"}
                 </div>
                 <div>
                   Warning: You can lose value in fixed constant automated market
@@ -227,13 +257,41 @@ export default function ManageLiquidity(props) {
               </Form.Group>
               <Button
                 type="submit"
-                disabled={!removePoolExists || !removeAmount}
+                disabled={
+                  !removePoolExists ||
+                  !removeAmount ||
+                  !userHasEnoughRemoveToken()
+                }
                 className="btn btn-lg btn-block btn-primary"
                 variant="contained"
                 color="primary"
               >
                 Remove Liquidity
               </Button>
+
+              <div className="mt-2">
+                <strong>Removing</strong>
+                <div>
+                  {removeToken.name}:{" "}
+                  <a
+                    className={userHasEnoughRemoveToken() ? "" : "text-danger"}
+                  >
+                    {removeAmount ? formatTokenBalance(removeAmount) : "0"}
+                  </a>{" "}
+                  /{" "}
+                  {userRemoveTokenBalance
+                    ? formatTokenBalance(userRemoveTokenBalance)
+                    : "0"}
+                </div>
+                <div>
+                  USD:{" "}
+                  {!removePrice || !removeAmount
+                    ? "0"
+                    : formatCurrency(
+                        (removePrice * removeAmount) / BASE_FACTOR
+                      )}
+                </div>
+              </div>
             </Form>
           </Tab>
         </Tabs>
