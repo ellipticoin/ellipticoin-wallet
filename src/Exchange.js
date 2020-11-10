@@ -325,30 +325,15 @@ export default function Exchange(props) {
               </span>
             </div>
           ) : null}
-          {!!outputAmount &&
-          outputAmount > 0 &&
-          !!inputAmount &&
-          inputAmount > 0 &&
-          inputToken.ticker !== outputToken.ticker ? (
-            <Button
-              type="submit"
-              className="btn btn-lg btn-block btn-primary m-1"
-              variant="contained"
-              color="primary"
-            >
-              Exchange
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              className="btn btn-lg btn-block btn-primary m-1"
-              variant="contained"
-              color="primary"
-              disabled
-            >
-              Exchange
-            </Button>
-          )}
+          <Button
+            type="submit"
+            className="btn btn-lg btn-block btn-primary m-1"
+            variant="contained"
+            color="primary"
+            disabled={!outputAmount || outputAmount < 0 || !inputAmount || inputAmount < 0 || inputToken.ticker === outputToken.ticker}
+          >
+            Exchange
+          </Button>
         </Form>
       </div>
     </>
