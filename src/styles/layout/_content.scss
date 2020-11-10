@@ -4,6 +4,39 @@
     padding-top: 106px;
   }
 }
+
+.actions-top {
+  //   display: flex;
+  // justify-content: space-between;
+    margin-bottom: 12px;
+}
+.your-address {
+    display: flex;
+    width: 1000px;
+@media only screen and (max-width: 720px) {
+    width: auto;
+flex-direction: column;
+  h1 {
+    font-size: 18px;
+  width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+    }
+}
+
+  // justify-content: space-between;
+    button {
+        margin: 3px 8px;
+        // top: -4px;
+    }
+}
+.total-balance {
+    text-align: right;
+@media only screen and (max-width: 720px) {
+    text-align: left;
+}
+}
 .section {
   padding: 0 16px;
   &.full {
@@ -77,27 +110,30 @@
   }
 }
 
-.your-address {
-  font-weight: bold;
-  font-size: 20px;
-  color: black;
-  button {
-    color: white;
-    background-color: $colorPrimary;
-    float: right;
-    padding: 4px 8px;
-    border-radius: 100%;
-    svg {
-      vertical-align: top;
-      position: relative;
-      top: 4px;
-    }
-    &:hover,
-    &:active,
-    &.active {
-      svg {
-        color: lighten($colorLine, 1%);
-      }
-    }
-  }
-}
+  // font-weight: bold;
+  // font-size: 25px;
+  // // line-height: 36px;
+  // text-align: middle;
+  // color: black;
+  // display: flex;
+  // justify-content: space-between;
+//   button {
+//     color: white;
+//     background-color: $colorPrimary;
+//     float: right;
+//     padding: 4px 8px;
+//     border-radius: 100%;
+//     svg {
+//       vertical-align: top;
+//       position: relative;
+//       top: 4px;
+//     }
+//     &:hover,
+//     &:active,
+//     &.active {
+//       svg {
+//         color: lighten($colorLine, 1%);
+//       }
+//     }
+//   }
+

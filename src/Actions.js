@@ -18,7 +18,7 @@ export default function Actions(props) {
           <div className="icon-wrapper bg-warning">
             <Repeat />
           </div>
-          <strong>Exchange</strong>
+          <strong>Trade</strong>
         </button>
       </div>
       <div className="item">

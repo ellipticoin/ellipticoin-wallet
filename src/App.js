@@ -5,8 +5,8 @@ import Exchange from "./Exchange";
 import Header from "./Header";
 import LiquidityBalances from "./LiquidityBalances";
 import ManageLiquidity from "./ManageLiquidity/ManageLiquidity";
+import NetworkStatistics from "./NetworkStatistics";
 import PendingTransactions from "./PendingTransactions";
-import Rewards from "./Rewards";
 import Send from "./Send";
 import Sidebar from "./Sidebar";
 import Total from "./Total";
@@ -30,7 +30,6 @@ import nacl from "tweetnacl";
 function App(props) {
   const { setHost } = props;
   const [ethBlockNumber, setEthBlockNumber] = useState();
-  const [issuanceRewards, setIssuanceRewards] = useState();
   const [signer, setSigner] = useState();
   const [ethAccounts, setEthAccounts] = useState([]);
   const [secretKey, setSecretKey] = useLocalStorage(
@@ -143,6 +142,11 @@ function App(props) {
           />
         );
 
+      case "NetworkStatistics":
+        return (
+          <NetworkStatistics onHide={() => setShowPage(null)} tokens={tokens} />
+        );
+
       default:
         return null;
     }
@@ -171,7 +175,7 @@ function App(props) {
               position: "absolute",
               width: "100%",
               height: "100%",
-              background: "white",
+              background: "#EDEDF5",
               ...props,
             }}
             key={key}
@@ -187,20 +191,13 @@ function App(props) {
           setSecretKey={setSecretKey}
         />
         <div id="appCapsule">
-          <div className="section wallet-card-section pt-1">
+          <div className="section wallet-card-section pt-1 mb-2">
             <div className="wallet-card">
-              <Total total={totalTokenValue} />
+              <Total total={totalTokenValue} publicKey={publicKey} />
               <Actions setShowModal={setShowModal} setShowPage={setShowPage} />
             </div>
           </div>
           <YourAddress publicKey={publicKey} />
-          <Rewards
-            publicKey={publicKey}
-            setIssuanceRewards={setIssuanceRewards}
-            issuanceRewards={issuanceRewards}
-            totalLockedValue={totalLockedValue}
-            blockNumber={currentBlock.number}
-          />
           <Balances tokens={tokens} total={totalTokenValue} />
           <LiquidityBalances
             blockNumber={currentBlock.number}
@@ -221,6 +218,7 @@ function App(props) {
         />
         <Sidebar
           setShowSidebar={setShowSidebar}
+          setShowPage={setShowPage}
           showSidebar={showSidebar}
           publicKey={publicKey}
           secretKey={secretKey}
