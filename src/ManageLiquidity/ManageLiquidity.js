@@ -1,6 +1,10 @@
 import { BASE_FACTOR, USD } from "../constants";
 import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
+import TokenAmountInput from "../Inputs/TokenAmountInput";
+import TokenSelect from "../Inputs/TokenSelect";
+import { LIQUIDITY_TOKENS } from "../constants";
 import {
+  excludeUsd,
   encodeToken,
   tokenToString,
   formatCurrency,
@@ -11,8 +15,6 @@ import { find } from "lodash";
 import { BigInt, greaterThan, multiply, divide } from "jsbi";
 import { ChevronLeft } from "react-feather";
 import { default as React, useMemo, useState, useEffect } from "react";
-import TokenAmountInput from "../Inputs/TokenAmountInput";
-import TokenSelect from "../Inputs/TokenSelect";
 import { usePostTransaction } from "../mutations";
 
 export default function ManageLiquidity(props) {
@@ -148,7 +150,7 @@ export default function ManageLiquidity(props) {
               <Form.Group className="basic">
                 <Form.Label>Token</Form.Label>
                 <TokenSelect
-                  tokens={tokens}
+                  tokens={excludeUsd(LIQUIDITY_TOKENS)}
                   onChange={(token) => setProvideToken(token)}
                   token={provideToken}
                 />

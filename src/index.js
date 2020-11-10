@@ -1,5 +1,5 @@
-import "./styles/style.scss";
 import ApolloWrapper from "./ApolloWrapper";
+import "./styles/style.scss";
 import React from "react";
 import ReactDOM from "react-dom";
 
