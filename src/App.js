@@ -124,6 +124,7 @@ function App(props) {
         return (
           <Exchange
             liquidityTokens={liquidityTokens}
+            userTokens={tokens}
             onHide={() => setShowPage(null)}
             publicKey={publicKey}
           />
