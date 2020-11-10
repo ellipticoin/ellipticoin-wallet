@@ -7,7 +7,7 @@ import {formatTokenBalance, parseUnits} from "./helpers";
 import { usePostTransaction } from "./mutations";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
 import { default as ethers } from "ethers";
-import { differenceBy, find } from "lodash";
+import { differenceBy } from "lodash";
 import { default as React } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -377,11 +377,10 @@ export default function Bridge(props) {
                 </Form.Group>
                 <Button
                   type="submit"
-                  disabled={transactionPending}
+                  disabled={transactionPending || userHasEnoughExitToken()}
                   className="btn btn-lg btn-block btn-primary mr-1 mb-1"
                   variant="contained"
                   color="primary"
-                  disabled={userHasEnoughExitToken()}
                 >
                   {transactionPending ? (
                     <Spinner size="md" animation="border" />
