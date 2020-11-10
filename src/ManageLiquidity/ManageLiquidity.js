@@ -1,6 +1,6 @@
 import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
-import { BASE_FACTOR, TOKENS, USD } from "../constants";
+import { BASE_FACTOR, TOKENS } from "../constants";
 import { LIQUIDITY_TOKENS } from "../constants";
 import {
   excludeUsd,
@@ -9,7 +9,6 @@ import {
   tokenToString,
   formatCurrency,
   formatTokenBalance,
-  Z,
 } from "../helpers";
 import { usePostTransaction } from "../mutations";
 import { BigInt } from "jsbi";
@@ -79,7 +78,7 @@ export default function ManageLiquidity(props) {
   );
   const userProvideTokenBalance = useMemo(() => {
     return userTokens.filter((t) => t.id === provideToken.id)[0].balance;
-  }, [provideToken]);
+  }, [provideToken, userTokens]);
   const userRemoveTokenBalance = useMemo(() => {
     return liquidityTokens.filter((t) => t.id === removeToken.id)[0].balance;
   }, [removeToken, liquidityTokens]);
@@ -216,11 +215,11 @@ export default function ManageLiquidity(props) {
                 <strong>Depositing</strong>
                 <div>
                   {provideToken.name}:{" "}
-                  <a
+                  <span
                     className={userHasEnoughProvideToken() ? "" : "text-danger"}
                   >
                     {provideAmount ? formatTokenBalance(provideAmount) : "0"}
-                  </a>{" "}
+                  </span>{" "}
                   /{" "}
                   {userProvideTokenBalance
                     ? formatTokenBalance(userProvideTokenBalance)
@@ -228,11 +227,13 @@ export default function ManageLiquidity(props) {
                 </div>
                 <div>
                   USD:{" "}
-                  <a className={userHasEnoughBaseToken() ? "" : "text-danger"}>
+                  <span
+                    className={userHasEnoughBaseToken() ? "" : "text-danger"}
+                  >
                     {!provideBaseTokenAmount
                       ? "0"
                       : formatCurrency(provideBaseTokenAmount)}
-                  </a>{" "}
+                  </span>{" "}
                   /{" "}
                   {userBaseTokenBalance
                     ? formatTokenBalance(userBaseTokenBalance)
@@ -310,11 +311,11 @@ export default function ManageLiquidity(props) {
                 <strong>Removing</strong>
                 <div>
                   {removeToken.name}:{" "}
-                  <a
+                  <span
                     className={userHasEnoughRemoveToken() ? "" : "text-danger"}
                   >
                     {removeAmount ? formatTokenBalance(removeAmount) : "0"}
-                  </a>{" "}
+                  </span>{" "}
                   /{" "}
                   {userRemoveTokenBalance
                     ? formatTokenBalance(userRemoveTokenBalance)
