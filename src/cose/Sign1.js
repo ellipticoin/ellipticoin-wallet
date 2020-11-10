@@ -1,7 +1,8 @@
 import { default as cbor, Tagged } from "cbor";
 
+const TAG_ID = 18;
+
 export default class Sign1 {
-  TAG_ID = 18;
   constructor(protectedHeaders, unprotectedHeaders, message, signature) {
     this.protectedHeaders = protectedHeaders;
     this.unprotectedHeaders = unprotectedHeaders;
@@ -9,7 +10,7 @@ export default class Sign1 {
     this.signature = signature;
   }
   encodeCBOR(encoder) {
-    const tagged = new Tagged(this.TAG_ID, [
+    const tagged = new Tagged(TAG_ID, [
       cbor.encode(this.protectedHeaders),
       this.unprotectedHeaders,
       this.message,
