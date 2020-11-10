@@ -28,6 +28,7 @@ export default function ManageLiquidity(props) {
   const [removeLiquidityToken, setRemoveLiquidityToken] = useState(
     liquidityTokens[0]
   );
+  const [error, setError] = React.useState("");
 
   const userBaseTokenBalance = userTokens.filter(
     (t) => tokenName(t) === "USD"
@@ -89,14 +90,7 @@ export default function ManageLiquidity(props) {
     );
     setRemoveToken(removeToken);
   };
-  const handleProvideSubmit = async (evt) => {
-    evt.preventDefault();
-    if (providePoolExists) {
-      await handleAddLiquidity();
-    } else {
-      await handleCreatePool();
-    }
-  };
+
   const userHasEnoughProvideToken = () => {
     return provideAmount / userProvideTokenBalance <= 1;
   };
@@ -106,22 +100,49 @@ export default function ManageLiquidity(props) {
   const userHasEnoughBaseToken = () => {
     return (providePrice / BASE_FACTOR) * provideAmount <= userBaseTokenBalance;
   };
+
+  const handleProvideSubmit = async (evt) => {
+    evt.preventDefault();
+    if (providePoolExists) {
+      await handleAddLiquidity();
+    } else {
+      await handleCreatePool();
+    }
+  };
   const handleAddLiquidity = async () => {
-    await addLiqidity(encodeToken(provideToken), Number(provideAmount));
-    onHide();
+    const res = await addLiqidity(
+      encodeToken(provideToken),
+      Number(provideAmount)
+    );
+    if (!res.returnValue) {
+      onHide();
+    } else {
+      setError(res.returnValue.Err.message);
+    }
   };
   const handleCreatePool = async () => {
-    await createPool(
+    const res = await createPool(
       encodeToken(provideToken),
       Number(provideAmount),
       Number(initialPrice)
     );
-    onHide();
+    if (!res.returnValue) {
+      onHide();
+    } else {
+      setError(res.returnValue.Err.message);
+    }
   };
   const handleRemoveLiquidity = async (evt) => {
     evt.preventDefault();
-    await removeLiqidity(encodeToken(removeToken), Number(removeAmount));
-    onHide();
+    const res = await removeLiqidity(
+      encodeToken(removeToken),
+      Number(removeAmount)
+    );
+    if (!res.returnValue) {
+      onHide();
+    } else {
+      setError(res.returnValue.Err.message);
+    }
   };
 
   return (
@@ -173,6 +194,13 @@ export default function ManageLiquidity(props) {
                 </Form.Group>
               )}
               <div></div>
+              {error ? (
+                <div id="error-message">
+                  <span className="text-danger">
+                    <strong>Error: {error}</strong>
+                  </span>
+                </div>
+              ) : null}
               <Button
                 type="submit"
                 className="btn btn-lg btn-block btn-primary mb-1"
@@ -188,7 +216,9 @@ export default function ManageLiquidity(props) {
                 <strong>Depositing</strong>
                 <div>
                   {provideToken.name}:{" "}
-                  <a class={userHasEnoughProvideToken() ? "" : "text-danger"}>
+                  <a
+                    className={userHasEnoughProvideToken() ? "" : "text-danger"}
+                  >
                     {provideAmount ? formatTokenBalance(provideAmount) : "0"}
                   </a>{" "}
                   /{" "}
@@ -198,7 +228,7 @@ export default function ManageLiquidity(props) {
                 </div>
                 <div>
                   USD:{" "}
-                  <a class={userHasEnoughBaseToken() ? "" : "text-danger"}>
+                  <a className={userHasEnoughBaseToken() ? "" : "text-danger"}>
                     {!provideBaseTokenAmount
                       ? "0"
                       : formatCurrency(provideBaseTokenAmount)}
@@ -255,6 +285,13 @@ export default function ManageLiquidity(props) {
                   placeholder="Amount"
                 />
               </Form.Group>
+              {error ? (
+                <div id="error-message">
+                  <span className="text-danger">
+                    <strong>Error: {error}</strong>
+                  </span>
+                </div>
+              ) : null}
               <Button
                 type="submit"
                 disabled={
