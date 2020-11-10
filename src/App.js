@@ -117,7 +117,7 @@ function App(props) {
               setPendingTransactions([...pendingTransactions, tx]);
             }}
             publicKey={publicKey}
-            tokens={tokens}
+            userTokens={tokens}
           />
         );
       case "Exchange":

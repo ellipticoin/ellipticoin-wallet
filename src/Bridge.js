@@ -1,13 +1,13 @@
 import BridgeJSON from "./Bridge.json";
 import TokenSelect from "./Inputs/TokenSelect.js";
-import { ETH_BRIDGE_ADDRESS, WETH } from "./constants";
+import {ETH_BRIDGE_ADDRESS, WETH} from "./constants";
 import { BASE_FACTOR } from "./constants";
 import { BRIDGE_TOKENS } from "./constants";
-import { parseUnits } from "./helpers";
+import {formatTokenBalance, parseUnits} from "./helpers";
 import { usePostTransaction } from "./mutations";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
 import { default as ethers } from "ethers";
-import { differenceBy } from "lodash";
+import { differenceBy, find } from "lodash";
 import { default as React } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -41,6 +41,7 @@ export default function Bridge(props) {
     publicKey,
     pushPendingTransation,
     ethAccounts,
+    userTokens
   } = props;
   const [amount, setAmount] = React.useState("");
   const [bridge, setBridge] = React.useState();
@@ -145,12 +146,24 @@ export default function Bridge(props) {
     outboundToken,
   ]);
 
+  const userTokenBalance = React.useMemo(() => {
+    return userTokens.find(
+      (token) => token.id === outboundToken.id
+    ).balance;
+  }, [userTokens, outboundToken]);
+
   const [postRelease] = usePostTransaction({
     contract: "Bridge",
     functionName: "release",
   });
   const release = async (event) => {
     event.preventDefault();
+    // eslint-disable-next-line no-restricted-globals
+    let conf = confirm("This will remove your balance on Ellipticoin. If you do not submit the resulting metamask transaction or that transaction fails, you will lose funds.");
+    if (!conf) {
+      return;
+    }
+
     setTransactionPending(true);
     try {
       const result = await postRelease(
@@ -162,6 +175,10 @@ export default function Bridge(props) {
     } catch (e) {
       alert(e.message);
     }
+  };
+
+  const userHasEnoughExitToken = () => {
+    return amount / userTokenBalance * BASE_FACTOR > 1;
   };
 
   const approve = async (evt) => {
@@ -320,6 +337,12 @@ export default function Bridge(props) {
                     placeholder="Amount"
                   />
                 </Form.Group>
+                <Form.Group className="basic">
+                  <Form.Label>Your Balance</Form.Label>
+                  <span className={ userHasEnoughExitToken() ? "text-danger" : ""}>
+                    {formatTokenBalance(userTokenBalance)}
+                  </span>
+                </Form.Group>
                 <div className="row justify-content-md-center mt-1">
                   <ArrowDown />
                 </div>
@@ -358,6 +381,7 @@ export default function Bridge(props) {
                   className="btn btn-lg btn-block btn-primary mr-1 mb-1"
                   variant="contained"
                   color="primary"
+                  disabled={userHasEnoughExitToken()}
                 >
                   {transactionPending ? (
                     <Spinner size="md" animation="border" />
