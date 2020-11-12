@@ -16,7 +16,7 @@ import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import { ArrowDown } from "react-feather";
 import { ChevronLeft } from "react-feather";
-import ExitTransactions from './ExitTransactions'
+import ReleaseTransactions from './ReleaseTransactions'
 
 const { MaxUint256 } = ethers.constants;
 const { hexlify, arrayify } = ethers.utils;
@@ -53,7 +53,6 @@ export default function Bridge(props) {
   const [outboundToken, setOutboundToken] = React.useState(BRIDGE_TOKENS[0]);
   const [ethAccount, setEthAccount] = React.useState(ethAccounts[0]);
   let [pendingTransactions, setPendingTransactions] = React.useState([]);
-  let [page, setPage] = React.useState(0);
 
   React.useEffect(() => {
     setEthAccount(ethAccounts[0]);
@@ -166,11 +165,6 @@ export default function Bridge(props) {
   });
   const release = async (event) => {
     event.preventDefault();
-    // eslint-disable-next-line no-restricted-globals
-    let conf = confirm("This will remove your balance on Ellipticoin. If you do not submit the resulting metamask transaction or that transaction fails, you will lose funds.");
-    if (!conf) {
-      return;
-    }
 
     setTransactionPending(true);
     try {
@@ -242,13 +236,9 @@ export default function Bridge(props) {
     setAmount(formatAmount(amount));
   };
 
-  const handleReplayExitTransaction = async (evt, txId, tokenContractAddress, quantity) => {
+  const handleReplayReleaseTransaction = async (evt, txId, tokenContractAddress, quantity) => {
     evt.preventDefault();
-    setTransactionPending(true);
-
-    console.log(`tx id: ${typeof txId}, addr: ${typeof tokenContractAddress}, quantity: ${typeof quantity}. token address: ${tokenContractAddress}`)
     await exitFundsToEthereum(txId, tokenContractAddress, formatAmount(quantity.toString()))();
-    setTransactionPending(false);
   };
 
   return (
@@ -409,9 +399,10 @@ export default function Bridge(props) {
                   )}
                 </Button>
               </Form>
-              <ExitTransactions
-                page={page}
-                onReplayTransaction={handleReplayExitTransaction}
+            </Tab>
+            <Tab eventKey="releaseHistory" title="Release History" className="p-2">
+              <ReleaseTransactions
+                onReplayTransaction={handleReplayReleaseTransaction}
               />
             </Tab>
           </Tabs>
