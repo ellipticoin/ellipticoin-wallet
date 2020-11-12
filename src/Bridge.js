@@ -16,6 +16,7 @@ import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import { ArrowDown } from "react-feather";
 import { ChevronLeft } from "react-feather";
+import ExitTransactions from './ExitTransactions'
 
 const { MaxUint256 } = ethers.constants;
 const { hexlify, arrayify } = ethers.utils;
@@ -52,6 +53,8 @@ export default function Bridge(props) {
   const [outboundToken, setOutboundToken] = React.useState(BRIDGE_TOKENS[0]);
   const [ethAccount, setEthAccount] = React.useState(ethAccounts[0]);
   let [pendingTransactions, setPendingTransactions] = React.useState([]);
+  let [page, setPage] = React.useState(0);
+
   React.useEffect(() => {
     setEthAccount(ethAccounts[0]);
   }, [ethAccounts]);
@@ -88,6 +91,36 @@ export default function Bridge(props) {
       setAllowance(allowance);
     })();
   }, [signer, inboundToken, setAllowance]);
+
+  const exitFundsToEthereum = React.useCallback((txId, tokenAddress, quantity) => {
+    return async () => {
+      const signature = await getSignature(txId);
+      let tx;
+      const outboundTokenContract = erc20FromAddress(
+        tokenAddress,
+        signer
+      );
+      const decimals = await outboundTokenContract.decimals();
+      if (tokenAddress === WETH.address) {
+        tx = await bridge.releaseWETH(
+          ethAccount,
+          parseUnits(quantity, decimals),
+          parseInt(txId),
+          hexlify(signature)
+        );
+      } else {
+        tx = await bridge.release(
+          tokenAddress,
+          ethAccount,
+          parseUnits(quantity, decimals),
+          parseInt(txId),
+          hexlify(signature)
+        );
+      }
+      await tx.wait();
+    }
+  }, [bridge, ethAccount, signer]);
+
   React.useEffect(() => {
     (async () => {
       const stillPendingTransactions = pendingTransactions.filter(
@@ -101,34 +134,7 @@ export default function Bridge(props) {
       );
       if (confirmedTransactions.length) {
         setPendingTransactions(stillPendingTransactions);
-        await Promise.all(
-          confirmedTransactions.map(async (transaction) => {
-            const signature = await getSignature(transaction.id);
-            let tx;
-            const outboundTokenContract = erc20FromAddress(
-              outboundToken.address,
-              signer
-            );
-            const decimals = await outboundTokenContract.decimals();
-            if (outboundToken.address === WETH.address) {
-              tx = await bridge.releaseWETH(
-                ethAccount,
-                parseUnits(amount, decimals),
-                parseInt(transaction.id),
-                hexlify(signature)
-              );
-            } else {
-              tx = await bridge.release(
-                outboundToken.address,
-                ethAccount,
-                parseUnits(amount, decimals),
-                parseInt(transaction.id),
-                hexlify(signature)
-              );
-            }
-            await tx.wait();
-          })
-        );
+        await Promise.all(confirmedTransactions.map((transaction) => exitFundsToEthereum(transaction.id, outboundToken.address, amount)()));
         clearForm();
         setTransactionPending(false);
         onHide();
@@ -144,7 +150,9 @@ export default function Bridge(props) {
     bridge,
     publicKey,
     outboundToken,
+    exitFundsToEthereum
   ]);
+
 
   const userTokenBalance = React.useMemo(() => {
     return userTokens.find(
@@ -225,10 +233,22 @@ export default function Bridge(props) {
     onHide();
   };
 
+  const formatAmount = (amt) => {
+    return amt.replace(/[^0-9.,]+/g, "");
+  }
+
   const handleAmountChange = (event) => {
     let amount = event.target.value;
-    amount = amount.replace(/[^0-9.,]+/g, "");
-    setAmount(amount);
+    setAmount(formatAmount(amount));
+  };
+
+  const handleReplayExitTransaction = async (evt, txId, tokenContractAddress, quantity) => {
+    evt.preventDefault();
+    setTransactionPending(true);
+
+    console.log(`tx id: ${typeof txId}, addr: ${typeof tokenContractAddress}, quantity: ${typeof quantity}. token address: ${tokenContractAddress}`)
+    await exitFundsToEthereum(txId, tokenContractAddress, formatAmount(quantity.toString()))();
+    setTransactionPending(false);
   };
 
   return (
@@ -389,6 +409,10 @@ export default function Bridge(props) {
                   )}
                 </Button>
               </Form>
+              <ExitTransactions
+                page={page}
+                onReplayTransaction={handleReplayExitTransaction}
+              />
             </Tab>
           </Tabs>
         ) : (
