@@ -7,7 +7,7 @@ import {useGetTransactionsByContractFunction} from './queries'
 import {BASE_FACTOR, TOKENS} from './constants'
 import {Button, Form} from 'react-bootstrap'
 
-const decodeExitTxArgs = (txArgs) => {
+const decodeReleaseTxArgs = (txArgs) => {
   const decoded = cbor.decode(Buffer.from(txArgs, 'base64'))
 
   return {
@@ -31,7 +31,7 @@ function ReleaseTransactions({onReplayTransaction}) {
 
   const transactions = transactionsByContractFunction.map(tx => {
     const txCopy = {...tx};
-    txCopy.arguments = decodeExitTxArgs(tx.arguments);
+    txCopy.arguments = decodeReleaseTxArgs(tx.arguments);
     return txCopy;
   });
 
