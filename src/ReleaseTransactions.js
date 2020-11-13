@@ -50,7 +50,7 @@ function ReleaseTransactions({onReplayTransaction}) {
     <div className="section mt-2">
       <h2>Ellipticoin Release Transactions:</h2>
 
-      { (transactions && transactions.length) || page !== 0
+      { page > 0 || transactions.length === pageSize
         ?
           <nav>
             <ul className="pagination justify-content-end">
