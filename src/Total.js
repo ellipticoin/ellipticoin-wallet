@@ -1,5 +1,5 @@
-import { formatCurrency } from "./helpers";
 import React from "react";
+import { formatCurrency } from "./helpers";
 
 export default function Total(props) {
   const { total } = props;

@@ -1,7 +1,7 @@
+import { Clipboard } from "react-feather";
+import React from "react";
 import base64url from "base64url";
 import copy from "copy-to-clipboard";
-import React from "react";
-import { Clipboard } from "react-feather";
 
 export default function YourAddress(props) {
   const { publicKey } = props;

@@ -6,13 +6,14 @@ import {
   NUMBER_OF_ERAS,
   NETWORK_ID,
 } from "./constants";
+import { find, get } from "lodash";
+
+import { BigInt } from "jsbi";
 import Ed25519Signer from "./cose/Ed25519Signer";
 import cbor from "cbor";
 import ethers from "ethers";
-import { BigInt } from "jsbi";
-import { find, get } from "lodash";
-import { useState } from "react";
 import nacl from "tweetnacl";
+import { useState } from "react";
 
 export function parseUnits(value, units) {
   try {
@@ -87,29 +88,6 @@ export function formatCurrency(amount) {
     .replace(/^(\D+)/, "$1 ");
 }
 
-export function formatTokenExchangeRate(amount, maxPlaces = 10, sigFigs = 6) {
-  if (!amount) return 0;
-
-  // No decimal
-  if (amount - Math.floor(amount) === 0) {
-    const figs = amount.toString().length;
-    return figs >= sigFigs ? amount : amount.toFixed(sigFigs - figs);
-  }
-
-  if (amount > 1) {
-    const sigFigsBefore = Math.floor(amount).toString().length;
-    return amount.toFixed(sigFigsBefore > sigFigs ? 2 : Math.max(2, sigFigs - sigFigsBefore));
-  }
-
-  let places = 0;
-  let tempAmount = amount;
-  while (tempAmount < 1) {
-    tempAmount *= 10;
-    places++;
-  }
-  return amount.toFixed(Math.min(maxPlaces, places + sigFigs - 1));
-}
-
 export function tokenName(token) {
   return get(
     find(
@@ -119,10 +97,6 @@ export function tokenName(token) {
     ),
     "name"
   );
-}
-
-export function excludeUsd(liquidityTokens) {
-  return liquidityTokens.filter((t) => tokenName(t) !== "USD");
 }
 
 export function encodeAddress(address) {

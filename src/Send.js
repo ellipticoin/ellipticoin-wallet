@@ -1,9 +1,10 @@
 import { BASE_FACTOR, TOKENS } from "./constants";
+import { Button, Form, Modal } from "react-bootstrap";
+
+import React from "react";
+import base64url from "base64url";
 import { tokenToString } from "./helpers";
 import { usePostTransaction } from "./mutations";
-import base64url from "base64url";
-import React from "react";
-import { Button, Form, Modal } from "react-bootstrap";
 
 export default function Send(props) {
   const { show, setShow, setHost } = props;

@@ -1,5 +1,6 @@
-import React from "react";
 import { Droplet, Link, Repeat, Send } from "react-feather";
+
+import React from "react";
 
 export default function Actions(props) {
   const { setShowModal, setShowPage } = props;

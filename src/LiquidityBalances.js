@@ -1,8 +1,9 @@
-import { BASE_FACTOR } from "./constants";
 import { blockReward, formatPercentage, tokenName } from "./helpers";
-import { excludeUsd, formatCurrency, formatTokenBalance } from "./helpers";
-import { sumBy } from "lodash";
+import { formatCurrency, formatTokenBalance } from "./helpers";
+
+import { BASE_FACTOR } from "./constants";
 import { default as React } from "react";
+import { sumBy } from "lodash";
 
 export default function YourLiquidity(props) {
   const { liquidityTokens, blockNumber } = props;
@@ -35,7 +36,7 @@ export default function YourLiquidity(props) {
               </tr>
             </thead>
             <tbody>
-              {excludeUsd(liquidityTokens).map((liquidityToken) => (
+              {liquidityTokens.map((liquidityToken) => (
                 <tr key={liquidityToken.id}>
                   <th scope="row">{tokenName(liquidityToken)}</th>
                   <td className="text-right">

@@ -1,6 +1,5 @@
-import base64url from "base64url";
 import { BigInt } from "jsbi";
-
+import base64url from "base64url";
 export const BASE_FACTOR = BigInt(1000000);
 export const BLOCKS_PER_ERA = 8000000;
 export const NUMBER_OF_ERAS = 8;

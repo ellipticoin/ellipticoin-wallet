@@ -1,9 +1,10 @@
-import { useLocalStorage } from "./helpers";
-import Logo from "./logo.svg";
-import base64url from "base64url";
-import React from "react";
 import { Menu, X } from "react-feather";
+
 import Identicon from "react-identicons";
+import Logo from "./logo.svg";
+import React from "react";
+import base64url from "base64url";
+import { useLocalStorage } from "./helpers";
 
 export default function WalletMenu(props) {
   const { setShowSidebar, publicKey } = props;

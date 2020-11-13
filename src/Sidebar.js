@@ -1,9 +1,9 @@
-import base64url from "base64url";
-import { saveAs } from "file-saver";
-import React from "react";
-import { Modal } from "react-bootstrap";
 import { Download, Upload, X } from "react-feather";
 import Identicon from "react-identicons";
+import { Modal } from "react-bootstrap";
+import React from "react";
+import base64url from "base64url";
+import { saveAs } from "file-saver";
 
 export default function Sidebar(props) {
   let {

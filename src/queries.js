@@ -1,8 +1,9 @@
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
-import { useLocalStorage } from "./helpers";
 import { gql, useQuery } from "@apollo/client";
-import { useMemo } from "react";
+
 import nacl from "tweetnacl";
+import { useLocalStorage } from "./helpers";
+import { useMemo } from "react";
 
 export const GET_TOKENS = gql`
   query tokens($tokenIds: [TokenId!]!, $address: Bytes!) {

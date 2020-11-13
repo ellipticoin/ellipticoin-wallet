@@ -1,6 +1,17 @@
+import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
+import { default as React, useMemo, useState } from "react";
+import { animated, useTransition } from "react-spring";
+import {
+  useGetCurrentBlock,
+  useGetLiquidityTokens,
+  useGetTokens,
+} from "./queries";
+
 import Actions from "./Actions";
+import { BASE_FACTOR } from "./constants";
 import Balances from "./Balances";
 import Bridge from "./Bridge";
+import { Buffer } from "buffer/";
 import Exchange from "./Exchange";
 import Header from "./Header";
 import LiquidityBalances from "./LiquidityBalances";
@@ -11,21 +22,11 @@ import Send from "./Send";
 import Sidebar from "./Sidebar";
 import Total from "./Total";
 import YourAddress from "./YourAddress";
-import { BASE_FACTOR } from "./constants";
-import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
-import { useLocalStorage } from "./helpers";
-import {
-  useGetCurrentBlock,
-  useGetLiquidityTokens,
-  useGetTokens,
-} from "./queries";
-import { Buffer } from "buffer/";
-import { default as ethers } from "ethers";
 import { compact } from "lodash";
-import { sumBy } from "lodash";
-import { default as React, useMemo, useState } from "react";
-import { animated, useTransition } from "react-spring";
+import { default as ethers } from "ethers";
 import nacl from "tweetnacl";
+import { sumBy } from "lodash";
+import { useLocalStorage } from "./helpers";
 
 function App(props) {
   const { setHost } = props;
