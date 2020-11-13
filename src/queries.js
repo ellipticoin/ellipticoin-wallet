@@ -43,8 +43,27 @@ export const GET_ISSUANCE_REWARDS = gql`
 `;
 
 const GET_NEXT_NONCE = gql`
-  query next_nonce($address: Bytes!) {
+  query nextNonce($address: Bytes!) {
     nextNonce(address: $address)
+  }
+`;
+
+
+const GET_TRANSACTIONS_BY_CONTRACT_FUNCTION = gql`
+  query transactionsByContractFunction($senderAddress: Bytes!, $contractName: String!, $functionName: String!, $page: U64!, $pageSize: U64!) {
+    transactionsByContractFunction(senderAddress: $senderAddress, contractName: $contractName, functionName: $functionName, page: $page, pageSize: $pageSize) {
+      id,
+      networkId,
+      blockNumber,
+      position,
+      contract,
+      sender,
+      nonce,
+      function,
+      arguments,
+      returnValue,
+      raw
+    }
   }
 `;
 
@@ -81,14 +100,7 @@ export function useGetCurrentBlock() {
 }
 
 export function useGetIssuanceRewards() {
-  const [secretKey] = useLocalStorage(
-    "secretKey",
-    () => nacl.sign.keyPair().secretKey
-  );
-  const publicKey = useMemo(
-    () => Buffer.from(nacl.sign.keyPair.fromSecretKey(secretKey).publicKey),
-    [secretKey]
-  );
+  const publicKey = usePublicKey()
   return useQuery(GET_ISSUANCE_REWARDS, {
     variables: {
       address: publicKey.toString("base64"),
@@ -97,17 +109,23 @@ export function useGetIssuanceRewards() {
 }
 
 export function useGetNextNonce() {
-  const [secretKey] = useLocalStorage(
-    "secretKey",
-    () => nacl.sign.keyPair().secretKey
-  );
-  const publicKey = useMemo(
-    () => Buffer.from(nacl.sign.keyPair.fromSecretKey(secretKey).publicKey),
-    [secretKey]
-  );
+  const publicKey = usePublicKey();
   return useQuery(GET_NEXT_NONCE, {
     variables: {
       address: publicKey.toString("base64"),
+    },
+  });
+}
+
+export function useGetTransactionsByContractFunction(contractName, functionName, page = 0, pageSize = 100) {
+  const publicKey = usePublicKey();
+  return useQuery(GET_TRANSACTIONS_BY_CONTRACT_FUNCTION, {
+    variables: {
+      senderAddress: publicKey.toString("base64"),
+      contractName,
+      functionName,
+      page: page.toString(),
+      pageSize: pageSize.toString()
     },
   });
 }
