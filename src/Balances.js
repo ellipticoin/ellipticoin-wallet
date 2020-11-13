@@ -1,6 +1,5 @@
-import { formatCurrency, formatTokenBalance, tokenName } from "./helpers";
-
 import { BASE_FACTOR } from "./constants";
+import { formatCurrency, formatTokenBalance, tokenName } from "./helpers";
 import { default as React } from "react";
 
 export default function Balances(props) {

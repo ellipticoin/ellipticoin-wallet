@@ -1,5 +1,10 @@
-import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { default as App } from "./App";
+import CurrentMinerContext from "./CurrentMinerContext";
+import HostContext from "./HostContext";
 import { BOOTNODES, PROD } from "./constants";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { ApolloProvider } from "@apollo/client";
+import { sample } from "lodash";
 import {
   default as React,
   useCallback,
@@ -7,12 +12,6 @@ import {
   useRef,
   useState,
 } from "react";
-
-import { ApolloProvider } from "@apollo/client";
-import { default as App } from "./App";
-import CurrentMinerContext from "./CurrentMinerContext";
-import HostContext from "./HostContext";
-import { sample } from "lodash";
 
 export default function ApolloWrapper() {
   const [host, setHost] = useState(sample(BOOTNODES));

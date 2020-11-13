@@ -1,8 +1,7 @@
 import { formatCurrency, formatTokenBalance } from "./helpers";
-
-import React from "react";
-import { useGetIssuanceRewards } from "./queries";
 import { usePostTransaction } from "./mutations";
+import { useGetIssuanceRewards } from "./queries";
+import React from "react";
 
 export default function Rewards(props) {
   const { totalLockedValue } = props;
