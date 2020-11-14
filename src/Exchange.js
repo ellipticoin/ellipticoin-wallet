@@ -334,7 +334,7 @@ export default function Exchange(props) {
                 {inputToken.ticker === outputToken.ticker
                   ? "0"
                   : inputToken.ticker !== "USD" && outputToken.ticker !== "USD"
-                  ? (LIQUIDITY_FEE / BASE_FACTOR) * 2
+                  ? `~${(LIQUIDITY_FEE / BASE_FACTOR) * 2}`
                   : LIQUIDITY_FEE / BASE_FACTOR}{" "}
                 = {fee ? Number(fee) / Number(BASE_FACTOR) : 0}{" "}
                 {inputToken.ticker}
