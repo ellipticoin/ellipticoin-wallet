@@ -155,6 +155,7 @@ export default function Exchange(props) {
 
   const outputAmount = useMemo(() => {
     const calculateInputAmountInBaseToken = (amount, totalSupply, price) => {
+      if (Number(totalSupply) === 0) return new BigInt(0);
       const baseTokenReserves = getBaseTokenReserves(totalSupply, price);
       const invariant = multiply(baseTokenReserves, totalSupply);
       const newBaseTokenReserves = divide(invariant, add(totalSupply, amount));
@@ -166,6 +167,7 @@ export default function Exchange(props) {
       totalSupply,
       price
     ) => {
+      if (Number(totalSupply) === 0) return new BigInt(0);
       const baseTokenReserves = getBaseTokenReserves(totalSupply, price);
       const invariant = multiply(baseTokenReserves, totalSupply);
       const newTokenReserves = divide(
@@ -190,11 +192,11 @@ export default function Exchange(props) {
     if (inputToken.name === "USD") {
       inputAmountInBaseToken = inputAmount;
     } else {
-      const fee = applyFee(inputAmount);
-      feeInBaseToken = (inputAmount - fee) * inputLiquidityToken.price;
+      const inputAmountAfterFee = applyFee(inputAmount);
+      feeInBaseToken = (inputAmount - inputAmountAfterFee) * inputLiquidityToken.price;
 
       inputAmountInBaseToken = calculateInputAmountInBaseToken(
-        fee,
+        inputAmountAfterFee,
         new BigInt(inputLiquidityToken.totalPoolSupply),
         new BigInt(inputLiquidityToken.price)
       );
@@ -210,8 +212,9 @@ export default function Exchange(props) {
       return inputAmountInBaseToken;
     }
 
-    const fee = applyFee(inputAmountInBaseToken);
-    feeInBaseToken += inputAmountInBaseToken - fee;
+    const outputAmountInBaseToken = applyFee(new BigInt(inputAmountInBaseToken));
+    const outputFeeInBaseToken = (inputAmountInBaseToken - outputAmountInBaseToken) * BASE_FACTOR
+    feeInBaseToken += Number(outputFeeInBaseToken);
 
     setFeeInInputToken(
       feeInBaseToken,
@@ -219,7 +222,7 @@ export default function Exchange(props) {
       inputToken.name
     );
     const amount = calculateAmountInOutputToken(
-      fee,
+      outputAmountInBaseToken,
       new BigInt(outputLiquidityToken.totalPoolSupply),
       new BigInt(outputLiquidityToken.price)
     );
