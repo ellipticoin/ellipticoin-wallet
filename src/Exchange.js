@@ -19,7 +19,7 @@ export default function Exchange(props) {
   const [inputAmount, setInputAmount] = React.useState();
   const [fee, setFee] = React.useState(new BigInt(0));
   const [minimumOutputAmount, setMinimumOutputAmount] = React.useState(
-    new BigInt(0)
+    "0"
   );
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[3]);
@@ -43,11 +43,15 @@ export default function Exchange(props) {
   };
   const handleSwap = async (evt) => {
     evt.preventDefault();
+    let formattedMinimumOutputAmount = minimumOutputAmount.startsWith(".") || minimumOutputAmount === ""
+      ? "0" + minimumOutputAmount
+      : minimumOutputAmount;
+    formattedMinimumOutputAmount = new BigInt(parseFloat(formattedMinimumOutputAmount) * BASE_FACTOR)
     let res = await exchange(
       encodeToken(inputToken),
       encodeToken(outputToken),
       Number(inputAmount),
-      Number(minimumOutputAmount)
+      Number(formattedMinimumOutputAmount)
     );
 
     if (!res.returnValue) {
@@ -75,9 +79,9 @@ export default function Exchange(props) {
   ) => {
     const quantity =
       outputTokenName === "USD"
-        ? (inputLiquidityToken.totalSupply / inputLiquidityToken.price) *
+        ? (inputLiquidityToken.totalPoolSupply / inputLiquidityToken.price) *
           BASE_FACTOR
-        : outputLiquidityToken.totalSupply / BASE_FACTOR;
+        : outputLiquidityToken.totalPoolSupply / BASE_FACTOR;
 
     setAvailableQuantity(isNaN(quantity) ? new BigInt(0) : quantity);
   };
@@ -170,13 +174,14 @@ export default function Exchange(props) {
       );
       return subtract(totalSupply, newTokenReserves);
     };
-    if (!inputAmount || !inputLiquidityToken.totalSupply) {
+
+    if (!inputAmount || !inputLiquidityToken.totalPoolSupply) {
       setFee(new BigInt(0));
       return;
     }
     if (inputToken.name === outputToken.name) {
       setFee(new BigInt(0));
-      setMinimumOutputAmount(inputAmount);
+      setMinimumOutputAmount((inputAmount / BASE_FACTOR).toString());
       return inputAmount;
     }
 
@@ -190,7 +195,7 @@ export default function Exchange(props) {
 
       inputAmountInBaseToken = calculateInputAmountInBaseToken(
         fee,
-        new BigInt(inputLiquidityToken.totalSupply),
+        new BigInt(inputLiquidityToken.totalPoolSupply),
         new BigInt(inputLiquidityToken.price)
       );
     }
@@ -201,7 +206,7 @@ export default function Exchange(props) {
         inputLiquidityToken.price,
         inputToken.name
       );
-      setMinimumOutputAmount(inputAmountInBaseToken);
+      setMinimumOutputAmount((inputAmountInBaseToken / BASE_FACTOR).toString());
       return inputAmountInBaseToken;
     }
 
@@ -215,10 +220,10 @@ export default function Exchange(props) {
     );
     const amount = calculateAmountInOutputToken(
       fee,
-      new BigInt(outputLiquidityToken.totalSupply),
+      new BigInt(outputLiquidityToken.totalPoolSupply),
       new BigInt(outputLiquidityToken.price)
     );
-    setMinimumOutputAmount(amount);
+    setMinimumOutputAmount((amount / BASE_FACTOR).toString());
     return amount;
   }, [
     inputAmount,
@@ -227,6 +232,15 @@ export default function Exchange(props) {
     outputToken,
     outputLiquidityToken,
   ]);
+
+  const handleMinimumOutputAmountChanged = (newVal) => {
+    if (newVal && (isNaN(newVal) || isNaN(parseFloat(newVal)))) {
+      setMinimumOutputAmount(minimumOutputAmount);
+      return;
+    }
+
+    setMinimumOutputAmount(newVal);
+  }
 
   return (
     <>
@@ -286,10 +300,11 @@ export default function Exchange(props) {
             <Form.Label>
               Minimum Output Token Amount (slippage protection)
             </Form.Label>
-            <TokenAmountInput
-              onChange={(value) => setMinimumOutputAmount(value)}
+            <Form.Control
+              onChange={(e) => handleMinimumOutputAmountChanged(e.target.value)}
               value={minimumOutputAmount}
               placeholder="Output Token Amount"
+              type="input"
             />
           </Form.Group>
           <Form.Group className="basic">
