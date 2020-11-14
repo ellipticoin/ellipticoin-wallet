@@ -330,13 +330,13 @@ export default function Exchange(props) {
             <li>
               <strong>Liquidity Fee</strong>
               <span>
-                {inputAmount ? formatTokenBalance(inputAmount) : 0} *{" "}
+                {inputAmount ? inputAmount / BASE_FACTOR : 0} *{" "}
                 {inputToken.ticker === outputToken.ticker
                   ? "0"
                   : inputToken.ticker !== "USD" && outputToken.ticker !== "USD"
-                  ? `~${(LIQUIDITY_FEE / BASE_FACTOR) * 2}`
+                  ? `~${LIQUIDITY_FEE / BASE_FACTOR * 2}`
                   : LIQUIDITY_FEE / BASE_FACTOR}{" "}
-                = {fee ? Number(fee) / Number(BASE_FACTOR) : 0}{" "}
+                = {fee ? formatTokenExchangeRate(Number(fee) / Number(BASE_FACTOR)) : 0}{" "}
                 {inputToken.ticker}
               </span>
             </li>
