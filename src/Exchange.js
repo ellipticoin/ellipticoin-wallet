@@ -108,7 +108,7 @@ export default function Exchange(props) {
         ? (inputLiquidityToken.totalPoolSupply / BASE_FACTOR * inputLiquidityToken.price / BASE_FACTOR)
         : outputLiquidityToken.totalPoolSupply / BASE_FACTOR;
 
-    return isNaN(quantity) ? new BigInt(0) : quantity;
+    return isNaN(quantity) ? ZERO : quantity;
   }, [
     outputToken,
     inputLiquidityToken,
