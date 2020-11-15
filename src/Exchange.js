@@ -342,7 +342,7 @@ export default function Exchange(props) {
             className="btn btn-lg btn-block btn-primary m-1"
             variant="contained"
             color="primary"
-            disabled={!outputAmount || outputAmount < 0 || !inputAmount || inputAmount < 0 || inputToken.ticker === outputToken.ticker ||  inputAmount / userTokenBalance > 1}
+            disabled={!outputAmount || EQ(outputAmount, ZERO) || !inputAmount || EQ(inputAmount, ZERO) || inputToken.ticker === outputToken.ticker ||  inputAmount / userTokenBalance > 1}
           >
             Exchange
           </Button>
