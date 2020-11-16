@@ -87,7 +87,8 @@ export default function ManageLiquidity(props) {
     const removeToken = userTokens.find(
       (removeToken) => tokenToString(removeToken) === removeTokenString
     );
-    setRemoveToken(removeToken);
+
+    setRemoveToken({ ...removeToken, name: tokenName(removeToken) });
   };
 
   const userHasEnoughProvideToken = () => {
