@@ -1,5 +1,6 @@
-import Web3 from "web3";
 import { promisify } from "es6-promisify";
+import Web3 from "web3";
+
 export async function getAccounts() {
   return window.web3.eth.getAccounts();
 }

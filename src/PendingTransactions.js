@@ -1,8 +1,7 @@
-import { default as React, useEffect } from "react";
-
-import { ExternalLink } from "react-feather";
-import Spinner from "react-bootstrap/Spinner";
 import classNames from "classnames";
+import { default as React, useEffect } from "react";
+import Spinner from "react-bootstrap/Spinner";
+import { ExternalLink } from "react-feather";
 
 export default function PendingTransactions(props) {
   const { pendingTransactions, setPendingTransactions, ethBlockNumber } = props;
