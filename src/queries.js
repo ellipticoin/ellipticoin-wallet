@@ -1,9 +1,8 @@
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
-import { gql, useQuery } from "@apollo/client";
-
-import nacl from "tweetnacl";
 import { useLocalStorage } from "./helpers";
+import { gql, useQuery } from "@apollo/client";
 import { useMemo } from "react";
+import nacl from "tweetnacl";
 
 export const GET_TOKENS = gql`
   query tokens($tokenIds: [TokenId!]!, $address: Bytes!) {
@@ -25,6 +24,7 @@ export const GET_LIQUIDITY_TOKENS = gql`
       balance
       shareOfPool
       totalSupply
+      totalPoolSupply
     }
   }
 `;
