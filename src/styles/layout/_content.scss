@@ -6,36 +6,33 @@
 }
 
 .actions-top {
-  //   display: flex;
-  // justify-content: space-between;
-    margin-bottom: 12px;
+  margin-bottom: 12px;
+  .row { justify-content: space-between; }
 }
 .your-address {
-    display: flex;
-    width: 1000px;
-@media only screen and (max-width: 720px) {
+  display: flex;
+  width: 1000px;
+  @media only screen and (max-width: 720px) {
     width: auto;
-flex-direction: column;
-  h1 {
-    font-size: 18px;
-  width: 250px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    flex-direction: column;
+    h1 {
+      font-size: 18px;
+      width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-}
+  }
 
-  // justify-content: space-between;
-    button {
-        margin: 3px 8px;
-        // top: -4px;
-    }
+  button {
+    margin: 3px 8px;
+  }
 }
 .total-balance {
-    text-align: right;
-@media only screen and (max-width: 720px) {
+  text-align: right;
+  @media only screen and (max-width: 720px) {
     text-align: left;
-}
+  }
 }
 .section {
   padding: 0 16px;
@@ -110,13 +107,13 @@ flex-direction: column;
   }
 }
 
-  // font-weight: bold;
-  // font-size: 25px;
-  // // line-height: 36px;
-  // text-align: middle;
-  // color: black;
-  // display: flex;
-  // justify-content: space-between;
+// font-weight: bold;
+// font-size: 25px;
+// // line-height: 36px;
+// text-align: middle;
+// color: black;
+// display: flex;
+// justify-content: space-between;
 //   button {
 //     color: white;
 //     background-color: $colorPrimary;
@@ -136,4 +133,3 @@ flex-direction: column;
 //       }
 //     }
 //   }
-
