@@ -26,7 +26,7 @@ export default function Actions(props) {
           <div className="icon-wrapper bg-danger">
             <Link />
           </div>
-          <strong>Bridge</strong>
+          <strong>Ellipticoin &lt;&gt; Ethereum</strong>
         </button>
       </div>
       <div className="item">

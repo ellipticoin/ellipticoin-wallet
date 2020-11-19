@@ -157,7 +157,7 @@ export default function ManageLiquidity(props) {
   };
 
   return (
-    <div style={{backgroundColor: "white", height: "100%"}}>
+    <div style={{ backgroundColor: "white", height: "100%" }}>
       <div className="appHeader">
         <div className="left">
           <button className="headerButton goBack">

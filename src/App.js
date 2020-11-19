@@ -8,9 +8,9 @@ import ManageLiquidity from "./ManageLiquidity/ManageLiquidity";
 import NetworkStatistics from "./NetworkStatistics";
 import PendingTransactions from "./PendingTransactions";
 import Send from "./Send";
+import Settings from "./Settings";
 import Sidebar from "./Sidebar";
 import Total from "./Total";
-import YourAddress from "./YourAddress";
 import { BASE_FACTOR } from "./constants";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
 import { useLocalStorage } from "./helpers";
@@ -39,6 +39,10 @@ function App(props) {
   const publicKey = useMemo(
     () => Buffer.from(nacl.sign.keyPair.fromSecretKey(secretKey).publicKey),
     [secretKey]
+  );
+  const [investorModeEnabled, setInvestorModeEnabled] = useLocalStorage(
+    "investorModeEnabled",
+    false
   );
 
   React.useEffect(() => {
@@ -69,7 +73,7 @@ function App(props) {
 
   const [showSidebar, setShowSidebar] = useState(false);
   const [showModal, setShowModal] = useState();
-  const [showPage, setShowPage] = useState();
+  const [showPage, setShowPage] = useState("Exchange");
   const [pendingTransactions, setPendingTransactions] = useState([]);
   const {
     data: { tokens } = { tokens: TOKENS },
@@ -87,16 +91,6 @@ function App(props) {
   const errors = useMemo(
     () => compact([tokenError, currentBlockError, liquidityTokenError]),
     [tokenError, currentBlockError, liquidityTokenError]
-  );
-  const totalLockedValue = useMemo(
-    () =>
-      sumBy(tokens, (token) => {
-        return (
-          (parseInt(token.totalSupply) * parseInt(token.price) || 0) /
-          BASE_FACTOR
-        );
-      }),
-    [tokens]
   );
   const pageTransition = useTransition(showPage, null, {
     enter: { transform: "translate3d(0,0,0)" },
@@ -123,6 +117,7 @@ function App(props) {
         return (
           <Exchange
             liquidityTokens={liquidityTokens}
+            investorModeEnabled={investorModeEnabled}
             userTokens={tokens}
             onHide={() => setShowPage(null)}
             publicKey={publicKey}
@@ -145,6 +140,15 @@ function App(props) {
       case "NetworkStatistics":
         return (
           <NetworkStatistics onHide={() => setShowPage(null)} tokens={tokens} />
+        );
+
+      case "Settings":
+        return (
+          <Settings
+            onHide={() => setShowPage(null)}
+            investorModeEnabled={investorModeEnabled}
+            setInvestorModeEnabled={setInvestorModeEnabled}
+          />
         );
 
       default:
@@ -197,7 +201,6 @@ function App(props) {
               <Actions setShowModal={setShowModal} setShowPage={setShowPage} />
             </div>
           </div>
-          <YourAddress publicKey={publicKey} />
           <Balances tokens={tokens} total={totalTokenValue} />
           <LiquidityBalances
             blockNumber={currentBlock.number}
