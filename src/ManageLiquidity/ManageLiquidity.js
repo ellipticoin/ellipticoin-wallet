@@ -1,6 +1,6 @@
 import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
-import {BASE_FACTOR, TOKENS, ZERO} from "../constants";
+import { BASE_FACTOR, TOKENS, ZERO } from "../constants";
 import { LIQUIDITY_TOKENS } from "../constants";
 import {
   excludeUsd,
@@ -32,8 +32,6 @@ export default function ManageLiquidity(props) {
   );
   const [error, setError] = React.useState("");
 
-  console.log(`Liquidity Tokens: ${JSON.stringify(liquidityTokens)}`);
-
   const userBaseTokenBalance = userTokens.filter(
     (t) => tokenName(t) === "USD"
   )[0].balance;
@@ -52,13 +50,13 @@ export default function ManageLiquidity(props) {
     contract: "Exchange",
     functionName: "create_pool",
   });
-  const [addLiqidity] = usePostTransaction({
+  const [addliquidity] = usePostTransaction({
     contract: "Exchange",
-    functionName: "add_liqidity",
+    functionName: "add_liquidity",
   });
-  const [removeLiqidity] = usePostTransaction({
+  const [removeliquidity] = usePostTransaction({
     contract: "Exchange",
-    functionName: "remove_liqidity",
+    functionName: "remove_liquidity",
   });
   const providePoolExists = useMemo(
     () => parseInt(provideLiquidityToken.totalSupply) > 0,
@@ -79,23 +77,21 @@ export default function ManageLiquidity(props) {
     return userTokens.filter((t) => t.id === provideToken.id)[0].balance;
   }, [provideToken, userTokens]);
 
-  const tokenAmountDeposited = useMemo(() => {
-    return removeLiquidityToken.balance;
+  const userTokensInPool = useMemo(() => {
+    return (
+      Math.round(
+        (removeLiquidityToken.shareOfPool *
+          removeLiquidityToken.poolSupplyOfToken) /
+          BASE_FACTOR /
+          100
+      ) * 100
+    );
   }, [removeLiquidityToken]);
 
-  const baseTokenAmountDeposited = useMemo(() => {
+  const userBaseTokensInPool = useMemo(() => {
     if (EQ(removeLiquidityToken.shareOfPool, ZERO)) return ZERO;
-    return (removeLiquidityToken.poolSupplyOfBaseToken * removeLiquidityToken.shareOfPool * removeLiquidityToken.poolSupplyOfToken) /
-      (removeLiquidityToken.totalSupply * BASE_FACTOR);
-  }, [removeLiquidityToken]);
-
-  const withdrawableTokenBalance = useMemo(() => {
-    return removeLiquidityToken.poolSupplyOfToken * removeLiquidityToken.shareOfPool / BASE_FACTOR;
-  }, [removeLiquidityToken]);
-
-  const withdrawableBaseTokenBalance = useMemo(() => {
-    return baseTokenAmountDeposited * removeLiquidityToken.totalSupply / removeLiquidityToken.poolSupplyOfToken;
-  }, [removeLiquidityToken, baseTokenAmountDeposited]);
+    return (userTokensInPool * removeLiquidityToken.price) / BASE_FACTOR;
+  }, [removeLiquidityToken, userTokensInPool]);
 
   const handleRemoveTokenChange = (removeTokenString) => {
     const removeToken = userTokens.find(
@@ -109,7 +105,7 @@ export default function ManageLiquidity(props) {
     return provideAmount / userProvideTokenBalance <= 1;
   };
   const userHasEnoughRemoveToken = () => {
-    return removeAmount / withdrawableTokenBalance <= 1;
+    return removeAmount / userTokensInPool <= 1;
   };
   const userHasEnoughBaseToken = () => {
     return (providePrice / BASE_FACTOR) * provideAmount <= userBaseTokenBalance;
@@ -124,7 +120,7 @@ export default function ManageLiquidity(props) {
     }
   };
   const handleAddLiquidity = async () => {
-    const res = await addLiqidity(
+    const res = await addliquidity(
       encodeToken(provideToken),
       Number(provideAmount)
     );
@@ -149,10 +145,9 @@ export default function ManageLiquidity(props) {
   const handleRemoveLiquidity = async (evt) => {
     evt.preventDefault();
 
-    const amount = removeAmount * removeLiquidityToken.totalSupply / removeLiquidityToken.poolSupplyOfToken;
-    const res = await removeLiqidity(
+    const res = await removeliquidity(
       encodeToken(removeToken),
-      Number(amount)
+      Number(removeAmount)
     );
     if (!res.returnValue) {
       onHide();
@@ -304,23 +299,7 @@ export default function ManageLiquidity(props) {
                 />
               </Form.Group>
               <div className="mt-2">
-                <strong>Deposited Amount</strong>
-                <div>
-                  {removeToken.name}:{" "}
-                  {tokenAmountDeposited
-                    ? formatTokenBalance(tokenAmountDeposited)
-                    : "0"}
-                </div>
-                <div>
-                  USD:{" "}
-                  {baseTokenAmountDeposited
-                    ? `~${formatTokenBalance(baseTokenAmountDeposited)}`
-                    : "0"}
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <strong>Withdrawable Amount</strong>
+                <strong>Withdrawable Amount*</strong>
                 <div>
                   {removeToken.name}:{" "}
                   <span
@@ -329,8 +308,8 @@ export default function ManageLiquidity(props) {
                     {removeAmount ? formatTokenBalance(removeAmount) : "0"}
                   </span>{" "}
                   /{" "}
-                  {withdrawableTokenBalance
-                    ? formatTokenBalance(withdrawableTokenBalance)
+                  {userTokensInPool
+                    ? formatTokenBalance(userTokensInPool)
                     : "0"}
                 </div>
                 <div>
@@ -338,12 +317,18 @@ export default function ManageLiquidity(props) {
                   {!removeAmount
                     ? "0"
                     : formatTokenBalance(
-                      (removeAmount / withdrawableTokenBalance * withdrawableBaseTokenBalance)
-                    )}
+                        (removeAmount / userTokensInPool) * userBaseTokensInPool
+                      )}
                   /{" "}
-                  {withdrawableBaseTokenBalance
-                    ? formatTokenBalance(withdrawableBaseTokenBalance)
+                  {userBaseTokensInPool
+                    ? formatTokenBalance(userBaseTokensInPool)
                     : "0"}
+                </div>
+                <div>
+                  <small>
+                    * You were making a market, so you took the other side of
+                    any trades that occurred in exchange for trading fees.
+                  </small>
                 </div>
               </div>
               <div className="mt-2"> </div>
