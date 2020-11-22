@@ -11,7 +11,7 @@ import {
   formatTokenBalance,
 } from "../helpers";
 import { usePostTransaction } from "../mutations";
-import { BigInt, add, subtract, multiply, divide, EQ } from "jsbi";
+import { BigInt, EQ } from "jsbi";
 import { find } from "lodash";
 import { default as React, useMemo, useState } from "react";
 import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
