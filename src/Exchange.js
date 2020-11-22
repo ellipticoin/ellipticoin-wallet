@@ -105,8 +105,8 @@ export default function Exchange(props) {
   const availableQuantity = useMemo(() => {
     const quantity =
       outputToken.name === "USD"
-        ? (inputLiquidityToken.totalPoolSupply / BASE_FACTOR * inputLiquidityToken.price / BASE_FACTOR)
-        : outputLiquidityToken.totalPoolSupply / BASE_FACTOR;
+        ? (inputLiquidityToken.poolSupplyOfToken / BASE_FACTOR * inputLiquidityToken.price / BASE_FACTOR)
+        : outputLiquidityToken.poolSupplyOfToken / BASE_FACTOR;
 
     return isNaN(quantity) ? ZERO : quantity;
   }, [
@@ -159,7 +159,7 @@ export default function Exchange(props) {
       return subtract(totalSupply, newTokenReserves);
     };
 
-    if (!inputAmount || !inputLiquidityToken.totalPoolSupply) {
+    if (!inputAmount || !inputLiquidityToken.poolSupplyOfToken) {
       setFee(ZERO);
       return;
     }
@@ -179,7 +179,7 @@ export default function Exchange(props) {
 
       inputAmountInBaseToken = calculateInputAmountInBaseToken(
         inputAmountAfterFee,
-        new BigInt(inputLiquidityToken.totalPoolSupply),
+        new BigInt(inputLiquidityToken.poolSupplyOfToken),
         new BigInt(inputLiquidityToken.price)
       );
     }
@@ -205,7 +205,7 @@ export default function Exchange(props) {
     );
     const amount = calculateAmountInOutputToken(
       outputAmountInBaseToken,
-      new BigInt(outputLiquidityToken.totalPoolSupply),
+      new BigInt(outputLiquidityToken.poolSupplyOfToken),
       new BigInt(outputLiquidityToken.price)
     );
     setMinimumOutputAmount((amount / BASE_FACTOR).toString());
