@@ -27,7 +27,7 @@ export default function Trade(props) {
   const [inputToken, setInputToken] = React.useState(USD);
   const [outputToken, setOutputToken] = React.useState(ELC);
   const [inputAmountState, setInputAmountState] = React.useState(
-    new InputState(ZERO, inputToken.ticker)
+    new InputState(null, inputToken.ticker)
   );
   const [
     minimumOutputAmountState,
@@ -71,7 +71,7 @@ export default function Trade(props) {
     functionName: "exchange",
   });
   const clearForm = () => {
-    setInputAmountState(new InputState(ZERO));
+    setInputAmountState(new InputState(null));
     setMinimumOutputAmountState(new InputState(ZERO));
     setError("");
   };
@@ -241,7 +241,7 @@ export default function Trade(props) {
 
   const inputTokenChanged = (token) => {
     setInputToken(token);
-    setInputAmountState(new InputState(ZERO));
+    setInputAmountState(new InputState(null));
     setMinimumOutputAmountState(new InputState(ZERO));
   };
 
