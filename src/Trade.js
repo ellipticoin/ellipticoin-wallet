@@ -13,21 +13,21 @@ import {
   formatTokenExchangeRate,
 } from "./helpers";
 import { usePostTransaction } from "./mutations";
-import { BigInt, add, subtract, multiply, divide, EQ } from "jsbi";
+import { BigInt, add, subtract, multiply, divide, EQ, GT } from "jsbi";
 import { find } from "lodash";
 import { default as React, useMemo } from "react";
 import { Button, Form } from "react-bootstrap";
 import { ArrowDown } from "react-feather";
 import { ChevronLeft } from "react-feather";
 
-export default function Exchange(props) {
+export default function Trade(props) {
   const { onHide, liquidityTokens, userTokens, investorModeEnabled } = props;
 
   const [fee, setFee] = React.useState(ZERO);
   const [inputToken, setInputToken] = React.useState(USD);
   const [outputToken, setOutputToken] = React.useState(ELC);
   const [inputAmountState, setInputAmountState] = React.useState(
-    new InputState(null, inputToken.ticker)
+    new InputState(ZERO, inputToken.ticker)
   );
   const [
     minimumOutputAmountState,
@@ -71,7 +71,7 @@ export default function Exchange(props) {
     functionName: "exchange",
   });
   const clearForm = () => {
-    setInputAmountState(new InputState(null));
+    setInputAmountState(new InputState(ZERO));
     setMinimumOutputAmountState(new InputState(ZERO));
     setError("");
   };
@@ -241,8 +241,8 @@ export default function Exchange(props) {
 
   const inputTokenChanged = (token) => {
     setInputToken(token);
-    setInputAmountState(new InputState(null));
-    setMinimumOutputAmountState(new InputState(null));
+    setInputAmountState(new InputState(ZERO));
+    setMinimumOutputAmountState(new InputState(ZERO));
   };
 
   return (
@@ -270,7 +270,16 @@ export default function Exchange(props) {
                   <div className="labels">
                     <Form.Label>From</Form.Label>
                     <Form.Label>
-                      Your Balance {formatTokenBalance(userTokenBalance)}
+                      Your Balance{" "}
+                      {inputAmount &&
+                      (!userTokenBalance ||
+                        GT(inputAmount, userTokenBalance)) ? (
+                        <span className="text-danger">
+                          {formatTokenBalance(userTokenBalance)}
+                        </span>
+                      ) : (
+                        formatTokenBalance(userTokenBalance)
+                      )}
                     </Form.Label>
                   </div>
                   <div className="row">

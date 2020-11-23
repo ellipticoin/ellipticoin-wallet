@@ -13,11 +13,7 @@ export default function TokenAmountInput(props) {
       inputText
     );
     if (!groups.number && !groups.decimal) {
-      if (!inputText) {
-        onChange({ value: null, formattedText: "" });
-      } else {
-        onChange(state);
-      }
+      onChange({ value: null, formattedText: "" });
       return;
     }
     const intValue = parseInt((groups.number || "0").replaceAll(",", ""));
