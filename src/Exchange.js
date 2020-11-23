@@ -111,10 +111,10 @@ export default function Trade(props) {
   const availableQuantity = useMemo(() => {
     const quantity =
       outputToken.name === "USD"
-        ? ((inputLiquidityToken.totalPoolSupply / BASE_FACTOR) *
+        ? ((inputLiquidityToken.poolSupplyOfToken / BASE_FACTOR) *
             inputLiquidityToken.price) /
           BASE_FACTOR
-        : outputLiquidityToken.totalPoolSupply / BASE_FACTOR;
+        : outputLiquidityToken.poolSupplyOfToken / BASE_FACTOR;
 
     return isNaN(quantity) ? ZERO : quantity;
   }, [outputToken, inputLiquidityToken, outputLiquidityToken]);
