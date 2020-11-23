@@ -1,7 +1,6 @@
 import Actions from "./Actions";
 import Balances from "./Balances";
 import Bridge from "./Bridge";
-import Exchange from "./Exchange";
 import Header from "./Header";
 import LiquidityBalances from "./LiquidityBalances";
 import ManageLiquidity from "./ManageLiquidity/ManageLiquidity";
@@ -11,6 +10,7 @@ import Send from "./Send";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
 import Total from "./Total";
+import Trade from "./Trade";
 import { BASE_FACTOR } from "./constants";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
 import { useLocalStorage } from "./helpers";
@@ -124,9 +124,9 @@ function App(props) {
             userTokens={tokens}
           />
         );
-      case "Exchange":
+      case "Trade":
         return (
-          <Exchange
+          <Trade
             liquidityTokens={liquidityTokens}
             investorModeEnabled={investorModeEnabled}
             userTokens={tokens}

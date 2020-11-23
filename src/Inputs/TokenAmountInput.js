@@ -1,40 +1,49 @@
 import { BASE_FACTOR } from "../constants";
+import { formatBigNumAsText } from "./helpers";
 import { BigInt } from "jsbi";
-import { default as React, useState } from "react";
+import { default as React, useMemo } from "react";
 import { Form } from "react-bootstrap";
 
 export default function TokenAmountInput(props) {
-  const { onChange, currency, value } = props;
-  const [textValue, setTextValue] = useState(value || "");
+  const { onChange, currency, state } = props;
+
   const handleOnChange = ({ target }) => {
+    const inputText = target.value;
     let { groups } = /\$?(?<number>[\d,]*)?(?<decimal>\.\d{0,6})?/.exec(
-      target.value
+      inputText
     );
-    if (!groups.number & !groups.decimal) {
-      onChange(null);
-      return setTextValue("");
+    if (!groups.number && !groups.decimal) {
+      onChange({ value: null, formattedText: "" });
+      return;
     }
     const intValue = parseInt((groups.number || "0").replaceAll(",", ""));
-    const floatValue = parseFloat(groups.decimal || "0");
+    const floatValue =
+      groups.decimal === "." ? 0 : parseFloat(groups.decimal || "0");
     const total = BASE_FACTOR * intValue + BASE_FACTOR * floatValue;
-    if (isNaN(total)) {
-      onChange(null);
-    } else {
-      onChange(new BigInt(total));
+
+    const bigNum = isNaN(total) ? null : new BigInt(total);
+
+    let text = inputText;
+    if (bigNum) {
+      text = formatBigNumAsText(bigNum, currency);
+      if (groups.decimal === ".") {
+        text += ".";
+      }
     }
-    const numberFormat =
-      currency === "USD"
-        ? {
-            style: "currency",
-            currency: "USD",
-            currencyDisplay: "narrowSymbol",
-          }
-        : {};
-    let formattedNumber = new Intl.NumberFormat("en-US", numberFormat)
-      .format(intValue)
-      .replace(/(\.|,)00$/g, "");
-    setTextValue(formattedNumber + (groups.decimal || ""));
+
+    onChange({ value: bigNum, formattedText: text });
   };
+
+  const textValue = useMemo(() => {
+    if (state.value && state.formattedText) {
+      return state.formattedText;
+    } else if (state.value) {
+      return formatBigNumAsText(state.value);
+    }
+
+    return "";
+  }, [state]);
+
   return (
     <Form.Control {...props} onChange={handleOnChange} value={textValue} />
   );

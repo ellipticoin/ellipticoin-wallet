@@ -14,7 +14,7 @@ export default function Actions(props) {
         </button>
       </div>
       <div className="item">
-        <button onClick={() => setShowPage("Exchange")}>
+        <button onClick={() => setShowPage("Trade")}>
           <div className="icon-wrapper bg-warning">
             <Repeat />
           </div>

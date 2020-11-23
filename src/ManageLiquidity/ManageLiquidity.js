@@ -1,3 +1,4 @@
+import { InputState } from "../Inputs";
 import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, TOKENS, ZERO } from "../constants";
@@ -19,9 +20,15 @@ import { ChevronLeft } from "react-feather";
 
 export default function ManageLiquidity(props) {
   const { onHide, liquidityTokens, userTokens } = props;
-  const [provideAmount, setProvideAmount] = useState(new BigInt(0));
-  const [removeAmount, setRemoveAmount] = useState(new BigInt(0));
-  const [initialPrice, setInitialPrice] = useState(new BigInt(0));
+  const [provideAmountState, setProvideAmountState] = useState(
+    new InputState(ZERO)
+  );
+  const [removeAmountState, setRemoveAmountState] = useState(
+    new InputState(ZERO)
+  );
+  const [initialPriceState, setInitialPriceState] = useState(
+    new InputState(ZERO, "USD")
+  );
   const [provideToken, setProvideToken] = useState(TOKENS[0]);
   const [removeToken, setRemoveToken] = useState(TOKENS[0]);
   const [provideLiquidityToken, setProvideLiquidityToken] = useState(
@@ -35,6 +42,16 @@ export default function ManageLiquidity(props) {
   const userBaseTokenBalance = userTokens.filter(
     (t) => tokenName(t) === "USD"
   )[0].balance;
+
+  const provideAmount = useMemo(() => {
+    return provideAmountState.value;
+  }, [provideAmountState]);
+  const removeAmount = useMemo(() => {
+    return removeAmountState.value;
+  }, [removeAmountState]);
+  const initialPrice = useMemo(() => {
+    return initialPriceState.value;
+  });
 
   React.useEffect(() => {
     const provideLiquidityToken = liquidityTokens.find(
@@ -99,6 +116,7 @@ export default function ManageLiquidity(props) {
     );
 
     setRemoveToken({ ...removeToken, name: tokenName(removeToken) });
+    setRemoveAmountState(new InputState(ZERO));
   };
 
   const userHasEnoughProvideToken = () => {
@@ -156,6 +174,12 @@ export default function ManageLiquidity(props) {
     }
   };
 
+  const handleProvideTokenChanged = (token) => {
+    setProvideToken(token);
+    setProvideAmountState(new InputState(ZERO));
+    setInitialPriceState(new InputState(ZERO, "USD"));
+  };
+
   return (
     <div style={{ backgroundColor: "white", height: "100%" }}>
       <div className="appHeader">
@@ -179,15 +203,16 @@ export default function ManageLiquidity(props) {
                 <Form.Label>Token</Form.Label>
                 <TokenSelect
                   tokens={excludeUsd(LIQUIDITY_TOKENS)}
-                  onChange={(token) => setProvideToken(token)}
+                  onChange={(token) => handleProvideTokenChanged(token)}
                   token={provideToken}
                 />
               </Form.Group>
               <Form.Group className="basic">
                 <Form.Label>Amount</Form.Label>
                 <TokenAmountInput
-                  onChange={(value) => setProvideAmount(value)}
-                  value={provideAmount}
+                  onChange={(state) => setProvideAmountState(state)}
+                  state={provideAmountState}
+                  currency={provideToken.name}
                   placeholder="Amount"
                 />
               </Form.Group>
@@ -197,8 +222,8 @@ export default function ManageLiquidity(props) {
                   <InputGroup className="mb-3">
                     <TokenAmountInput
                       currency="USD"
-                      onChange={(value) => setInitialPrice(value)}
-                      value={initialPrice}
+                      onChange={(state) => setInitialPriceState(state)}
+                      state={initialPriceState}
                       placeholder="Inital Price"
                     />
                   </InputGroup>
@@ -293,8 +318,9 @@ export default function ManageLiquidity(props) {
               <Form.Group className="basic">
                 <Form.Label>Amount</Form.Label>
                 <TokenAmountInput
-                  onChange={(value) => setRemoveAmount(value)}
-                  value={removeAmount}
+                  onChange={(state) => setRemoveAmountState(state)}
+                  state={removeAmountState}
+                  currency={removeToken.name}
                   placeholder="Amount"
                 />
               </Form.Group>
