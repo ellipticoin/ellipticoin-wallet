@@ -5,12 +5,12 @@ import Exchange from "./Exchange";
 import Header from "./Header";
 import LiquidityBalances from "./LiquidityBalances";
 import ManageLiquidity from "./ManageLiquidity/ManageLiquidity";
+import NetworkStatistics from "./NetworkStatistics";
 import PendingTransactions from "./PendingTransactions";
-import Rewards from "./Rewards";
 import Send from "./Send";
+import Settings from "./Settings";
 import Sidebar from "./Sidebar";
 import Total from "./Total";
-import YourAddress from "./YourAddress";
 import { BASE_FACTOR } from "./constants";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
 import { useLocalStorage } from "./helpers";
@@ -40,6 +40,10 @@ function App(props) {
   const publicKey = useMemo(
     () => Buffer.from(nacl.sign.keyPair.fromSecretKey(secretKey).publicKey),
     [secretKey]
+  );
+  const [investorModeEnabled, setInvestorModeEnabled] = useLocalStorage(
+    "investorModeEnabled",
+    false
   );
 
   React.useEffect(() => {
@@ -124,6 +128,7 @@ function App(props) {
         return (
           <Exchange
             liquidityTokens={liquidityTokens}
+            investorModeEnabled={investorModeEnabled}
             userTokens={tokens}
             onHide={() => setShowPage(null)}
             publicKey={publicKey}
@@ -140,6 +145,20 @@ function App(props) {
             }
             show={showPage === "ManageLiquidity"}
             publicKey={publicKey}
+          />
+        );
+
+      case "NetworkStatistics":
+        return (
+          <NetworkStatistics onHide={() => setShowPage(null)} tokens={tokens} />
+        );
+
+      case "Settings":
+        return (
+          <Settings
+            onHide={() => setShowPage(null)}
+            investorModeEnabled={investorModeEnabled}
+            setInvestorModeEnabled={setInvestorModeEnabled}
           />
         );
 
@@ -171,7 +190,7 @@ function App(props) {
               position: "absolute",
               width: "100%",
               height: "100%",
-              background: "white",
+              background: "#EDEDF5",
               ...props,
             }}
             key={key}
@@ -187,26 +206,24 @@ function App(props) {
           setSecretKey={setSecretKey}
         />
         <div id="appCapsule">
-          <div className="section wallet-card-section pt-1">
+          <div className="section wallet-card-section pt-1 mb-2">
             <div className="wallet-card">
-              <Total total={totalTokenValue} />
+              <Total total={totalTokenValue} publicKey={publicKey} />
               <Actions setShowModal={setShowModal} setShowPage={setShowPage} />
             </div>
           </div>
-          <YourAddress publicKey={publicKey} />
-          <Rewards
-            publicKey={publicKey}
-            setIssuanceRewards={setIssuanceRewards}
-            issuanceRewards={issuanceRewards}
-            totalLockedValue={totalLockedValue}
-            blockNumber={currentBlock.number}
-          />
           <Balances tokens={tokens} total={totalTokenValue} />
-          <LiquidityBalances
-            blockNumber={currentBlock.number}
-            liquidityTokens={liquidityTokens}
-            total={totalLiquidityValue}
-          />
+          {sumBy(liquidityTokens, "balance") > 0 ? (
+            <LiquidityBalances
+              publicKey={publicKey}
+              blockNumber={currentBlock.number}
+              liquidityTokens={liquidityTokens}
+              total={totalLiquidityValue}
+              setIssuanceRewards={setIssuanceRewards}
+              issuanceRewards={issuanceRewards}
+              totalLockedValue={totalLockedValue}
+            />
+          ) : null}
         </div>
         <PendingTransactions
           pendingTransactions={pendingTransactions}
@@ -221,6 +238,7 @@ function App(props) {
         />
         <Sidebar
           setShowSidebar={setShowSidebar}
+          setShowPage={setShowPage}
           showSidebar={showSidebar}
           publicKey={publicKey}
           secretKey={secretKey}

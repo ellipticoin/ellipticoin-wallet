@@ -1,11 +1,19 @@
+import Rewards from "./Rewards";
 import { BASE_FACTOR } from "./constants";
 import { blockReward, formatPercentage, tokenName } from "./helpers";
 import { excludeUsd, formatCurrency, formatTokenBalance } from "./helpers";
 import { sumBy } from "lodash";
 import { default as React } from "react";
 
-export default function YourLiquidity(props) {
-  const { liquidityTokens, blockNumber } = props;
+export default function LiquidityBalances(props) {
+  const {
+    liquidityTokens,
+    blockNumber,
+    publicKey,
+    setIssuanceRewards,
+    issuanceRewards,
+    totalLockedValue,
+  } = props;
   const total = sumBy(liquidityTokens, (liquidityToken) => {
     let total =
       liquidityToken.balance * 2 * (liquidityToken.price / BASE_FACTOR);
@@ -17,6 +25,13 @@ export default function YourLiquidity(props) {
       <div className="section-heading">
         <h2 className="title">Your Liquidity</h2>
       </div>
+      <Rewards
+        publicKey={publicKey}
+        setIssuanceRewards={setIssuanceRewards}
+        issuanceRewards={issuanceRewards}
+        totalLockedValue={totalLockedValue}
+        blockNumber={blockNumber}
+      />
       <div className="card">
         <div className="table-responsive">
           <table className="table rounded">

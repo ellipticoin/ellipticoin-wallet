@@ -1,9 +1,12 @@
 import BridgeJSON from "./Bridge.json";
 import TokenSelect from "./Inputs/TokenSelect.js";
 import ReleaseTransactions from "./ReleaseTransactions";
-import { ETH_BRIDGE_ADDRESS, WETH } from "./constants";
-import { BASE_FACTOR } from "./constants";
-import { BRIDGE_TOKENS } from "./constants";
+import {
+  BRIDGE_TOKENS,
+  ETH_BRIDGE_ADDRESS,
+  WETH,
+  BASE_FACTOR,
+} from "./constants";
 import { formatTokenBalance, parseUnits } from "./helpers";
 import { usePostTransaction } from "./mutations";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
@@ -252,7 +255,7 @@ export default function Bridge(props) {
   };
 
   return (
-    <>
+    <div style={{ backgroundColor: "white", height: "100%" }}>
       <div className="appHeader">
         <div className="left">
           <button className="headerButton goBack">
@@ -443,6 +446,6 @@ export default function Bridge(props) {
           </p>
         )}
       </div>
-    </>
+    </div>
   );
 }

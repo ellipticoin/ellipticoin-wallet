@@ -2,13 +2,14 @@ import base64url from "base64url";
 import { saveAs } from "file-saver";
 import React from "react";
 import { Modal } from "react-bootstrap";
-import { Download, Upload, X } from "react-feather";
+import { Download, Upload, X, BarChart, Settings } from "react-feather";
 import Identicon from "react-identicons";
 
 export default function Sidebar(props) {
   let {
     showSidebar,
     setShowSidebar,
+    setShowPage,
     publicKey,
     secretKey,
     setSecretKey,
@@ -87,6 +88,28 @@ export default function Sidebar(props) {
                     <Upload color="#333" />
                   </div>
                   <div className="in">Load Private Key</div>
+                </button>
+              </li>
+              <li>
+                <button
+                  className="item"
+                  onClick={() => setShowPage("NetworkStatistics")}
+                >
+                  <div className="icon-box">
+                    <BarChart color="#333" />
+                  </div>
+                  <div className="in">Network Statistics</div>
+                </button>
+              </li>
+              <li>
+                <button
+                  className="item"
+                  onClick={() => setShowPage("Settings")}
+                >
+                  <div className="icon-box">
+                    <Settings color="#333" />
+                  </div>
+                  <div className="in">Settings</div>
                 </button>
               </li>
             </ul>
