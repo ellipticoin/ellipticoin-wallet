@@ -98,7 +98,7 @@ function App(props) {
     from: { transform: "translate3d(-100%,0,0)" },
     leave: { transform: "translate3d(-100%,0,0)" },
   });
-const totalLockedValue = useMemo(
+  const totalLockedValue = useMemo(
     () =>
       sumBy(tokens, (token) => {
         return (
@@ -213,16 +213,17 @@ const totalLockedValue = useMemo(
             </div>
           </div>
           <Balances tokens={tokens} total={totalTokenValue} />
-          {sumBy(liquidityTokens, "balance") > 0 ?
-          <LiquidityBalances
-            publicKey={publicKey}
-            blockNumber={currentBlock.number}
-            liquidityTokens={liquidityTokens}
-            total={totalLiquidityValue}
-            setIssuanceRewards={setIssuanceRewards}
-            issuanceRewards={issuanceRewards}
-            totalLockedValue={totalLockedValue}
-          />:null}
+          {sumBy(liquidityTokens, "balance") > 0 ? (
+            <LiquidityBalances
+              publicKey={publicKey}
+              blockNumber={currentBlock.number}
+              liquidityTokens={liquidityTokens}
+              total={totalLiquidityValue}
+              setIssuanceRewards={setIssuanceRewards}
+              issuanceRewards={issuanceRewards}
+              totalLockedValue={totalLockedValue}
+            />
+          ) : null}
         </div>
         <PendingTransactions
           pendingTransactions={pendingTransactions}

@@ -169,7 +169,7 @@ export default function Trade(props) {
     }
     if (inputToken.name === outputToken.name) {
       setFee(ZERO);
-      if(investorModeEnabled) {
+      if (investorModeEnabled) {
         setMinimumOutputAmount((inputAmount / BASE_FACTOR).toString());
       }
       return inputAmount;
@@ -198,7 +198,9 @@ export default function Trade(props) {
         inputToken.name
       );
       if (investorModeEnabled) {
-        setMinimumOutputAmount((inputAmountInBaseToken / BASE_FACTOR).toString());
+        setMinimumOutputAmount(
+          (inputAmountInBaseToken / BASE_FACTOR).toString()
+        );
       }
 
       return inputAmountInBaseToken;
@@ -222,11 +224,11 @@ export default function Trade(props) {
       new BigInt(outputLiquidityToken.price)
     );
     if (investorModeEnabled) {
-        setMinimumOutputAmount((amount / BASE_FACTOR).toString());
+      setMinimumOutputAmount((amount / BASE_FACTOR).toString());
     }
     return amount;
   }, [
-investorModeEnabled,
+    investorModeEnabled,
     inputAmount,
     inputToken,
     inputLiquidityToken,
@@ -242,7 +244,6 @@ investorModeEnabled,
 
     setMinimumOutputAmount(newVal);
   };
-
 
   return (
     <div className="section">
@@ -361,7 +362,11 @@ investorModeEnabled,
                   <li>
                     <strong>Output Amount</strong>
                     <h3 className="m-0">
-                      {outputAmount ? `${formatTokenBalance(outputAmount)} ${outputToken.ticker}` : null}
+                      {outputAmount
+                        ? `${formatTokenBalance(outputAmount)} ${
+                            outputToken.ticker
+                          }`
+                        : null}
                       <small>
                         {outputAmount
                           ? ` @ ${formatTokenExchangeRate(

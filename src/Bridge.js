@@ -1,6 +1,5 @@
 import BridgeJSON from "./Bridge.json";
 import TokenSelect from "./Inputs/TokenSelect.js";
-import {formatTokenBalance, parseUnits} from "./helpers";
 import ReleaseTransactions from "./ReleaseTransactions";
 import {
   BRIDGE_TOKENS,
@@ -8,6 +7,7 @@ import {
   WETH,
   BASE_FACTOR,
 } from "./constants";
+import { formatTokenBalance, parseUnits } from "./helpers";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
 import { default as ethers } from "ethers";
 import { differenceBy } from "lodash";
