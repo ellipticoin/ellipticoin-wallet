@@ -1,4 +1,4 @@
-import { TokenAmountInput, TokenSelect } from "./Inputs";
+import { TokenAmountInput, TokenSelect, InputState } from "./Inputs";
 import { BASE_FACTOR, LIQUIDITY_FEE, TOKENS, ZERO } from "./constants";
 import {
   encodeToken,
@@ -16,9 +16,14 @@ import { ChevronLeft } from "react-feather";
 
 export default function Exchange(props) {
   const { onHide, liquidityTokens, userTokens } = props;
-  const [inputAmount, setInputAmount] = React.useState();
+  const [inputAmountState, setInputAmountState] = React.useState(
+    new InputState(null)
+  );
+  const [
+    minimumOutputAmountState,
+    setMinimumOutputAmountState,
+  ] = React.useState(new InputState(ZERO));
   const [fee, setFee] = React.useState(ZERO);
-  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState("0");
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[3]);
   const [inputLiquidityToken, setInputLiquidityToken] = React.useState(
@@ -29,6 +34,14 @@ export default function Exchange(props) {
   );
   const [userTokenBalance, setUserTokenBalance] = React.useState();
   const [error, setError] = React.useState("");
+
+  const inputAmount = useMemo(() => {
+    return inputAmountState.value;
+  }, [inputAmountState]);
+
+  const minimumOutputAmount = useMemo(() => {
+    return minimumOutputAmountState.value;
+  }, [minimumOutputAmountState]);
 
   const handleOutputTokenChange = (tokenString) => {
     const outputToken = TOKENS.find(
@@ -65,9 +78,9 @@ export default function Exchange(props) {
     functionName: "exchange",
   });
   const clearForm = () => {
-    setInputAmount("");
+    setInputAmountState(new InputState(null));
+    setMinimumOutputAmountState(new InputState(ZERO));
     setError("");
-    setMinimumOutputAmount("0");
   };
 
   const setFeeInInputToken = (
@@ -164,7 +177,7 @@ export default function Exchange(props) {
     }
     if (inputToken.name === outputToken.name) {
       setFee(ZERO);
-      setMinimumOutputAmount((inputAmount / BASE_FACTOR).toString());
+      setMinimumOutputAmountState(new InputState(inputAmount, inputToken.name));
       return inputAmount;
     }
 
@@ -190,7 +203,9 @@ export default function Exchange(props) {
         inputLiquidityToken.price,
         inputToken.name
       );
-      setMinimumOutputAmount((inputAmountInBaseToken / BASE_FACTOR).toString());
+      setMinimumOutputAmountState(
+        new InputState(inputAmountInBaseToken, "USD")
+      );
       return inputAmountInBaseToken;
     }
 
@@ -211,7 +226,7 @@ export default function Exchange(props) {
       new BigInt(outputLiquidityToken.poolSupplyOfToken),
       new BigInt(outputLiquidityToken.price)
     );
-    setMinimumOutputAmount((amount / BASE_FACTOR).toString());
+    setMinimumOutputAmountState(new InputState(amount));
     return amount;
   }, [
     inputAmount,
@@ -221,13 +236,10 @@ export default function Exchange(props) {
     outputLiquidityToken,
   ]);
 
-  const handleMinimumOutputAmountChanged = (newVal) => {
-    if (newVal && (isNaN(newVal) || isNaN(parseFloat(newVal)))) {
-      setMinimumOutputAmount(minimumOutputAmount);
-      return;
-    }
-
-    setMinimumOutputAmount(newVal);
+  const inputTokenChanged = (token) => {
+    setInputToken(token);
+    setInputAmountState(new InputState(null));
+    setMinimumOutputAmountState(new InputState(null));
   };
 
   return (
@@ -246,15 +258,16 @@ export default function Exchange(props) {
             <Form.Label>Input Token</Form.Label>
             <TokenSelect
               tokens={TOKENS}
-              onChange={(token) => setInputToken(token)}
+              onChange={(token) => inputTokenChanged(token)}
               token={inputToken}
             />
           </Form.Group>
           <Form.Group className="basic">
             <Form.Label>Input Amount</Form.Label>
             <TokenAmountInput
-              onChange={(value) => setInputAmount(value)}
-              value={inputAmount}
+              onChange={(state) => setInputAmountState(state)}
+              currency={inputToken.ticker}
+              state={inputAmountState}
               placeholder="Amount"
             />
           </Form.Group>
@@ -292,11 +305,11 @@ export default function Exchange(props) {
             <Form.Label>
               Minimum Output Token Amount (slippage protection)
             </Form.Label>
-            <Form.Control
-              onChange={(e) => handleMinimumOutputAmountChanged(e.target.value)}
-              value={minimumOutputAmount}
+            <TokenAmountInput
+              onChange={(state) => setMinimumOutputAmountState(state)}
+              state={minimumOutputAmountState}
+              currency={outputToken.ticker}
               placeholder="Output Token Amount"
-              type="input"
             />
           </Form.Group>
           <Form.Group className="basic">
