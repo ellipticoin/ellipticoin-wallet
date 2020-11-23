@@ -1,4 +1,4 @@
-import Rewards from "./Rewards.js";
+import LockedValue from "./LockedValue.js";
 import { default as React } from "react";
 import { ChevronLeft } from "react-feather";
 
@@ -15,7 +15,7 @@ export default function NetworkStatistics(props) {
         <h2 className="mt-2 mb-0">Network Statistics</h2>
       </div>
       <div id="appCapsule" className="p2 mt-1">
-        <Rewards tokens={tokens} />
+        <LockedValue tokens={tokens} />
       </div>
     </>
   );

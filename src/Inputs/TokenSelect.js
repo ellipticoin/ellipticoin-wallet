@@ -1,29 +1,17 @@
 import { tokenName } from "../helpers";
-import { find } from "lodash";
 import { default as React } from "react";
-import { Form } from "react-bootstrap";
 import Select from "react-select";
 
 export default function TokenSelect(props) {
-  const {
-    onChange,
-    token,
-    tokens,
-    nameProperty,
-    disabledTokens,
-    defaultValue,
-  } = props;
+  const { onChange, tokens, nameProperty, disabledTokens } = props;
+  const defaultValue = props.defaultValue || tokens[0];
   const options = tokens.map((token) => ({
     value: token,
     label: nameProperty === "ethName" ? token.ethName : tokenName(token),
-    disabled: [disabledTokens || []]
+    disabled: (disabledTokens || [])
       .map((token) => token.id)
       .includes(token.id),
   }));
-  // const handleTokenChange = (tokenId) => {
-  //   const token = tokens.find((token) => token.id === tokenId);
-  //   onChange(token);
-  // };
   return (
     <Select
       styles={{ menu: (provided, state) => ({ ...provided, color: "#000" }) }}

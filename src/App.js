@@ -30,6 +30,7 @@ import nacl from "tweetnacl";
 function App(props) {
   const { setHost } = props;
   const [ethBlockNumber, setEthBlockNumber] = useState();
+  const [issuanceRewards, setIssuanceRewards] = useState();
   const [signer, setSigner] = useState();
   const [ethAccounts, setEthAccounts] = useState([]);
   const [secretKey, setSecretKey] = useLocalStorage(
@@ -73,7 +74,7 @@ function App(props) {
 
   const [showSidebar, setShowSidebar] = useState(false);
   const [showModal, setShowModal] = useState();
-  const [showPage, setShowPage] = useState("Exchange");
+  const [showPage, setShowPage] = useState();
   const [pendingTransactions, setPendingTransactions] = useState([]);
   const {
     data: { tokens } = { tokens: TOKENS },
@@ -97,6 +98,16 @@ function App(props) {
     from: { transform: "translate3d(-100%,0,0)" },
     leave: { transform: "translate3d(-100%,0,0)" },
   });
+const totalLockedValue = useMemo(
+    () =>
+      sumBy(tokens, (token) => {
+        return (
+          (parseInt(token.totalSupply) * parseInt(token.price) || 0) /
+          BASE_FACTOR
+        );
+      }),
+    [tokens]
+  );
   const page = () => {
     switch (showPage) {
       case "Bridge":
@@ -202,11 +213,16 @@ function App(props) {
             </div>
           </div>
           <Balances tokens={tokens} total={totalTokenValue} />
+          {sumBy(liquidityTokens, "balance") > 0 ?
           <LiquidityBalances
+            publicKey={publicKey}
             blockNumber={currentBlock.number}
             liquidityTokens={liquidityTokens}
             total={totalLiquidityValue}
-          />
+            setIssuanceRewards={setIssuanceRewards}
+            issuanceRewards={issuanceRewards}
+            totalLockedValue={totalLockedValue}
+          />:null}
         </div>
         <PendingTransactions
           pendingTransactions={pendingTransactions}

@@ -12,7 +12,7 @@ export default function Balances(props) {
       <div className="section-heading">
         <h2 className="title">Your Balances</h2>
       </div>
-      <div className="card">
+        <div className="card">
         <div className="table-responsive">
           <table className="table rounded">
             <thead>
