@@ -24,7 +24,7 @@ export default function Trade(props) {
   const { onHide, liquidityTokens, userTokens, investorModeEnabled } = props;
   const [inputAmount, setInputAmount] = React.useState();
   const [fee, setFee] = React.useState(ZERO);
-  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState("");
+  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState("0");
   const [inputToken, setInputToken] = React.useState(USD);
   const [outputToken, setOutputToken] = React.useState(ELC);
   const [inputLiquidityToken, setInputLiquidityToken] = React.useState(
@@ -36,22 +36,6 @@ export default function Trade(props) {
   const [userTokenBalance, setUserTokenBalance] = React.useState();
   const [error, setError] = React.useState("");
 
-  React.useEffect(() => {
-    setInputLiquidityToken(find(liquidityTokens, ["id", inputToken.id]));
-  }, [inputToken, liquidityTokens]);
-  const [exchange] = usePostTransaction({
-    contract: "Trade",
-    functionName: "exchange",
-  });
-  const clearForm = () => {
-    setInputAmount("");
-  };
-  const handleOutputTokenChange = (tokenString) => {
-    const outputToken = TOKENS.find(
-      (token) => tokenToString(token) === tokenString
-    );
-    setOutputToken(outputToken);
-  };
   const handleSwap = async (evt) => {
     evt.preventDefault();
     let formattedMinimumOutputAmount =
@@ -75,6 +59,16 @@ export default function Trade(props) {
       setError(res.returnValue.Err.message);
     }
   };
+  const [exchange] = usePostTransaction({
+    contract: "Exchange",
+    functionName: "exchange",
+  });
+  const clearForm = () => {
+    setInputAmount("");
+    setError("");
+    setMinimumOutputAmount("0");
+  };
+
   const setFeeInInputToken = (
     feeInBaseToken,
     priceInBaseToken,
@@ -408,117 +402,3 @@ export default function Trade(props) {
     </div>
   );
 }
-// </div>
-// </div>
-// </div>
-//     <Form noValidate autoComplete="off" onSubmit={(evt) => handleSwap(evt)}>
-//       <Form.Group className="basic">
-//         <Form.Label>Input Token</Form.Label>
-//         <TokenSelect
-//           tokens={TOKENS}
-//           onChange={(token) => setInputToken(token)}
-//           token={inputToken}
-//         />
-//       </Form.Group>
-//       <Form.Group className="basic">
-//         <Form.Label>Input Amount</Form.Label>
-//         <TokenAmountInput
-//           onChange={(value) => setInputAmount(value)}
-//           value={inputAmount}
-//           placeholder="Amount"
-//         />
-//       </Form.Group>
-//       <Form.Group className="basic">
-//         <Form.Label>Your Balance</Form.Label>
-//         <span className={inputAmount / userTokenBalance > 1 ? "text-danger" : ""}>
-//           {formatTokenBalance(userTokenBalance)}
-//         </span>
-//       </Form.Group>
-//       <div className="row justify-content-md-center mt-1">
-//         <ArrowDown />
-//       </div>
-//       <Form.Group className="basic">
-//         <Form.Label>Output Token</Form.Label>
-//         <Form.Control
-//           as="select"
-//           onChange={(event) => {
-//             handleOutputTokenChange(event.target.value);
-//           }}
-//           value={tokenToString(outputToken)}
-//           custom
-//         >
-//           {TOKENS.map((token) => (
-//             <option key={token.name} value={tokenToString(token)}>
-//               {token.name}
-//             </option>
-//           ))}
-//         </Form.Control>
-//       </Form.Group>
-//       <Form.Group className="basic">
-//         <Form.Label>
-//           Minimum Output Token Amount (slippage protection)
-//         </Form.Label>
-//         <Form.Control
-//           onChange={(e) => handleMinimumOutputAmountChanged(e.target.value)}
-//           value={minimumOutputAmount}
-//           placeholder="Output Token Amount"
-//           type="input"
-//         />
-//       </Form.Group>
-//       <Form.Group className="basic">
-//         <Form.Label>Current Rate</Form.Label>
-//         <span>
-//           {exchangeRate ? formatTokenExchangeRate(exchangeRate) : "N/A"}{" "}
-//           {outputToken.ticker} {" "}/{" "} {inputToken.ticker}
-//
-//         </span>
-//       </Form.Group>
-//       <Form.Group className="basic">
-//         <Form.Label>Available Quantity</Form.Label>
-//         <span>{formatTokenBalance(availableQuantity * BASE_FACTOR)}</span>
-//       </Form.Group>
-//       <ul className="listview flush transparent simple-listview no-space mt-3">
-//         <li>
-//           <strong>Transaction Fee</strong>
-//           <span className="text-success">Free while in Beta</span>
-//         </li>
-//         <li>
-//           <strong>Liquidity Fee</strong>
-//           <span>
-//             {inputAmount ? inputAmount / BASE_FACTOR : 0} *{" "}
-//             {inputToken.ticker === outputToken.ticker
-//               ? "0"
-//               : inputToken.ticker !== "USD" && outputToken.ticker !== "USD"
-//               ? `~${LIQUIDITY_FEE / BASE_FACTOR * 2}`
-//               : LIQUIDITY_FEE / BASE_FACTOR}{" "}
-//             = {fee ? formatTokenExchangeRate(Number(fee) / Number(BASE_FACTOR)) : 0}{" "}
-//             {inputToken.ticker}
-//           </span>
-//         </li>
-//         <li>
-//           <strong>Output Amount</strong>
-//           <h3 className="m-0">
-//             {outputAmount ? formatTokenBalance(outputAmount) : null}
-//             <small>{outputAmount ? ` @ ${formatTokenExchangeRate(outputAmount / inputAmount)} ${outputToken.ticker} / ${inputToken.ticker}` : ""}</small>
-//           </h3>
-//         </li>
-//       </ul>
-//       {error ? (
-//         <div id="error-message">
-//           <span className="text-danger">
-//             <strong>Error: {error}</strong>
-//           </span>
-//         </div>
-//       ) : null}
-//       <Button
-//         type="submit"
-//         className="btn btn-lg btn-block btn-primary m-1"
-//         variant="contained"
-//         color="primary"
-//         disabled={!outputAmount || EQ(outputAmount, ZERO) || !inputAmount || EQ(inputAmount, ZERO) || inputToken.ticker === outputToken.ticker ||  inputAmount / userTokenBalance > 1}
-//       >
-//         Exchange
-//       </Button>
-//     </Form>
-//   </div>
-// </div>

@@ -39,9 +39,3 @@ export default function Settings(props) {
     </>
   );
 }
-// <Form.Check id="customSwitch4" className="custom-control-input" type="checkbox" onClick={() => setChecked(true)} checked="checked" />
-// <input type="checkbox" className="custom-control-input" id="customSwitch4"  />
-// <div className="custom-control custom-switch">
-//     <Form.Check id="customSwitch4" className="custom-control-input" type="checkbox" />
-//     <label className="custom-control-label" for="customSwitch4"></label>
-// </div>

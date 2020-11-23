@@ -93,11 +93,6 @@ function App(props) {
     () => compact([tokenError, currentBlockError, liquidityTokenError]),
     [tokenError, currentBlockError, liquidityTokenError]
   );
-  const pageTransition = useTransition(showPage, null, {
-    enter: { transform: "translate3d(0,0,0)" },
-    from: { transform: "translate3d(-100%,0,0)" },
-    leave: { transform: "translate3d(-100%,0,0)" },
-  });
   const totalLockedValue = useMemo(
     () =>
       sumBy(tokens, (token) => {
@@ -108,6 +103,11 @@ function App(props) {
       }),
     [tokens]
   );
+  const pageTransition = useTransition(showPage, null, {
+    enter: { transform: "translate3d(0,0,0)" },
+    from: { transform: "translate3d(-100%,0,0)" },
+    leave: { transform: "translate3d(-100%,0,0)" },
+  });
   const page = () => {
     switch (showPage) {
       case "Bridge":

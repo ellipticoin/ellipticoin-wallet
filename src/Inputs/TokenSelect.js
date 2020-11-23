@@ -28,17 +28,3 @@ export default function TokenSelect(props) {
     />
   );
 }
-// <Form.Control
-//   as="select"
-//   onChange={(event) => {
-//     handleTokenChange(event.target.value);
-//   }}
-//   value={token.id}
-//   custom
-// >
-//   {tokens.map((token) => (
-//     <option key={token.id} value={token.id}>
-//       {nameProperty === "ethName" ? token.ethName : tokenName(token)}
-//     </option>
-//   ))}
-// </Form.Control>
