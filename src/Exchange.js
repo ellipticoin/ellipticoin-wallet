@@ -1,5 +1,5 @@
 import { TokenAmountInput, TokenSelect } from "./Inputs";
-import {BASE_FACTOR, LIQUIDITY_FEE, TOKENS, ZERO} from "./constants";
+import { BASE_FACTOR, LIQUIDITY_FEE, TOKENS, ZERO } from "./constants";
 import {
   encodeToken,
   tokenToString,
@@ -18,9 +18,7 @@ export default function Exchange(props) {
   const { onHide, liquidityTokens, userTokens } = props;
   const [inputAmount, setInputAmount] = React.useState();
   const [fee, setFee] = React.useState(ZERO);
-  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState(
-    "0"
-  );
+  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState("0");
   const [inputToken, setInputToken] = React.useState(TOKENS[0]);
   const [outputToken, setOutputToken] = React.useState(TOKENS[3]);
   const [inputLiquidityToken, setInputLiquidityToken] = React.useState(
@@ -40,10 +38,13 @@ export default function Exchange(props) {
   };
   const handleSwap = async (evt) => {
     evt.preventDefault();
-    let formattedMinimumOutputAmount = minimumOutputAmount.startsWith(".") || minimumOutputAmount === ""
-      ? "0" + minimumOutputAmount
-      : minimumOutputAmount;
-    formattedMinimumOutputAmount = new BigInt(parseFloat(formattedMinimumOutputAmount) * BASE_FACTOR)
+    let formattedMinimumOutputAmount =
+      minimumOutputAmount.startsWith(".") || minimumOutputAmount === ""
+        ? "0" + minimumOutputAmount
+        : minimumOutputAmount;
+    formattedMinimumOutputAmount = new BigInt(
+      parseFloat(formattedMinimumOutputAmount) * BASE_FACTOR
+    );
     let res = await exchange(
       encodeToken(inputToken),
       encodeToken(outputToken),
@@ -105,15 +106,13 @@ export default function Exchange(props) {
   const availableQuantity = useMemo(() => {
     const quantity =
       outputToken.name === "USD"
-        ? (inputLiquidityToken.poolSupplyOfToken / BASE_FACTOR * inputLiquidityToken.price / BASE_FACTOR)
+        ? ((inputLiquidityToken.poolSupplyOfToken / BASE_FACTOR) *
+            inputLiquidityToken.price) /
+          BASE_FACTOR
         : outputLiquidityToken.poolSupplyOfToken / BASE_FACTOR;
 
     return isNaN(quantity) ? ZERO : quantity;
-  }, [
-    outputToken,
-    inputLiquidityToken,
-    outputLiquidityToken,
-  ]);
+  }, [outputToken, inputLiquidityToken, outputLiquidityToken]);
 
   const exchangeRate = useMemo(() => {
     if (inputToken.ticker === outputToken.ticker) {
@@ -175,7 +174,8 @@ export default function Exchange(props) {
       inputAmountInBaseToken = inputAmount;
     } else {
       const inputAmountAfterFee = applyFee(inputAmount);
-      feeInBaseToken = (inputAmount - inputAmountAfterFee) * inputLiquidityToken.price;
+      feeInBaseToken =
+        (inputAmount - inputAmountAfterFee) * inputLiquidityToken.price;
 
       inputAmountInBaseToken = calculateInputAmountInBaseToken(
         inputAmountAfterFee,
@@ -194,8 +194,11 @@ export default function Exchange(props) {
       return inputAmountInBaseToken;
     }
 
-    const outputAmountInBaseToken = applyFee(new BigInt(inputAmountInBaseToken));
-    const outputFeeInBaseToken = (inputAmountInBaseToken - outputAmountInBaseToken) * BASE_FACTOR
+    const outputAmountInBaseToken = applyFee(
+      new BigInt(inputAmountInBaseToken)
+    );
+    const outputFeeInBaseToken =
+      (inputAmountInBaseToken - outputAmountInBaseToken) * BASE_FACTOR;
     feeInBaseToken += Number(outputFeeInBaseToken);
 
     setFeeInInputToken(
@@ -225,7 +228,7 @@ export default function Exchange(props) {
     }
 
     setMinimumOutputAmount(newVal);
-  }
+  };
 
   return (
     <>
@@ -257,7 +260,11 @@ export default function Exchange(props) {
           </Form.Group>
           <Form.Group className="basic">
             <Form.Label>Your Balance</Form.Label>
-            <span className={inputAmount / userTokenBalance > 1 ? "text-danger" : ""}>
+            <span
+              className={
+                inputAmount / userTokenBalance > 1 ? "text-danger" : ""
+              }
+            >
               {formatTokenBalance(userTokenBalance)}
             </span>
           </Form.Group>
@@ -296,8 +303,7 @@ export default function Exchange(props) {
             <Form.Label>Current Rate</Form.Label>
             <span>
               {exchangeRate ? formatTokenExchangeRate(exchangeRate) : "N/A"}{" "}
-              {outputToken.ticker} {" "}/{" "} {inputToken.ticker}
-
+              {outputToken.ticker} / {inputToken.ticker}
             </span>
           </Form.Group>
           <Form.Group className="basic">
@@ -316,9 +322,12 @@ export default function Exchange(props) {
                 {inputToken.ticker === outputToken.ticker
                   ? "0"
                   : inputToken.ticker !== "USD" && outputToken.ticker !== "USD"
-                  ? `~${LIQUIDITY_FEE / BASE_FACTOR * 2}`
+                  ? `~${(LIQUIDITY_FEE / BASE_FACTOR) * 2}`
                   : LIQUIDITY_FEE / BASE_FACTOR}{" "}
-                = {fee ? formatTokenExchangeRate(Number(fee) / Number(BASE_FACTOR)) : 0}{" "}
+                ={" "}
+                {fee
+                  ? formatTokenExchangeRate(Number(fee) / Number(BASE_FACTOR))
+                  : 0}{" "}
                 {inputToken.ticker}
               </span>
             </li>
@@ -326,7 +335,13 @@ export default function Exchange(props) {
               <strong>Output Amount</strong>
               <h3 className="m-0">
                 {outputAmount ? formatTokenBalance(outputAmount) : null}
-                <small>{outputAmount ? ` @ ${formatTokenExchangeRate(outputAmount / inputAmount)} ${outputToken.ticker} / ${inputToken.ticker}` : ""}</small>
+                <small>
+                  {outputAmount
+                    ? ` @ ${formatTokenExchangeRate(
+                        outputAmount / inputAmount
+                      )} ${outputToken.ticker} / ${inputToken.ticker}`
+                    : ""}
+                </small>
               </h3>
             </li>
           </ul>
@@ -342,7 +357,14 @@ export default function Exchange(props) {
             className="btn btn-lg btn-block btn-primary m-1"
             variant="contained"
             color="primary"
-            disabled={!outputAmount || EQ(outputAmount, ZERO) || !inputAmount || EQ(inputAmount, ZERO) || inputToken.ticker === outputToken.ticker ||  inputAmount / userTokenBalance > 1}
+            disabled={
+              !outputAmount ||
+              EQ(outputAmount, ZERO) ||
+              !inputAmount ||
+              EQ(inputAmount, ZERO) ||
+              inputToken.ticker === outputToken.ticker ||
+              inputAmount / userTokenBalance > 1
+            }
           >
             Exchange
           </Button>

@@ -98,7 +98,9 @@ export function formatTokenExchangeRate(amount, maxPlaces = 10, sigFigs = 6) {
 
   if (amount > 1) {
     const sigFigsBefore = Math.floor(amount).toString().length;
-    return amount.toFixed(sigFigsBefore > sigFigs ? 2 : Math.max(2, sigFigs - sigFigsBefore));
+    return amount.toFixed(
+      sigFigsBefore > sigFigs ? 2 : Math.max(2, sigFigs - sigFigsBefore)
+    );
   }
 
   let places = 0;

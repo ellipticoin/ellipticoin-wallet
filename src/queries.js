@@ -50,20 +50,31 @@ const GET_NEXT_NONCE = gql`
   }
 `;
 
-
 const GET_TRANSACTIONS_BY_CONTRACT_FUNCTION = gql`
-  query transactionsByContractFunction($senderAddress: Bytes!, $contractName: String!, $functionName: String!, $page: U64!, $pageSize: U64!) {
-    transactionsByContractFunction(senderAddress: $senderAddress, contractName: $contractName, functionName: $functionName, page: $page, pageSize: $pageSize) {
-      id,
-      networkId,
-      blockNumber,
-      position,
-      contract,
-      sender,
-      nonce,
-      function,
-      arguments,
-      returnValue,
+  query transactionsByContractFunction(
+    $senderAddress: Bytes!
+    $contractName: String!
+    $functionName: String!
+    $page: U64!
+    $pageSize: U64!
+  ) {
+    transactionsByContractFunction(
+      senderAddress: $senderAddress
+      contractName: $contractName
+      functionName: $functionName
+      page: $page
+      pageSize: $pageSize
+    ) {
+      id
+      networkId
+      blockNumber
+      position
+      contract
+      sender
+      nonce
+      function
+      arguments
+      returnValue
       raw
     }
   }
@@ -102,7 +113,7 @@ export function useGetCurrentBlock() {
 }
 
 export function useGetIssuanceRewards() {
-  const publicKey = usePublicKey()
+  const publicKey = usePublicKey();
   return useQuery(GET_ISSUANCE_REWARDS, {
     variables: {
       address: publicKey.toString("base64"),
@@ -119,7 +130,12 @@ export function useGetNextNonce() {
   });
 }
 
-export function useGetTransactionsByContractFunction(contractName, functionName, page = 0, pageSize = 100) {
+export function useGetTransactionsByContractFunction(
+  contractName,
+  functionName,
+  page = 0,
+  pageSize = 100
+) {
   const publicKey = usePublicKey();
   return useQuery(GET_TRANSACTIONS_BY_CONTRACT_FUNCTION, {
     variables: {
@@ -127,7 +143,7 @@ export function useGetTransactionsByContractFunction(contractName, functionName,
       contractName,
       functionName,
       page: page.toString(),
-      pageSize: pageSize.toString()
+      pageSize: pageSize.toString(),
     },
   });
 }
