@@ -1,10 +1,9 @@
-import { formatCurrency, formatTokenBalance } from "./helpers";
+import { formatTokenBalance } from "./helpers";
 import { usePostTransaction } from "./mutations";
 import { useGetIssuanceRewards } from "./queries";
 import React from "react";
 
 export default function Rewards(props) {
-  const { totalLockedValue } = props;
   const { data: { issuanceRewards } = 0 } = useGetIssuanceRewards();
   const [harvest] = usePostTransaction({
     contract: "Ellipticoin",
@@ -16,30 +15,20 @@ export default function Rewards(props) {
     await harvest();
   };
   return (
-    <div className="section">
-      <div className="row mt-2">
-        <div className="col-6">
-          <div className="stat-box">
-            <button
-              type="button"
-              onClick={() => handleHarvest()}
-              style={{ float: "right" }}
-              className="btn btn-success btn-lg mr-1"
-            >
-              Harvest
-            </button>
-            <div className="title">Mature Liquidity Rewards</div>
-            <div className="value text-success">
-              {formatTokenBalance(issuanceRewards)}
-            </div>
-          </div>
-        </div>
-        <div className="col-6">
-          <div className="stat-box">
-            <div className="title">Network Total Locked Value</div>
-            <div className="value text-success">
-              {formatCurrency(totalLockedValue)}
-            </div>
+    <div className="row mt-2 mb-2">
+      <div className="col-4">
+        <div className="stat-box">
+          <button
+            type="button"
+            onClick={() => handleHarvest()}
+            style={{ float: "right" }}
+            className="btn btn-success btn-lg mr-1"
+          >
+            Harvest
+          </button>
+          <div className="title">Mature Liquidity Rewards</div>
+          <div className="value text-success">
+            {formatTokenBalance(issuanceRewards)}
           </div>
         </div>
       </div>
