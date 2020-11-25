@@ -1,12 +1,10 @@
 import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
-import { BASE_FACTOR, TOKENS, ZERO } from "../constants";
-import { LIQUIDITY_TOKENS } from "../constants";
+import { BASE_FACTOR, ELC, ZERO, LIQUIDITY_TOKENS } from "../constants";
 import {
   excludeUsd,
   encodeToken,
   tokenName,
-  tokenToString,
   formatCurrency,
   formatTokenBalance,
 } from "../helpers";
@@ -22,8 +20,8 @@ export default function ManageLiquidity(props) {
   const [provideAmount, setProvideAmount] = useState(new BigInt(0));
   const [removeAmount, setRemoveAmount] = useState(new BigInt(0));
   const [initialPrice, setInitialPrice] = useState(new BigInt(0));
-  const [provideToken, setProvideToken] = useState(TOKENS[0]);
-  const [removeToken, setRemoveToken] = useState(TOKENS[0]);
+  const [provideToken, setProvideToken] = useState(ELC);
+  const [removeToken, setRemoveToken] = useState(ELC);
   const [provideLiquidityToken, setProvideLiquidityToken] = useState(
     liquidityTokens[0]
   );
@@ -92,14 +90,6 @@ export default function ManageLiquidity(props) {
     if (EQ(removeLiquidityToken.shareOfPool, ZERO)) return ZERO;
     return (userTokensInPool * removeLiquidityToken.price) / BASE_FACTOR;
   }, [removeLiquidityToken, userTokensInPool]);
-
-  const handleRemoveTokenChange = (removeTokenString) => {
-    const removeToken = userTokens.find(
-      (removeToken) => tokenToString(removeToken) === removeTokenString
-    );
-
-    setRemoveToken({ ...removeToken, name: tokenName(removeToken) });
-  };
 
   const userHasEnoughProvideToken = () => {
     return provideAmount / userProvideTokenBalance <= 1;
@@ -181,6 +171,7 @@ export default function ManageLiquidity(props) {
                   tokens={excludeUsd(LIQUIDITY_TOKENS)}
                   onChange={(token) => setProvideToken(token)}
                   token={provideToken}
+                  defaultValue={ELC}
                 />
               </Form.Group>
               <Form.Group className="basic">
@@ -275,20 +266,12 @@ export default function ManageLiquidity(props) {
             >
               <Form.Group className="basic">
                 <Form.Label>Token</Form.Label>
-                <Form.Control
-                  as="select"
-                  onChange={(event) => {
-                    handleRemoveTokenChange(event.target.value);
-                  }}
-                  value={tokenToString(removeToken)}
-                  custom
-                >
-                  {userTokens.map((token) => (
-                    <option key={token.id} value={tokenToString(token)}>
-                      {tokenName(token)}
-                    </option>
-                  ))}
-                </Form.Control>
+                <TokenSelect
+                  tokens={excludeUsd(LIQUIDITY_TOKENS)}
+                  onChange={(token) => setRemoveToken(token)}
+                  token={removeToken}
+                  defaultValue={ELC}
+                />
               </Form.Group>
               <Form.Group className="basic">
                 <Form.Label>Amount</Form.Label>
