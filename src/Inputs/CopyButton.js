@@ -1,12 +1,14 @@
 import { default as React, useState, useRef } from "react";
 import { Overlay, Tooltip } from "react-bootstrap";
+import copy from "copy-to-clipboard";
 
 export default function CopyButton(props) {
-  const { children } = props;
+  const { children, content } = props;
   const [copied, setCopied] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const handleClick = () => {
     setCopied(true);
+    copy(content)
     setShowTooltip(false);
     setTimeout(() => setCopied(false), 1000);
   };
