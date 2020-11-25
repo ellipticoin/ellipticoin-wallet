@@ -1,4 +1,4 @@
-import { TokenAmountInput, TokenSelect } from "./Inputs";
+import { TokenAmountInput, TokenSelect, InputState } from "./Inputs";
 import {
   BASE_FACTOR,
   LIQUIDITY_FEE,
@@ -13,7 +13,7 @@ import {
   formatTokenExchangeRate,
 } from "./helpers";
 import { usePostTransaction } from "./mutations";
-import { BigInt, add, subtract, multiply, divide, EQ } from "jsbi";
+import { BigInt, add, subtract, multiply, divide, EQ, GT } from "jsbi";
 import { find } from "lodash";
 import { default as React, useMemo } from "react";
 import { Button, Form } from "react-bootstrap";
@@ -22,11 +22,17 @@ import { ChevronLeft } from "react-feather";
 
 export default function Trade(props) {
   const { onHide, liquidityTokens, userTokens, investorModeEnabled } = props;
-  const [inputAmount, setInputAmount] = React.useState();
+
   const [fee, setFee] = React.useState(ZERO);
-  const [minimumOutputAmount, setMinimumOutputAmount] = React.useState("0");
   const [inputToken, setInputToken] = React.useState(USD);
   const [outputToken, setOutputToken] = React.useState(ELC);
+  const [inputAmountState, setInputAmountState] = React.useState(
+    new InputState(null, inputToken.ticker)
+  );
+  const [
+    minimumOutputAmountState,
+    setMinimumOutputAmountState,
+  ] = React.useState(new InputState(ZERO, outputToken.ticker));
   const [inputLiquidityToken, setInputLiquidityToken] = React.useState(
     liquidityTokens
   );
@@ -36,20 +42,21 @@ export default function Trade(props) {
   const [userTokenBalance, setUserTokenBalance] = React.useState();
   const [error, setError] = React.useState("");
 
+  const inputAmount = useMemo(() => {
+    return inputAmountState.value;
+  }, [inputAmountState]);
+
+  const minimumOutputAmount = useMemo(() => {
+    return minimumOutputAmountState.value;
+  }, [minimumOutputAmountState]);
+
   const handleSwap = async (evt) => {
     evt.preventDefault();
-    let formattedMinimumOutputAmount =
-      minimumOutputAmount.startsWith(".") || minimumOutputAmount === ""
-        ? "0" + minimumOutputAmount
-        : minimumOutputAmount;
-    formattedMinimumOutputAmount = new BigInt(
-      parseFloat(formattedMinimumOutputAmount) * BASE_FACTOR
-    );
     let res = await exchange(
       encodeToken(inputToken),
       encodeToken(outputToken),
       Number(inputAmount),
-      Number(formattedMinimumOutputAmount)
+      Number(minimumOutputAmount)
     );
 
     if (!res.returnValue) {
@@ -64,9 +71,9 @@ export default function Trade(props) {
     functionName: "exchange",
   });
   const clearForm = () => {
-    setInputAmount("");
+    setInputAmountState(new InputState(null));
+    setMinimumOutputAmountState(new InputState(ZERO));
     setError("");
-    setMinimumOutputAmount("0");
   };
 
   const setFeeInInputToken = (
@@ -164,7 +171,9 @@ export default function Trade(props) {
     if (inputToken.name === outputToken.name) {
       setFee(ZERO);
       if (investorModeEnabled) {
-        setMinimumOutputAmount((inputAmount / BASE_FACTOR).toString());
+        setMinimumOutputAmountState(
+          new InputState(inputAmount, inputToken.name)
+        );
       }
       return inputAmount;
     }
@@ -192,8 +201,8 @@ export default function Trade(props) {
         inputToken.name
       );
       if (investorModeEnabled) {
-        setMinimumOutputAmount(
-          (inputAmountInBaseToken / BASE_FACTOR).toString()
+        setMinimumOutputAmountState(
+          new InputState(inputAmountInBaseToken, "USD")
         );
       }
 
@@ -218,7 +227,7 @@ export default function Trade(props) {
       new BigInt(outputLiquidityToken.price)
     );
     if (investorModeEnabled) {
-      setMinimumOutputAmount((amount / BASE_FACTOR).toString());
+      setMinimumOutputAmountState(new InputState(amount));
     }
     return amount;
   }, [
@@ -230,13 +239,10 @@ export default function Trade(props) {
     outputLiquidityToken,
   ]);
 
-  const handleMinimumOutputAmountChanged = (newVal) => {
-    if (newVal && (isNaN(newVal) || isNaN(parseFloat(newVal)))) {
-      setMinimumOutputAmount(minimumOutputAmount);
-      return;
-    }
-
-    setMinimumOutputAmount(newVal);
+  const inputTokenChanged = (token) => {
+    setInputToken(token);
+    setInputAmountState(new InputState(null));
+    setMinimumOutputAmountState(new InputState(ZERO));
   };
 
   return (
@@ -264,23 +270,33 @@ export default function Trade(props) {
                   <div className="labels">
                     <Form.Label>From</Form.Label>
                     <Form.Label>
-                      Your Balance {formatTokenBalance(userTokenBalance)}
+                      Your Balance{" "}
+                      {inputAmount &&
+                      (!userTokenBalance ||
+                        GT(inputAmount, userTokenBalance)) ? (
+                        <span className="text-danger">
+                          {formatTokenBalance(userTokenBalance)}
+                        </span>
+                      ) : (
+                        formatTokenBalance(userTokenBalance)
+                      )}
                     </Form.Label>
                   </div>
                   <div className="row">
                     <div className="col-6">
                       <TokenAmountInput
-                        onChange={(value) => setInputAmount(value)}
-                        value={inputAmount}
+                        onChange={(state) => setInputAmountState(state)}
+                        currency={inputToken.ticker}
+                        state={inputAmountState}
                         placeholder="0.0"
                       />
                     </div>
                     <div className="col-6">
                       <TokenSelect
-                        onChange={setInputToken}
-                        token={inputToken}
-                        defaultValue={USD}
                         tokens={TOKENS}
+                        defaultValue={USD}
+                        onChange={(token) => inputTokenChanged(token)}
+                        token={inputToken}
                       />
                     </div>
                   </div>
@@ -303,13 +319,11 @@ export default function Trade(props) {
                       <Form.Label>
                         Minimum Output Token Amount (slippage protection)
                       </Form.Label>
-                      <Form.Control
-                        onChange={(e) =>
-                          handleMinimumOutputAmountChanged(e.target.value)
-                        }
-                        value={minimumOutputAmount}
+                      <TokenAmountInput
+                        onChange={(state) => setMinimumOutputAmountState(state)}
+                        state={minimumOutputAmountState}
+                        currency={outputToken.ticker}
                         placeholder="Output Token Amount"
-                        type="input"
                       />
                     </Form.Group>
                     <Form.Group className="basic">
