@@ -24,7 +24,7 @@ export default function TokenAmountInput(props) {
     const bigNum = isNaN(total) ? null : new BigInt(total);
 
     let text = inputText;
-    if (bigNum && !/^\$?0?\.0+$/.test(text)) {
+    if (bigNum) {
       text = formatBigNumAsText(bigNum, currency);
       let split = text.split(".");
       if (
