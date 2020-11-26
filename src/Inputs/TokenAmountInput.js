@@ -24,10 +24,14 @@ export default function TokenAmountInput(props) {
     const bigNum = isNaN(total) ? null : new BigInt(total);
 
     let text = inputText;
-    if (bigNum) {
+    if (bigNum && !/^\$?0?\.0+$/.test(text)) {
       text = formatBigNumAsText(bigNum, currency);
-      if (groups.decimal === ".") {
-        text += ".";
+      let split = text.split(".");
+      if (
+        groups.decimal !== undefined &&
+        (split.length < 2 || split[1].length < groups.decimal.length - 1)
+      ) {
+        text = split[0] + groups.decimal;
       }
     }
 
