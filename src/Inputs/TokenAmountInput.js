@@ -26,8 +26,12 @@ export default function TokenAmountInput(props) {
     let text = inputText;
     if (bigNum) {
       text = formatBigNumAsText(bigNum, currency);
-      if (groups.decimal === ".") {
-        text += ".";
+      let split = text.split(".");
+      if (
+        groups.decimal !== undefined &&
+        (split.length < 2 || split[1].length < groups.decimal.length - 1)
+      ) {
+        text = split[0] + groups.decimal;
       }
     }
 
