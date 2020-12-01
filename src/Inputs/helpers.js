@@ -19,7 +19,7 @@ export const formatBigNumAsText = (num, currency) => {
       ? {
           style: "currency",
           currency: "USD",
-          currencyDisplay: "narrowSymbol",
+          currencyDisplay: "symbol",
         }
       : {};
 
