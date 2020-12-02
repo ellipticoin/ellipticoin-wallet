@@ -10,7 +10,7 @@ import {
   formatTokenBalance,
 } from "../helpers";
 import { usePostTransaction } from "../mutations";
-import { EQ } from "jsbi";
+import { EQ, BigInt } from "jsbi";
 import { find } from "lodash";
 import { default as React, useMemo, useState } from "react";
 import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
@@ -98,8 +98,8 @@ export default function ManageLiquidity(props) {
         (removeLiquidityToken.shareOfPool *
           removeLiquidityToken.poolSupplyOfToken) /
           BASE_FACTOR /
-          100
-      ) * 100
+          10
+      ) * 10
     );
   }, [removeLiquidityToken]);
 
@@ -152,9 +152,18 @@ export default function ManageLiquidity(props) {
   const handleRemoveLiquidity = async (evt) => {
     evt.preventDefault();
 
+    let amountToRemove = removeAmount;
+    if (EQ(removeAmount, userTokensInPool)) {
+      amountToRemove = BigInt(
+        (removeLiquidityToken.shareOfPool *
+          removeLiquidityToken.poolSupplyOfToken) /
+          BASE_FACTOR
+      );
+    }
+
     const res = await removeliquidity(
       encodeToken(removeToken),
-      Number(removeAmount)
+      Number(amountToRemove)
     );
     if (!res.returnValue) {
       onHide();
