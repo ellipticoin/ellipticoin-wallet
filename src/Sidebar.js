@@ -1,5 +1,5 @@
+import { downloadSecretKey } from "./helpers";
 import base64url from "base64url";
-import { saveAs } from "file-saver";
 import React from "react";
 import { Modal } from "react-bootstrap";
 import { Download, Upload, X, BarChart, Settings } from "react-feather";
@@ -13,13 +13,12 @@ export default function Sidebar(props) {
     publicKey,
     secretKey,
     setSecretKey,
+    setSecretKeyDownloaded,
   } = props;
 
   const downloadPrivateKey = (option) => {
-    var blob = new Blob([Buffer.from(secretKey).toString("base64")], {
-      type: "text/plain;charset=utf-8",
-    });
-    saveAs(blob, "ellipticoin-private-key.txt");
+    downloadSecretKey(secretKey, true);
+    setSecretKeyDownloaded(true);
   };
 
   const uploadPrivateKey = (option) => {

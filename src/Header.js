@@ -1,4 +1,4 @@
-import { useLocalStorage } from "./helpers";
+import { downloadSecretKey, useLocalStorage } from "./helpers";
 import Logo from "./logo.svg";
 import base64url from "base64url";
 import React from "react";
@@ -6,8 +6,26 @@ import { Menu, X } from "react-feather";
 import Identicon from "react-identicons";
 
 export default function WalletMenu(props) {
-  const { setShowSidebar, publicKey } = props;
-  const [showWarning, setShowWarning] = useLocalStorage("showWarning", true);
+  const {
+    showWarning,
+    setShowWarning,
+    setShowSidebar,
+    publicKey,
+    secretKey,
+    secretKeyDownloaded,
+    setSecretKeyDownloaded,
+  } = props;
+
+  const hideWarning = () => {
+    if (secretKeyDownloaded) {
+      setShowWarning(false);
+      return true;
+    }
+    const res = downloadSecretKey(secretKey);
+    setSecretKeyDownloaded(res);
+    setShowWarning(!res);
+    return res;
+  };
 
   return (
     <>
@@ -21,10 +39,7 @@ export default function WalletMenu(props) {
                   more tokens than you'd be happy to lose.
                 </h3>
               </div>
-              <button
-                style={{ float: "right" }}
-                onClick={() => setShowWarning(false)}
-              >
+              <button style={{ float: "right" }} onClick={() => hideWarning()}>
                 <X color={"white"} />
               </button>
             </div>
