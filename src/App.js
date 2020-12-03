@@ -13,7 +13,7 @@ import Total from "./Total";
 import Trade from "./Trade";
 import { BASE_FACTOR } from "./constants";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
-import { useLocalStorage } from "./helpers";
+import { downloadSecretKey, useLocalStorage } from "./helpers";
 import {
   useGetCurrentBlock,
   useGetLiquidityTokens,
@@ -37,6 +37,12 @@ function App(props) {
     "secretKey",
     () => nacl.sign.keyPair().secretKey
   );
+  const [secretKeyDownloaded, setSecretKeyDownloaded] = useLocalStorage(
+    "secretKeyDownloaded",
+    false
+  );
+  const [showWarning, setShowWarning] = useLocalStorage("showWarning", true);
+
   const publicKey = useMemo(
     () => Buffer.from(nacl.sign.keyPair.fromSecretKey(secretKey).publicKey),
     [secretKey]
@@ -108,9 +114,21 @@ function App(props) {
     from: { transform: "translate3d(-100%,0,0)" },
     leave: { transform: "translate3d(-100%,0,0)" },
   });
+  const downloadPrivateKey = () => {
+    if (secretKeyDownloaded || !showWarning) {
+      return true;
+    }
+    const res = downloadSecretKey(secretKey);
+    setSecretKeyDownloaded(res);
+    return res;
+  };
   const page = () => {
     switch (showPage) {
       case "Bridge":
+        if (!downloadPrivateKey()) {
+          setShowPage(null);
+          return;
+        }
         return (
           <Bridge
             onHide={() => setShowPage(null)}
@@ -125,6 +143,10 @@ function App(props) {
           />
         );
       case "Trade":
+        if (!downloadPrivateKey()) {
+          setShowPage(null);
+          return;
+        }
         return (
           <Trade
             liquidityTokens={liquidityTokens}
@@ -135,6 +157,10 @@ function App(props) {
           />
         );
       case "ManageLiquidity":
+        if (!downloadPrivateKey()) {
+          setShowPage(null);
+          return;
+        }
         return (
           <ManageLiquidity
             onHide={() => setShowPage(null)}
@@ -201,9 +227,14 @@ function App(props) {
       )}
       <div style={{ display: showPage ? "none" : "block" }}>
         <Header
+          showWarning={showWarning}
+          setShowWarning={setShowWarning}
           setShowSidebar={setShowSidebar}
           publicKey={publicKey}
           setSecretKey={setSecretKey}
+          secretKey={secretKey}
+          secretKeyDownloaded={secretKeyDownloaded}
+          setSecretKeyDownloaded={setSecretKeyDownloaded}
         />
         <div id="appCapsule">
           <div className="section wallet-card-section pt-1 mb-2">
@@ -243,6 +274,7 @@ function App(props) {
           publicKey={publicKey}
           secretKey={secretKey}
           setSecretKey={setSecretKey}
+          setSecretKeyDownloaded={setSecretKeyDownloaded}
         />
       </div>
     </>

@@ -9,6 +9,7 @@ import {
 import Ed25519Signer from "./cose/Ed25519Signer";
 import cbor from "cbor";
 import ethers from "ethers";
+import { saveAs } from "file-saver";
 import { BigInt } from "jsbi";
 import { find, get } from "lodash";
 import { useState } from "react";
@@ -177,4 +178,22 @@ export function useLocalStorage(key, initialValue) {
   };
 
   return [storedValue, setValue];
+}
+
+export function downloadSecretKey(secretKey, noConfirm) {
+  if (!noConfirm) {
+    // eslint-disable-next-line no-restricted-globals
+    let res = confirm(
+      "You will be asked to download your private key to prevent loss of funds."
+    );
+    if (!res) {
+      return false;
+    }
+  }
+
+  let blob = new Blob([Buffer.from(secretKey).toString("base64")], {
+    type: "text/plain;charset=utf-8",
+  });
+  saveAs(blob, "ellipticoin-private-key.txt");
+  return true;
 }
