@@ -198,7 +198,21 @@ export default function ManageLiquidity(props) {
               onSubmit={(evt) => handleProvideSubmit(evt)}
             >
               <Form.Group className="basic">
-                <Form.Label>Token</Form.Label>
+                <div className="labels">
+                  <Form.Label>Token</Form.Label>
+                  <Form.Label>
+                    Your Balance:{" "}
+                    <span
+                      className={
+                        !userHasEnoughProvideToken() ? "text-danger" : ""
+                      }
+                    >
+                      {userProvideTokenBalance
+                        ? formatTokenBalance(userProvideTokenBalance)
+                        : "0"}
+                    </span>
+                  </Form.Label>
+                </div>
                 <TokenSelect
                   tokens={excludeUsd(LIQUIDITY_TOKENS)}
                   onChange={(token) => handleProvideTokenChanged(token)}
@@ -228,6 +242,23 @@ export default function ManageLiquidity(props) {
                   </InputGroup>
                 </Form.Group>
               )}
+              <Form.Group className="basic">
+                <Form.Label>USD to Deposit</Form.Label>
+                <div className="mt-1">
+                  <span
+                    className={userHasEnoughBaseToken() ? "" : "text-danger"}
+                  >
+                    {!provideBaseTokenAmount
+                      ? "0"
+                      : formatCurrency(provideBaseTokenAmount)}
+                  </span>{" "}
+                  of{" "}
+                  {userBaseTokenBalance
+                    ? formatTokenBalance(userBaseTokenBalance)
+                    : "0"}
+                </div>
+                <hr className="mt-0" />
+              </Form.Group>
               <div></div>
               {error ? (
                 <div id="error-message">
@@ -248,33 +279,6 @@ export default function ManageLiquidity(props) {
                 {providePoolExists ? "Add Liquidity" : "Create Pool"}
               </Button>
               <div className="mt-2">
-                <strong>Depositing</strong>
-                <div>
-                  {provideToken.name}:{" "}
-                  <span
-                    className={userHasEnoughProvideToken() ? "" : "text-danger"}
-                  >
-                    {provideAmount ? formatTokenBalance(provideAmount) : "0"}
-                  </span>{" "}
-                  /{" "}
-                  {userProvideTokenBalance
-                    ? formatTokenBalance(userProvideTokenBalance)
-                    : "0"}
-                </div>
-                <div>
-                  USD:{" "}
-                  <span
-                    className={userHasEnoughBaseToken() ? "" : "text-danger"}
-                  >
-                    {!provideBaseTokenAmount
-                      ? "0"
-                      : formatCurrency(provideBaseTokenAmount)}
-                  </span>{" "}
-                  /{" "}
-                  {userBaseTokenBalance
-                    ? formatTokenBalance(userBaseTokenBalance)
-                    : "0"}
-                </div>
                 <div>
                   Warning: You can lose value in fixed constant automated market
                   makers due to{" "}
@@ -298,7 +302,21 @@ export default function ManageLiquidity(props) {
               onSubmit={(evt) => handleRemoveLiquidity(evt)}
             >
               <Form.Group className="basic">
-                <Form.Label>Token</Form.Label>
+                <div className="labels">
+                  <Form.Label>Token</Form.Label>
+                  <Form.Label>
+                    Your Balance:{" "}
+                    <span
+                      className={
+                        !userHasEnoughRemoveToken() ? "text-danger" : ""
+                      }
+                    >
+                      {userTokensInPool
+                        ? formatTokenBalance(userTokensInPool)
+                        : "0"}
+                    </span>
+                  </Form.Label>
+                </div>
                 <TokenSelect
                   tokens={excludeUsd(LIQUIDITY_TOKENS)}
                   onChange={(token) => setRemoveToken(token)}
@@ -315,40 +333,34 @@ export default function ManageLiquidity(props) {
                   placeholder="Amount"
                 />
               </Form.Group>
-              <div className="mt-2">
-                <strong>Withdrawable Amount*</strong>
+              <Form.Group className="basic">
+                <Form.Label>USD to Withdraw</Form.Label>
                 <div>
-                  {removeToken.name}:{" "}
                   <span
-                    className={userHasEnoughRemoveToken() ? "" : "text-danger"}
+                    className={
+                      (removeAmount / userTokensInPool) * userBaseTokensInPool >
+                      userBaseTokensInPool
+                        ? "text-danger"
+                        : ""
+                    }
                   >
-                    {removeAmount ? formatTokenBalance(removeAmount) : "0"}
-                  </span>{" "}
-                  /{" "}
-                  {userTokensInPool
-                    ? formatTokenBalance(userTokensInPool)
-                    : "0"}
+                    {!removeAmount
+                      ? "0"
+                      : formatTokenBalance(
+                          (removeAmount / userTokensInPool) *
+                            userBaseTokensInPool
+                        )}
+                  </span>
+                  <span>
+                    {" "}
+                    of{" "}
+                    {userBaseTokensInPool
+                      ? formatTokenBalance(userBaseTokensInPool)
+                      : "0"}
+                  </span>
                 </div>
-                <div>
-                  USD:{" "}
-                  {!removeAmount
-                    ? "0"
-                    : formatTokenBalance(
-                        (removeAmount / userTokensInPool) * userBaseTokensInPool
-                      )}
-                  /{" "}
-                  {userBaseTokensInPool
-                    ? formatTokenBalance(userBaseTokensInPool)
-                    : "0"}
-                </div>
-                <div>
-                  <small>
-                    * You were making a market, so you took the other side of
-                    any trades that occurred in exchange for trading fees.
-                  </small>
-                </div>
-              </div>
-              <div className="mt-2"> </div>
+                <hr className="mt-0" />
+              </Form.Group>
               {error ? (
                 <div id="error-message">
                   <span className="text-danger">
@@ -370,6 +382,14 @@ export default function ManageLiquidity(props) {
               >
                 Remove Liquidity
               </Button>
+              <div className="mt-2">
+                <div>
+                  * Values will likely differ from original deposit values. You
+                  were making a market, so when someone bought/sold, you
+                  sold/bought to/from them in exchange for trading fees.
+                </div>
+              </div>
+              <div className="mt-2"> </div>
             </Form>
           </Tab>
         </Tabs>

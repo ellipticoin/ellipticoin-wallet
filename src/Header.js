@@ -1,4 +1,4 @@
-import { downloadSecretKey, useLocalStorage } from "./helpers";
+import { downloadSecretKey } from "./helpers";
 import Logo from "./logo.svg";
 import base64url from "base64url";
 import React from "react";
