@@ -10,7 +10,7 @@ import {
   formatTokenBalance,
 } from "../helpers";
 import { usePostTransaction } from "../mutations";
-import { EQ, BigInt, GT } from "jsbi";
+import { EQ, BigInt } from "jsbi";
 import { find } from "lodash";
 import { default as React, useMemo, useState } from "react";
 import { Button, Form, InputGroup, Tab, Tabs } from "react-bootstrap";
