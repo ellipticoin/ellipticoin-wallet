@@ -83,7 +83,7 @@ export default function Trade(props) {
   ) => {
     setFee(
       inputTokenName === "USD"
-        ? feeInBaseToken
+        ? feeInBaseToken / BASE_FACTOR
         : feeInBaseToken / priceInBaseToken
     );
   };
@@ -270,7 +270,7 @@ export default function Trade(props) {
                   <div className="labels">
                     <Form.Label>From</Form.Label>
                     <Form.Label>
-                      Your Balance{" "}
+                      Your Balance:{" "}
                       {inputAmount &&
                       (!userTokenBalance ||
                         GT(inputAmount, userTokenBalance)) ? (
