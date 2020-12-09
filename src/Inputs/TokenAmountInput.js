@@ -21,7 +21,7 @@ export default function TokenAmountInput(props) {
       groups.decimal === "." ? 0 : parseFloat(groups.decimal || "0");
     const total = BASE_FACTOR * intValue + BASE_FACTOR * floatValue;
 
-    const bigNum = isNaN(total) ? null : new BigInt(total);
+    const bigNum = isNaN(total) ? null : new BigInt(Math.round(total));
 
     let text = inputText;
     if (bigNum) {
