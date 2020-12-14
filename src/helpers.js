@@ -124,6 +124,17 @@ export function tokenName(token) {
   );
 }
 
+export function tokenTicker(token) {
+  return get(
+    find(
+      [ELC, ...BRIDGE_TOKENS],
+      ({ issuer, id }) =>
+        issuer === token.issuer && id.toString("base64") === token.id
+    ),
+    "ticker"
+  );
+}
+
 export function excludeUsd(liquidityTokens) {
   return liquidityTokens.filter((t) => tokenName(t) !== "USD");
 }
