@@ -258,6 +258,7 @@ function App(props) {
         </div>
         <PendingTransactions
           pendingTransactions={pendingTransactions}
+          d
           setPendingTransactions={setPendingTransactions}
           ethBlockNumber={ethBlockNumber}
         />

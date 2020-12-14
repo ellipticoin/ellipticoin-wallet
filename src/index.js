@@ -1,4 +1,5 @@
 import ApolloWrapper from "./ApolloWrapper";
+import "./App.css";
 import "./styles/style.scss";
 import React from "react";
 import ReactDOM from "react-dom";

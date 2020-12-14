@@ -1,6 +1,11 @@
 import Rewards from "./Rewards";
 import { BASE_FACTOR } from "./constants";
-import { blockReward, formatPercentage, tokenName } from "./helpers";
+import {
+  blockReward,
+  formatPercentage,
+  tokenName,
+  tokenTicker,
+} from "./helpers";
 import { excludeUsd, formatCurrency, formatTokenBalance } from "./helpers";
 import { sumBy } from "lodash";
 import { default as React } from "react";
@@ -38,23 +43,20 @@ export default function LiquidityBalances(props) {
             <thead>
               <tr>
                 <th scope="col">Token</th>
-                <th scope="col" className="text-center">
-                  ELC Issuance Per Block (Percentage Share Pool)
-                </th>
-                <th scope="col" className="text-center">
-                  Tokens Locked
-                </th>
-                <th scope="col" className="text-center">
-                  +
-                </th>
-                <th scope="col" className="text-center">
-                  USD Locked
+                <th scope="col" className="text-right">
+                  Your Share of Pool
                 </th>
                 <th scope="col" className="text-right">
-                  =
+                  Your ELC Issuance Per Block
                 </th>
                 <th scope="col" className="text-right">
-                  Total Locked Value
+                  Your Tokens In Pool
+                </th>
+                <th scope="col" className="text-right">
+                  Implied Price Per Token
+                </th>
+                <th scope="col" className="text-right">
+                  Your Total Value In Pool
                 </th>
               </tr>
             </thead>
@@ -62,27 +64,35 @@ export default function LiquidityBalances(props) {
               {excludeUsd(liquidityTokens).map((liquidityToken) => (
                 <tr key={liquidityToken.id}>
                   <th scope="row">{tokenName(liquidityToken)}</th>
-                  <td className="text-center">
+                  <td className="text-right">
+                    {formatPercentage(liquidityToken.shareOfPool)}
+                  </td>
+                  <td className="text-right">
                     {formatTokenBalance(
                       (blockReward(blockNumber) * liquidityToken.shareOfPool) /
                         2
-                    )}{" "}
-                    ({formatPercentage(liquidityToken.shareOfPool)})
-                  </td>
-                  <td className="text-center">
-                    {formatTokenBalance(
-                      liquidityToken.poolSupplyOfToken *
-                        (liquidityToken.shareOfPool / BASE_FACTOR)
                     )}
                   </td>
-                  <td></td>
-                  <td className="text-center">
-                    {formatTokenBalance(
-                      liquidityToken.poolSupplyOfBaseToken *
-                        (liquidityToken.shareOfPool / BASE_FACTOR)
-                    )}
+                  <td className="text-right">
+                    <p className="no-margin">
+                      {formatTokenBalance(
+                        liquidityToken.poolSupplyOfToken *
+                          (liquidityToken.shareOfPool / BASE_FACTOR)
+                      )}{" "}
+                      {tokenTicker(liquidityToken)}
+                    </p>
+                    <p className="no-margin">
+                      {"+ "}
+                      {formatTokenBalance(
+                        liquidityToken.poolSupplyOfBaseToken *
+                          (liquidityToken.shareOfPool / BASE_FACTOR)
+                      )}
+                      {" USD"}
+                    </p>
                   </td>
-                  <td></td>
+                  <td className="text-right">
+                    {formatCurrency(liquidityToken.price)}
+                  </td>
                   <td className="text-right">
                     {formatCurrency(
                       liquidityToken.poolSupplyOfBaseToken *
@@ -93,8 +103,8 @@ export default function LiquidityBalances(props) {
                 </tr>
               ))}
               <tr>
-                <td colSpan="6"></td>
-                <td className="text-right text-primary">
+                <td></td>
+                <td colSpan="5" className="text-right text-primary">
                   <strong>Total: {formatCurrency(total)}</strong>
                 </td>
               </tr>
