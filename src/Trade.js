@@ -239,6 +239,14 @@ export default function Trade(props) {
     outputLiquidityToken,
   ]);
 
+  const maxInputAmount = () => {
+    if (userTokenBalance) {
+      setInputAmountState(
+        new InputState(new BigInt(userTokenBalance), inputToken.ticker)
+      );
+    }
+  };
+
   const inputTokenChanged = (token) => {
     setInputToken(token);
     setInputAmountState(new InputState(null));
@@ -269,7 +277,10 @@ export default function Trade(props) {
                 <Form.Group className="basic">
                   <div className="labels">
                     <Form.Label>From</Form.Label>
-                    <Form.Label>
+                    <Form.Label
+                      onClick={() => maxInputAmount()}
+                      className={userTokenBalance ? "cursor-pointer" : ""}
+                    >
                       Your Balance:{" "}
                       {inputAmount &&
                       (!userTokenBalance ||

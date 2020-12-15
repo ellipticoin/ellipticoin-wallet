@@ -178,6 +178,22 @@ export default function ManageLiquidity(props) {
     setInitialPriceState(new InputState(ZERO, "USD"));
   };
 
+  const maxProvideAmount = () => {
+    if (userProvideTokenBalance) {
+      setProvideAmountState(
+        new InputState(userProvideTokenBalance, provideToken.ticker)
+      );
+    }
+  };
+
+  const maxRemoveAmount = () => {
+    if (userTokensInPool) {
+      setRemoveAmountState(
+        new InputState(userTokensInPool, provideToken.ticker)
+      );
+    }
+  };
+
   return (
     <div style={{ backgroundColor: "white", height: "100%" }}>
       <div className="appHeader">
@@ -200,7 +216,10 @@ export default function ManageLiquidity(props) {
               <Form.Group className="basic">
                 <div className="labels">
                   <Form.Label>Token</Form.Label>
-                  <Form.Label>
+                  <Form.Label
+                    onClick={() => maxProvideAmount()}
+                    className={userProvideTokenBalance ? "cursor-pointer" : ""}
+                  >
                     Your Balance:{" "}
                     <span
                       className={
@@ -304,7 +323,10 @@ export default function ManageLiquidity(props) {
               <Form.Group className="basic">
                 <div className="labels">
                   <Form.Label>Token</Form.Label>
-                  <Form.Label>
+                  <Form.Label
+                    onClick={() => maxRemoveAmount()}
+                    className={userTokensInPool ? "cursor-pointer" : ""}
+                  >
                     Your Balance:{" "}
                     <span
                       className={
