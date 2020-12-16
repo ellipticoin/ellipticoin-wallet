@@ -1,11 +1,11 @@
-import { TokenAmountInput, TokenSelect, InputState } from "./Inputs";
+import { InputState, TokenAmountInput, TokenSelect } from "./Inputs";
 import {
   BASE_FACTOR,
+  ELC,
   LIQUIDITY_FEE,
   TOKENS,
-  ZERO,
   USD,
-  ELC,
+  ZERO,
 } from "./constants";
 import {
   encodeToken,
@@ -13,7 +13,7 @@ import {
   formatTokenExchangeRate,
 } from "./helpers";
 import { usePostTransaction } from "./mutations";
-import { BigInt, add, subtract, multiply, divide, EQ, GT } from "jsbi";
+import { BigInt, EQ, GT, add, divide, multiply, subtract } from "jsbi";
 import { find } from "lodash";
 import { default as React, useMemo } from "react";
 import { Button, Form } from "react-bootstrap";

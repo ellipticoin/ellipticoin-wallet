@@ -28,7 +28,7 @@ export default function Rewards(props) {
           </button>
           <div className="title">Mature Liquidity Rewards</div>
           <div className="value text-success">
-            {formatTokenBalance(issuanceRewards)}
+            {formatTokenBalance(issuanceRewards)} ELC
           </div>
         </div>
       </div>
