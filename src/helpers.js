@@ -3,8 +3,8 @@ import {
   BLOCKS_PER_ERA,
   BRIDGE_TOKENS,
   ELC,
-  NUMBER_OF_ERAS,
   NETWORK_ID,
+  NUMBER_OF_ERAS,
 } from "./constants";
 import Ed25519Signer from "./cose/Ed25519Signer";
 import cbor from "cbor";
@@ -22,12 +22,23 @@ export function parseUnits(value, units) {
     return ethers.utils.parseUnits("0");
   }
 }
+const PROTOTYPE_ISSUANCE = 130036019000;
+const FIRST_ERA_ISSUANCE_PER_BLOCK = (BASE_FACTOR * 128) / 100;
+const LAST_BLOCK_OF_FIRST_ERA =
+  BLOCKS_PER_ERA * FIRST_ERA_ISSUANCE_PER_BLOCK -
+  PROTOTYPE_ISSUANCE / FIRST_ERA_ISSUANCE_PER_BLOCK;
 export function blockReward(blockNumber) {
   if (blockNumber > BLOCKS_PER_ERA * NUMBER_OF_ERAS) {
     return 0;
   }
-  const era = Math.floor(blockNumber / BLOCKS_PER_ERA);
-  return (1.28 * 10 ** 8) / 2 ** era / 10 ** 8;
+
+  if (blockNumber <= LAST_BLOCK_OF_FIRST_ERA) {
+    return FIRST_ERA_ISSUANCE_PER_BLOCK / BASE_FACTOR;
+  }
+
+  const era =
+    Math.floor(blockNumber - LAST_BLOCK_OF_FIRST_ERA / BLOCKS_PER_ERA) + 1;
+  return (1.28 * BASE_FACTOR) / 2 ** era / BASE_FACTOR;
 }
 
 export function signTransaction(transaction, secretKey) {
@@ -68,15 +79,16 @@ export function encodeToken(token) {
 }
 
 export function formatPercentage(amount) {
-  if (isNaN(amount)) return;
-
-  return `${((BigInt(amount) * 100) / BASE_FACTOR)
-    .toFixed(2)
-    .replace(/\.?0+$/, "")}%`;
+  if (isNaN(amount)) {
+    amount = 0;
+  }
+  return `${(amount * 100).toFixed(2).replace(/\.?0+$/, "")}%`;
 }
 
 export function formatCurrency(amount) {
-  if (isNaN(amount)) return;
+  if (isNaN(amount)) {
+    amount = 0;
+  }
 
   return new Intl.NumberFormat("en", {
     style: "currency",
@@ -84,7 +96,17 @@ export function formatCurrency(amount) {
     minimumFractionDigits: 2,
     currencyDisplay: "symbol",
   })
-    .format(BigInt(Math.floor(amount)) / BASE_FACTOR)
+    .format(BigInt(Math.floor(amount * 100)) / BASE_FACTOR / 100)
+    .replace(/^(\D+)/, "$1 ");
+}
+
+export function formatTokenBalance(amount) {
+  if (!amount) return 0;
+
+  return new Intl.NumberFormat("en", {
+    minimumFractionDigits: 6,
+  })
+    .format(BigInt(Math.floor(amount * BASE_FACTOR)) / BASE_FACTOR / BASE_FACTOR)
     .replace(/^(\D+)/, "$1 ");
 }
 
@@ -149,16 +171,6 @@ export function encodeAddress(address) {
       PublicKey: address,
     };
   }
-}
-
-export function formatTokenBalance(amount) {
-  if (!amount) return 0;
-
-  return new Intl.NumberFormat("en", {
-    minimumFractionDigits: 6,
-  })
-    .format(BigInt(Math.round(amount)) / BASE_FACTOR)
-    .replace(/^(\D+)/, "$1 ");
 }
 
 export function useLocalStorage(key, initialValue) {

@@ -13,7 +13,16 @@
   }
   td,
   th {
+    vertical-align: middle;
     border-top: 1px solid $colorLine;
+
+    &.no-border {
+        border-top: none;
+    }
+
+    &.no-padding-top {
+        padding-top: 0;
+    }
   }
 }
 .table-dark {

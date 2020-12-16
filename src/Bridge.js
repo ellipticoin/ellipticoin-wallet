@@ -2,10 +2,10 @@ import BridgeJSON from "./Bridge.json";
 import TokenSelect from "./Inputs/TokenSelect.js";
 import ReleaseTransactions from "./ReleaseTransactions";
 import {
+  BASE_FACTOR,
   BRIDGE_TOKENS,
   ETH_BRIDGE_ADDRESS,
   WETH,
-  BASE_FACTOR,
 } from "./constants";
 import { formatTokenBalance, parseUnits } from "./helpers";
 import { usePostTransaction } from "./mutations";

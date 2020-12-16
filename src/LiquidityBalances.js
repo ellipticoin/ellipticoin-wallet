@@ -2,11 +2,13 @@ import Rewards from "./Rewards";
 import { BASE_FACTOR } from "./constants";
 import {
   blockReward,
+  excludeUsd,
+  formatCurrency,
   formatPercentage,
+  formatTokenBalance,
   tokenName,
   tokenTicker,
 } from "./helpers";
-import { excludeUsd, formatCurrency, formatTokenBalance } from "./helpers";
 import { sumBy } from "lodash";
 import { default as React } from "react";
 
@@ -21,7 +23,8 @@ export default function LiquidityBalances(props) {
   } = props;
   const total = sumBy(liquidityTokens, (liquidityToken) => {
     let total =
-      liquidityToken.balance * 2 * (liquidityToken.price / BASE_FACTOR);
+      (2 * liquidityToken.poolSupplyOfBaseToken * liquidityToken.balance) /
+      liquidityToken.totalSupply;
     return isNaN(total) ? 0 : total;
   });
 
@@ -44,63 +47,77 @@ export default function LiquidityBalances(props) {
               <tr>
                 <th scope="col">Token</th>
                 <th scope="col" className="text-right">
-                  Your Share of Pool
+                  Share of Pool
                 </th>
                 <th scope="col" className="text-right">
-                  Your ELC Issuance Per Block
+                  ELC Issuance Per Block
                 </th>
                 <th scope="col" className="text-right">
-                  Your Tokens In Pool
+                  Tokens In Pool
                 </th>
                 <th scope="col" className="text-right">
-                  Implied Price Per Token
+                  Token Price
                 </th>
                 <th scope="col" className="text-right">
-                  Your Total Value In Pool
+                  Total Value In Pool
                 </th>
               </tr>
             </thead>
             <tbody>
               {excludeUsd(liquidityTokens).map((liquidityToken) => (
-                <tr key={liquidityToken.id}>
-                  <th scope="row">{tokenName(liquidityToken)}</th>
-                  <td className="text-right">
-                    {formatPercentage(liquidityToken.shareOfPool)}
-                  </td>
-                  <td className="text-right">
-                    {formatTokenBalance(
-                      (blockReward(blockNumber) * liquidityToken.shareOfPool) /
-                        2
-                    )}
-                  </td>
-                  <td className="text-right">
-                    <p className="no-margin">
+                <React.Fragment key={liquidityToken.id}>
+                  <tr>
+                    <th scope="row" rowSpan="2">
+                      {tokenName(liquidityToken)}
+                    </th>
+                    <td className="text-right" rowSpan="2">
+                      {formatPercentage(
+                        liquidityToken.balance / liquidityToken.totalSupply
+                      )}
+                    </td>
+                    <td className="text-right" rowSpan="2">
                       {formatTokenBalance(
-                        liquidityToken.poolSupplyOfToken *
-                          (liquidityToken.shareOfPool / BASE_FACTOR)
+                        (blockReward(blockNumber) *
+                          liquidityToken.balance *
+                          BASE_FACTOR) /
+                          (liquidityToken.totalSupply * 3)
+                      )}
+                    </td>
+                    <td className="text-right no-padding-bottom">
+                      {formatTokenBalance(
+                        (liquidityToken.poolSupplyOfToken *
+                          liquidityToken.balance) /
+                          liquidityToken.totalSupply
                       )}{" "}
                       {tokenTicker(liquidityToken)}
-                    </p>
-                    <p className="no-margin">
-                      {"+ "}
-                      {formatTokenBalance(
-                        liquidityToken.poolSupplyOfBaseToken *
-                          (liquidityToken.shareOfPool / BASE_FACTOR)
+                    </td>
+                    <td className="text-right" rowSpan="2">
+                      {formatCurrency(
+                        (liquidityToken.poolSupplyOfBaseToken * BASE_FACTOR) /
+                          liquidityToken.poolSupplyOfToken
                       )}
-                      {" USD"}
-                    </p>
-                  </td>
-                  <td className="text-right">
-                    {formatCurrency(liquidityToken.price)}
-                  </td>
-                  <td className="text-right">
-                    {formatCurrency(
-                      liquidityToken.poolSupplyOfBaseToken *
-                        (liquidityToken.shareOfPool / BASE_FACTOR) *
-                        2
-                    )}
-                  </td>
-                </tr>
+                    </td>
+                    <td className="text-right" rowSpan="2">
+                      {formatCurrency(
+                        ((liquidityToken.poolSupplyOfBaseToken *
+                          liquidityToken.balance) /
+                          liquidityToken.totalSupply) *
+                          2
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="text-right no-border no-padding-top">
+                      +{" "}
+                      {formatCurrency(
+                        (liquidityToken.poolSupplyOfBaseToken *
+                          liquidityToken.balance) /
+                          liquidityToken.totalSupply
+                      )}{" "}
+                      USD
+                    </td>
+                  </tr>
+                </React.Fragment>
               ))}
               <tr>
                 <td></td>

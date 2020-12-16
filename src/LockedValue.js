@@ -1,6 +1,6 @@
 import btcLogo from "./BTC-logo.png";
 import ethLogo from "./ETH-logo.png";
-import { BTC, USD, WETH, BASE_FACTOR } from "./constants";
+import { BASE_FACTOR, BTC, USD, WETH } from "./constants";
 import { formatCurrency, formatTokenBalance } from "./helpers";
 import { find, sumBy } from "lodash";
 import { default as React, useMemo } from "react";

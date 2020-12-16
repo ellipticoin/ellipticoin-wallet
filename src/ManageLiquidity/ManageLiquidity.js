@@ -65,7 +65,7 @@ export default function ManageLiquidity(props) {
     contract: "Exchange",
     functionName: "create_pool",
   });
-  const [addliquidity] = usePostTransaction({
+  const [addLiquidity] = usePostTransaction({
     contract: "Exchange",
     functionName: "add_liquidity",
   });
@@ -81,13 +81,16 @@ export default function ManageLiquidity(props) {
     () => parseInt(removeLiquidityToken.totalSupply) > 0,
     [removeLiquidityToken]
   );
-  const providePrice = useMemo(() => {
-    return providePoolExists ? provideLiquidityToken.price : initialPrice;
-  }, [provideLiquidityToken, providePoolExists, initialPrice]);
-  const provideBaseTokenAmount = useMemo(
-    () => (provideAmount * providePrice) / BASE_FACTOR,
-    [provideAmount, providePrice]
-  );
+  const provideBaseTokenAmount = useMemo(() => {
+    if (providePoolExists) {
+      return (
+        (provideAmount * provideLiquidityToken.poolSupplyOfBaseToken) /
+        provideLiquidityToken.poolSupplyOfToken
+      );
+    } else {
+      return (provideAmount * initialPrice) / BASE_FACTOR;
+    }
+  }, [initialPrice, provideAmount, providePoolExists, provideLiquidityToken]);
   const userProvideTokenBalance = useMemo(() => {
     return userTokens.filter((t) => t.id === provideToken.id)[0].balance;
   }, [provideToken, userTokens]);
@@ -115,7 +118,7 @@ export default function ManageLiquidity(props) {
     return removeAmount / userTokensInPool <= 1;
   };
   const userHasEnoughBaseToken = () => {
-    return (providePrice / BASE_FACTOR) * provideAmount <= userBaseTokenBalance;
+    return provideBaseTokenAmount <= userBaseTokenBalance;
   };
 
   const handleProvideSubmit = async (evt) => {
@@ -127,7 +130,7 @@ export default function ManageLiquidity(props) {
     }
   };
   const handleAddLiquidity = async () => {
-    const res = await addliquidity(
+    const res = await addLiquidity(
       encodeToken(provideToken),
       Number(provideAmount)
     );

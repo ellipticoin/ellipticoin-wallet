@@ -20,9 +20,8 @@ export const GET_LIQUIDITY_TOKENS = gql`
     liquidityTokens(tokenIds: $tokenIds, address: $address) {
       id
       issuer
-      price
       balance
-      shareOfPool
+      price
       totalSupply
       poolSupplyOfToken
       poolSupplyOfBaseToken

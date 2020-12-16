@@ -2,7 +2,7 @@ import { downloadSecretKey } from "./helpers";
 import base64url from "base64url";
 import React from "react";
 import { Modal } from "react-bootstrap";
-import { Download, Upload, X, BarChart, Settings } from "react-feather";
+import { BarChart, Download, Settings, Upload, X } from "react-feather";
 import Identicon from "react-identicons";
 
 export default function Sidebar(props) {
