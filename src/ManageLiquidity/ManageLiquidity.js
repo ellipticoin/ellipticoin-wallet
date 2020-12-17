@@ -98,9 +98,9 @@ export default function ManageLiquidity(props) {
   const userTokensInPool = useMemo(() => {
     return (
       Math.round(
-        (removeLiquidityToken.shareOfPool *
-          removeLiquidityToken.poolSupplyOfToken) /
-          BASE_FACTOR /
+        (removeLiquidityToken.poolSupplyOfToken *
+          removeLiquidityToken.balance) /
+          removeLiquidityToken.totalSupply /
           10
       ) * 10
     );
@@ -158,9 +158,9 @@ export default function ManageLiquidity(props) {
     let amountToRemove = removeAmount;
     if (EQ(removeAmount, userTokensInPool)) {
       amountToRemove = BigInt(
-        (removeLiquidityToken.shareOfPool *
-          removeLiquidityToken.poolSupplyOfToken) /
-          BASE_FACTOR
+        (removeLiquidityToken.poolSupplyOfToken *
+           removeLiquidityToken.balance) /
+           removeLiquidityToken.totalSupply 
       );
     }
 
