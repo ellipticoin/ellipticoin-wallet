@@ -96,7 +96,7 @@ export default function LockedValue(props) {
                       </td>
                       <td className="text-right">
                         {formatCurrency(
-                          (usd.totalSupply * usd.price) / BASE_FACTOR
+                          usd.totalSupply
                         )}
                       </td>
                     </tr>
