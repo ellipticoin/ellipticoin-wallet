@@ -1,7 +1,7 @@
 import btcLogo from "./BTC-logo.png";
 import ethLogo from "./ETH-logo.png";
 import { BASE_FACTOR, BTC, USD, WETH } from "./constants";
-import { formatCurrency, formatTokenBalance } from "./helpers";
+import { formatCurrency, formatTokenBalance, tokenName } from "./helpers";
 import { find, sumBy } from "lodash";
 import { default as React, useMemo } from "react";
 
@@ -14,9 +14,9 @@ export default function LockedValue(props) {
   const totalLockedValue = useMemo(
     () =>
       sumBy([weth, btc, usd], (token) => {
+        let price = tokenName(token) === "USD" ? BASE_FACTOR : token.price;
         return (
-          (parseInt(token.totalSupply) * parseInt(token.price) || 0) /
-          BASE_FACTOR
+          (parseInt(token.totalSupply) * parseInt(price) || 0) / BASE_FACTOR
         );
       }),
     [btc, usd, weth]
@@ -95,9 +95,7 @@ export default function LockedValue(props) {
                         {formatTokenBalance(usd.totalSupply)} USD
                       </td>
                       <td className="text-right">
-                        {formatCurrency(
-                          (usd.totalSupply * usd.price) / BASE_FACTOR
-                        )}
+                        {formatCurrency(usd.totalSupply)}
                       </td>
                     </tr>
                     <tr>
