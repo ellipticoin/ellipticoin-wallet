@@ -30,10 +30,10 @@ export default function Balances(props) {
                 <tr key={token.id}>
                   <th scope="row">{tokenName(token)}</th>
                   <td>{formatTokenBalance(token.balance)}</td>
-                  <td>{formatCurrency(token.price)}</td>
+                  <td>{formatCurrency(((tokenName(token) === "USD" ? 1 * BASE_FACTOR :token.price)))}</td>
                   <td className="text-right text-primary">
                     {formatCurrency(
-                      token.balance * (token.price / BASE_FACTOR)
+                      token.balance * ((tokenName(token) === "USD" ? 1 * BASE_FACTOR :token.price) / BASE_FACTOR)
                     )}
                   </td>
                 </tr>
