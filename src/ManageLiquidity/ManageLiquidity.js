@@ -159,8 +159,8 @@ export default function ManageLiquidity(props) {
     if (EQ(removeAmount, userTokensInPool)) {
       amountToRemove = BigInt(
         (removeLiquidityToken.poolSupplyOfToken *
-           removeLiquidityToken.balance) /
-           removeLiquidityToken.totalSupply 
+          removeLiquidityToken.balance) /
+          removeLiquidityToken.totalSupply
       );
     }
 

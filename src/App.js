@@ -13,7 +13,7 @@ import Total from "./Total";
 import Trade from "./Trade";
 import { BASE_FACTOR } from "./constants";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
-import { downloadSecretKey, useLocalStorage } from "./helpers";
+import { downloadSecretKey, tokenName, useLocalStorage } from "./helpers";
 import {
   useGetCurrentBlock,
   useGetLiquidityTokens,
@@ -102,9 +102,9 @@ function App(props) {
   const totalLockedValue = useMemo(
     () =>
       sumBy(tokens, (token) => {
+        const price = tokenName(token) === "USD" ? BASE_FACTOR : token.price;
         return (
-          (parseInt(token.totalSupply) * parseInt(token.price) || 0) /
-          BASE_FACTOR
+          (parseInt(token.totalSupply) * parseInt(price) || 0) / BASE_FACTOR
         );
       }),
     [tokens]
@@ -202,7 +202,8 @@ function App(props) {
     );
   const totalLiquidityValue = 0;
   const totalTokenValue = sumBy(tokens, (token) => {
-    let total = token.balance * (token.price / BASE_FACTOR);
+    const price = tokenName(token) === "USD" ? BASE_FACTOR : token.price;
+    let total = token.balance * (price / BASE_FACTOR);
     return isNaN(total) ? 0 : total;
   });
 
