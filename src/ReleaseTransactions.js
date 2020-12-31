@@ -2,7 +2,6 @@ import { BASE_FACTOR, TOKENS } from "./constants";
 import { useGetTransactionsByContractFunction } from "./queries";
 import cbor from "cbor";
 import { toChecksumAddress } from "ethereumjs-util";
-import { BigInt } from "jsbi";
 import { default as React } from "react";
 import { Button, Form } from "react-bootstrap";
 
@@ -12,7 +11,7 @@ const decodeReleaseTxArgs = (txArgs) => {
   return {
     token: TOKENS.find((token) => token.id === decoded[0].toString("base64")),
     address: toChecksumAddress("0x" + decoded[1].toString("hex")),
-    amount: new BigInt(decoded[2]) / BASE_FACTOR,
+    amount: BigInt(decoded[2] * Number(BASE_FACTOR)) / BASE_FACTOR,
   };
 };
 

@@ -81,12 +81,45 @@ const GET_TRANSACTIONS_BY_CONTRACT_FUNCTION = gql`
 
 export function useGetTokens() {
   const publicKey = usePublicKey();
-  return useQuery(GET_TOKENS, {
+  let { data: { tokens } = { tokens: TOKENS }, error } = useQuery(GET_TOKENS, {
     variables: {
       tokenIds: TOKENS.map(encodeToken),
       address: publicKey.toString("base64"),
     },
   });
+  tokens = tokens.map((token) => ({
+    ...token,
+    balance: BigInt(token.balance),
+    price: BigInt(token.price || 0),
+    totalSupply: BigInt(token.totalSupply),
+  }));
+  return { data: { tokens }, error };
+}
+
+export function useGetLiquidityTokens() {
+  const publicKey = usePublicKey();
+  let { data: { liquidityTokens } = { liquidityTokens: [] }, error } = useQuery(
+    GET_LIQUIDITY_TOKENS,
+    {
+      variables: {
+        tokenIds: LIQUIDITY_TOKENS.map(encodeToken),
+        address: publicKey.toString("base64"),
+      },
+    }
+  );
+
+  liquidityTokens = liquidityTokens
+    .map((liquidityToken) => ({
+      ...liquidityToken,
+      balance: BigInt(liquidityToken.balance),
+      price: BigInt(liquidityToken.price),
+      totalSupply: BigInt(liquidityToken.totalSupply),
+      poolSupplyOfToken: BigInt(liquidityToken.poolSupplyOfToken),
+      poolSupplyOfBaseToken: BigInt(liquidityToken.poolSupplyOfBaseToken),
+    }))
+    .filter((liquidityToken) => liquidityToken.balance !== 0n);
+
+  return { data: { liquidityTokens }, error };
 }
 
 export function usePublicKey() {
@@ -97,27 +130,20 @@ export function usePublicKey() {
   );
 }
 
-export function useGetLiquidityTokens() {
-  const publicKey = usePublicKey();
-  return useQuery(GET_LIQUIDITY_TOKENS, {
-    variables: {
-      tokenIds: LIQUIDITY_TOKENS.map(encodeToken),
-      address: publicKey.toString("base64"),
-    },
-  });
-}
-
 export function useGetCurrentBlock() {
   return useQuery(GET_CURRENT_BLOCK);
 }
 
 export function useGetIssuanceRewards() {
   const publicKey = usePublicKey();
-  return useQuery(GET_ISSUANCE_REWARDS, {
+  let { data: { issuanceRewards } = 0n } = useQuery(GET_ISSUANCE_REWARDS, {
     variables: {
       address: publicKey.toString("base64"),
     },
   });
+  issuanceRewards = BigInt(issuanceRewards || 0);
+
+  return { data: { issuanceRewards } };
 }
 
 export function useGetNextNonce() {

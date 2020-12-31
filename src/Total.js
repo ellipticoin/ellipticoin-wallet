@@ -1,10 +1,11 @@
 import CopyButton from "./Inputs/CopyButton.js";
-import { formatCurrency } from "./helpers";
+import { USD } from "./constants";
+import { Value } from "./helpers";
 import base64url from "base64url";
 import { default as React } from "react";
 
 export default function Total(props) {
-  const { total, publicKey } = props;
+  const { totalBalance, publicKey } = props;
 
   return (
     <div className="actions-top">
@@ -17,10 +18,12 @@ export default function Total(props) {
             </CopyButton>
           </div>
         </div>
-        <div className="col-lg-3 col-md-12 total-balance align-self-end">
+        <div className="col-lg-4 col-md-12 total-balance align-self-end">
           <div>Total Balance</div>
           <div>
-            <h1>{formatCurrency(total)} USD</h1>
+            <h1>
+              <Value token={USD}>{totalBalance}</Value>
+            </h1>
           </div>
         </div>
       </div>

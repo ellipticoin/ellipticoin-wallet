@@ -1,3 +1,4 @@
+import TokenAmountInput from "./Inputs/TokenAmountInput";
 import { BASE_FACTOR, TOKENS } from "./constants";
 import { tokenToString } from "./helpers";
 import { usePostTransaction } from "./mutations";
@@ -7,7 +8,7 @@ import { Button, Form, Modal } from "react-bootstrap";
 
 export default function Send(props) {
   const { show, setShow, setHost } = props;
-  const [sendAmount, setSendAmount] = React.useState(
+  const [amount, setAmount] = React.useState(
     // "1"
     ""
   );
@@ -17,10 +18,6 @@ export default function Send(props) {
     ""
   );
   const [token, setToken] = React.useState(TOKENS[0]);
-  const clearForm = () => {
-    setSendAmount("");
-    setToAddress("");
-  };
   const handleTokenChange = (tokenString) => {
     const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
@@ -30,10 +27,9 @@ export default function Send(props) {
     postTransfer(
       [{ Contract: token.issuer }, Array.from(Buffer.from(token.id, "base64"))],
       base64url.toBuffer(toAddress),
-      Math.floor(parseFloat(sendAmount) * BASE_FACTOR)
+      Number(amount)
     );
     setShow(false);
-    clearForm();
   };
 
   const [postTransfer] = usePostTransaction(
@@ -81,9 +77,10 @@ export default function Send(props) {
 
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
-                  <Form.Control
-                    onChange={(event) => setSendAmount(event.target.value)}
-                    value={sendAmount}
+                  <TokenAmountInput
+                    onChange={(state) => setAmount(state)}
+                    state={amount}
+                    currency={token.name}
                     placeholder="Amount"
                   />
                 </Form.Group>

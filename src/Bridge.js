@@ -1,5 +1,6 @@
 import BridgeJSON from "./Bridge.json";
 import TokenSelect from "./Inputs/TokenSelect.js";
+import TokenAmountInput from "./Inputs/TokenAmountInput.js";
 import ReleaseTransactions from "./ReleaseTransactions";
 import {
   BASE_FACTOR,
@@ -7,10 +8,10 @@ import {
   ETH_BRIDGE_ADDRESS,
   WETH,
 } from "./constants";
-import { formatTokenBalance, parseUnits } from "./helpers";
+import { parseUnits, Value } from "./helpers";
 import { usePostTransaction } from "./mutations";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
-import { default as ethers } from "ethers";
+import { ethers } from "ethers";
 import { differenceBy } from "lodash";
 import { default as React } from "react";
 import Button from "react-bootstrap/Button";
@@ -141,7 +142,6 @@ export default function Bridge(props) {
             exitFundsToEthereum(transaction.id, outboundToken.address, amount)()
           )
         );
-        clearForm();
         setTransactionPending(false);
         onHide();
       }
@@ -175,16 +175,12 @@ export default function Bridge(props) {
       const result = await postRelease(
         Buffer.from(outboundToken.id, "base64"),
         arrayify(ethAccount),
-        Math.floor(parseFloat(amount) * BASE_FACTOR)
+        Number(amount)
       );
       setPendingTransactions([...pendingTransactions, result]);
     } catch (e) {
       alert(e.message);
     }
-  };
-
-  const userHasEnoughExitToken = () => {
-    return (amount / userTokenBalance) * BASE_FACTOR > 1;
   };
 
   const approve = async (evt) => {
@@ -197,10 +193,6 @@ export default function Bridge(props) {
     setIsApproved(true);
   };
 
-  const clearForm = () => {
-    setAmount("");
-    setInboundToken(BRIDGE_TOKENS[0]);
-  };
   const handleEthAccountChange = (ethAccount) => {
     setEthAccount(ethAccount);
   };
@@ -227,7 +219,6 @@ export default function Bridge(props) {
     setTransactionPending(true);
     pushPendingTransation(await tx.wait());
     setTransactionPending(false);
-    clearForm();
     onHide();
   };
 
@@ -285,9 +276,10 @@ export default function Bridge(props) {
                 </Form.Group>
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
-                  <Form.Control
-                    onChange={(event) => handleAmountChange(event)}
-                    value={amount}
+                  <TokenAmountInput
+                    onChange={(amount) => setAmount(amount)}
+                    state={amount}
+                    currency={outboundToken.name}
                     placeholder="Amount"
                   />
                 </Form.Group>
@@ -302,7 +294,9 @@ export default function Bridge(props) {
                 </Form.Group>
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
-                  <div className="mt-1">{amount || "Amount"}</div>
+                  <div className="mt-1">
+                    <Value>{amount}</Value>
+                  </div>
                   <hr className="mt-0" />
                 </Form.Group>
                 {isApproved ? (
@@ -354,18 +348,19 @@ export default function Bridge(props) {
                 </Form.Group>
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
-                  <Form.Control
-                    disabled={transactionPending}
-                    onChange={(event) => setAmount(event.target.value)}
+                  <TokenAmountInput
+                    onChange={(amount) => setAmount(amount)}
+                    state={amount}
+                    currency={outboundToken.name}
                     placeholder="Amount"
                   />
                 </Form.Group>
                 <Form.Group className="basic">
                   <Form.Label>Your Balance</Form.Label>
                   <span
-                    className={userHasEnoughExitToken() ? "text-danger" : ""}
+                    className={amount > userTokenBalance ? "text-danger" : ""}
                   >
-                    {formatTokenBalance(userTokenBalance)}
+                    <Value>{userTokenBalance}</Value>
                   </span>
                 </Form.Group>
                 <div className="row justify-content-md-center mt-1">
@@ -402,7 +397,7 @@ export default function Bridge(props) {
                 </Form.Group>
                 <Button
                   type="submit"
-                  disabled={transactionPending || userHasEnoughExitToken()}
+                  disabled={transactionPending}
                   className="btn btn-lg btn-block btn-primary mr-1 mb-1"
                   variant="contained"
                   color="primary"

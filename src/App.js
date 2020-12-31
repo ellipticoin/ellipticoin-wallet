@@ -3,24 +3,23 @@ import Balances from "./Balances";
 import Bridge from "./Bridge";
 import Header from "./Header";
 import LiquidityBalances from "./LiquidityBalances";
-import ManageLiquidity from "./ManageLiquidity/ManageLiquidity";
+import ManageLiquidity from "./ManageLiquidity";
 import NetworkStatistics from "./NetworkStatistics";
 import PendingTransactions from "./PendingTransactions";
 import Send from "./Send";
-import Settings from "./Settings";
 import Sidebar from "./Sidebar";
 import Total from "./Total";
 import Trade from "./Trade";
 import { BASE_FACTOR } from "./constants";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
-import { downloadSecretKey, tokenName, useLocalStorage } from "./helpers";
+import { downloadSecretKey, findToken, useLocalStorage } from "./helpers";
 import {
   useGetCurrentBlock,
   useGetLiquidityTokens,
   useGetTokens,
 } from "./queries";
 import { Buffer } from "buffer/";
-import { default as ethers } from "ethers";
+import { ethers } from "ethers";
 import { compact } from "lodash";
 import { sumBy } from "lodash";
 import { default as React, useMemo, useState } from "react";
@@ -73,7 +72,7 @@ function App(props) {
     if (!signer) return;
     (async () => {
       signer.provider.on("block", (blockNumber) => {
-        setEthBlockNumber(blockNumber);
+        setEthBlockNumber(BigInt(blockNumber));
       });
     })();
   }, [signer]);
@@ -98,16 +97,6 @@ function App(props) {
   const errors = useMemo(
     () => compact([tokenError, currentBlockError, liquidityTokenError]),
     [tokenError, currentBlockError, liquidityTokenError]
-  );
-  const totalLockedValue = useMemo(
-    () =>
-      sumBy(tokens, (token) => {
-        const price = tokenName(token) === "USD" ? BASE_FACTOR : token.price;
-        return (
-          (parseInt(token.totalSupply) * parseInt(price) || 0) / BASE_FACTOR
-        );
-      }),
-    [tokens]
   );
   const pageTransition = useTransition(showPage, null, {
     enter: { transform: "translate3d(0,0,0)" },
@@ -179,15 +168,6 @@ function App(props) {
           <NetworkStatistics onHide={() => setShowPage(null)} tokens={tokens} />
         );
 
-      case "Settings":
-        return (
-          <Settings
-            onHide={() => setShowPage(null)}
-            investorModeEnabled={investorModeEnabled}
-            setInvestorModeEnabled={setInvestorModeEnabled}
-          />
-        );
-
       default:
         return null;
     }
@@ -200,12 +180,22 @@ function App(props) {
         ))}
       </>
     );
-  const totalLiquidityValue = 0;
-  const totalTokenValue = sumBy(tokens, (token) => {
-    const price = tokenName(token) === "USD" ? BASE_FACTOR : token.price;
-    let total = token.balance * (price / BASE_FACTOR);
-    return isNaN(total) ? 0 : total;
-  });
+  const totalBalance = tokens.reduce((sum, token) => {
+    const price = findToken(token).name === "USD" ? BASE_FACTOR : token.price;
+    let total = (token.balance * price) / BASE_FACTOR;
+    return sum + total;
+  }, 0n);
+  const totalLiquidityBalance = liquidityTokens.reduce(
+    (sum, liquidityToken) => {
+      const price =
+        findToken(liquidityToken).name === "USD"
+          ? BASE_FACTOR
+          : liquidityToken.price;
+      let total = liquidityToken.balance * ((price * 2n) / BASE_FACTOR);
+      return sum + total;
+    },
+    0n
+  );
 
   return (
     <>
@@ -240,22 +230,21 @@ function App(props) {
         <div id="appCapsule">
           <div className="section wallet-card-section pt-1 mb-2">
             <div className="wallet-card">
-              <Total total={totalTokenValue} publicKey={publicKey} />
+              <Total totalBalance={totalBalance} publicKey={publicKey} />
               <Actions setShowModal={setShowModal} setShowPage={setShowPage} />
             </div>
           </div>
-          <Balances tokens={tokens} total={totalTokenValue} />
-          {sumBy(liquidityTokens, "balance") > 0 ? (
+          <Balances tokens={tokens} totalBalance={totalBalance} />
+          {totalLiquidityBalance && (
             <LiquidityBalances
               publicKey={publicKey}
               blockNumber={currentBlock.number}
               liquidityTokens={liquidityTokens}
-              total={totalLiquidityValue}
+              totalLiquidityBalance={totalLiquidityBalance}
               setIssuanceRewards={setIssuanceRewards}
               issuanceRewards={issuanceRewards}
-              totalLockedValue={totalLockedValue}
             />
-          ) : null}
+          )}
         </div>
         <PendingTransactions
           pendingTransactions={pendingTransactions}
