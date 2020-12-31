@@ -2,17 +2,20 @@ import {
   BASE_FACTOR,
   BLOCKS_PER_ERA,
   BRIDGE_TOKENS,
+  TOKENS,
   ELC,
+  USD,
   NETWORK_ID,
   NUMBER_OF_ERAS,
 } from "./constants";
 import Ed25519Signer from "./cose/Ed25519Signer";
-import cbor from "cbor";
-import ethers from "ethers";
+import Sign1 from "./cose/Sign1";
+import CBOR from "cbor";
+import { ethers } from "ethers";
 import { saveAs } from "file-saver";
-import { BigInt } from "jsbi";
 import { find, get } from "lodash";
 import { useState } from "react";
+import { NumeralFormatter } from "cleave.js";
 import nacl from "tweetnacl";
 
 export function parseUnits(value, units) {
@@ -22,35 +25,16 @@ export function parseUnits(value, units) {
     return ethers.utils.parseUnits("0");
   }
 }
-const PROTOTYPE_ISSUANCE = 130036019000;
-const FIRST_ERA_ISSUANCE_PER_BLOCK = (BASE_FACTOR * 128) / 100;
-const LAST_BLOCK_OF_FIRST_ERA =
-  BLOCKS_PER_ERA * FIRST_ERA_ISSUANCE_PER_BLOCK -
-  PROTOTYPE_ISSUANCE / FIRST_ERA_ISSUANCE_PER_BLOCK;
-export function blockReward(blockNumber) {
-  if (blockNumber > BLOCKS_PER_ERA * NUMBER_OF_ERAS) {
-    return 0;
-  }
-
-  if (blockNumber <= LAST_BLOCK_OF_FIRST_ERA) {
-    return FIRST_ERA_ISSUANCE_PER_BLOCK / BASE_FACTOR;
-  }
-
-  const era =
-    Math.floor(blockNumber - LAST_BLOCK_OF_FIRST_ERA / BLOCKS_PER_ERA) + 1;
-  return (1.28 * BASE_FACTOR) / 2 ** era / BASE_FACTOR;
-}
-
 export function signTransaction(transaction, secretKey) {
   return sign(
-    cbor.encode({ ...transaction, network_id: NETWORK_ID }),
+    CBOR.encode({ ...transaction, network_id: NETWORK_ID }),
     secretKey
   );
 }
 export function sign(message, secretKey) {
   const { publicKey } = nacl.sign.keyPair.fromSecretKey(secretKey);
   const signer = new Ed25519Signer(publicKey, secretKey);
-  return cbor.encode(signer.sign(Buffer.from(message)));
+  return CBOR.encode(signer.sign(Buffer.from(message)));
 }
 
 export function padBuffer(buffer, len) {
@@ -58,16 +42,6 @@ export function padBuffer(buffer, len) {
     buffer,
     Buffer.from(Array(len - buffer.length).fill(0)),
   ]);
-}
-
-export function tokenId(ticker) {
-  return Array.from(padBuffer(Buffer.from(ticker), 32));
-}
-
-// export function signTransaction(transaction, privateKey) {}
-
-export function ethTokenId(address) {
-  return Array.from(padBuffer(Buffer.from(address, "hex"), 32));
 }
 
 export function tokenToString({ id }) {
@@ -78,73 +52,50 @@ export function encodeToken(token) {
   return [encodeAddress(token.issuer), Buffer(token.id, "base64")];
 }
 
-export function formatPercentage(amount) {
-  if (isNaN(amount)) {
-    amount = 0;
-  }
-  return `${(amount * 100).toFixed(2).replace(/\.?0+$/, "")}%`;
+export function Percentage({ numerator, denomiator }) {
+  if (numerator === 0n) return (0).toFixed(4);
+  return `${(Number(numerator * 100n) / Number(denomiator)).toFixed(4)}%`;
 }
 
-export function formatCurrency(amount) {
-  if (isNaN(amount)) {
-    amount = 0;
-  }
-
-  return new Intl.NumberFormat("en", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    currencyDisplay: "symbol",
-  })
-    .format(BigInt(Math.floor(amount * 100)) / BASE_FACTOR / 100)
-    .replace(/^(\D+)/, "$1 ");
+export function Value({ children, token }) {
+  const digits = BASE_FACTOR.toString().length - 1;
+  const numeralFormatter = new NumeralFormatter(undefined, undefined, digits);
+  return (
+    <>
+      {token && token.id === USD.id ? "$ " : null}
+      {children === 0n
+        ? "0"
+        : numeralFormatter.format(
+            bigIntToNumber(children).toFixed(digits).toString()
+          )}
+      {token ? ` ${findToken(token).ticker}` : null}
+    </>
+  );
 }
 
-export function formatTokenBalance(amount) {
-  if (!amount) return 0;
-
-  return new Intl.NumberFormat("en", {
-    minimumFractionDigits: 6,
-  })
-    .format(
-      BigInt(Math.floor(amount * BASE_FACTOR)) / BASE_FACTOR / BASE_FACTOR
-    )
-    .replace(/^(\D+)/, "$1 ");
+function bigIntToNumber(n) {
+  return Number(n) / Number(BASE_FACTOR);
 }
 
-export function formatTokenExchangeRate(amount, maxPlaces = 10, sigFigs = 6) {
-  if (!amount) return 0;
-
-  // No decimal
-  if (amount - Math.floor(amount) === 0) {
-    const figs = amount.toString().length;
-    return figs >= sigFigs ? amount : amount.toFixed(sigFigs - figs);
+export function Price({ children }) {
+  const digits = BASE_FACTOR.toString().length - 1;
+  const numeralFormatter = new NumeralFormatter(undefined, undefined, digits);
+  if (children !== 0n && children < BASE_FACTOR) {
+    return `$ ${numeralFormatter.format(
+      bigIntToNumber(children)
+        .toFixed(digits)
+        .replace(/0{1,4}$/, "")
+    )}`;
+  } else {
+    return `$ ${numeralFormatter.format(bigIntToNumber(children).toFixed(2))}`;
   }
-
-  if (amount > 1) {
-    const sigFigsBefore = Math.floor(amount).toString().length;
-    return amount.toFixed(
-      sigFigsBefore > sigFigs ? 2 : Math.max(2, sigFigs - sigFigsBefore)
-    );
-  }
-
-  let places = 0;
-  let tempAmount = amount;
-  while (tempAmount < 1) {
-    tempAmount *= 10;
-    places++;
-  }
-  return amount.toFixed(Math.min(maxPlaces, places + sigFigs - 1));
 }
 
-export function tokenName(token) {
-  return get(
-    find(
-      [ELC, ...BRIDGE_TOKENS],
-      ({ issuer, id }) =>
-        issuer === token.issuer && id.toString("base64") === token.id
-    ),
-    "name"
+export function findToken(token) {
+  return find(
+    TOKENS,
+    ({ issuer, id }) =>
+      issuer === token.issuer && id.toString("base64") === token.id
   );
 }
 
@@ -159,8 +110,12 @@ export function tokenTicker(token) {
   );
 }
 
-export function excludeUsd(liquidityTokens) {
-  return liquidityTokens.filter((t) => tokenName(t) !== "USD");
+export function stringToBigInt(string) {
+  const [integerValue, decimaValue = "0"] = string.split(".");
+  return (
+    BigInt(integerValue) * BASE_FACTOR +
+    BigInt(decimaValue.padEnd(BASE_FACTOR.toString().length - 1, "0"))
+  );
 }
 
 export function encodeAddress(address) {
@@ -179,11 +134,11 @@ export function useLocalStorage(key, initialValue) {
   const [storedValue, setStoredValue] = useState(() => {
     const item = window.localStorage.getItem(key);
     if (item) {
-      return cbor.decode(Buffer.from(item, "base64"));
+      return CBOR.decode(Buffer.from(item, "base64"));
     } else {
       const value =
         initialValue instanceof Function ? initialValue() : initialValue;
-      window.localStorage.setItem(key, cbor.encode(value).toString("base64"));
+      window.localStorage.setItem(key, CBOR.encode(value).toString("base64"));
       return value;
     }
   });
@@ -195,7 +150,7 @@ export function useLocalStorage(key, initialValue) {
       setStoredValue(valueToStore);
       window.localStorage.setItem(
         key,
-        cbor.encode(valueToStore).toString("base64")
+        CBOR.encode(valueToStore).toString("base64")
       );
     } catch (error) {
       console.log(error);

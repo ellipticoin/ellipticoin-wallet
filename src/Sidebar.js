@@ -3,7 +3,6 @@ import base64url from "base64url";
 import React from "react";
 import { Modal } from "react-bootstrap";
 import { BarChart, Download, Settings, Upload, X } from "react-feather";
-import Identicon from "react-identicons";
 
 export default function Sidebar(props) {
   let {
@@ -54,13 +53,7 @@ export default function Sidebar(props) {
         <div className="modal-content">
           <div className="modal-body p-0">
             <div className="profileBox pt-2 pb-2">
-              <div className="image-wrapper">
-                <Identicon
-                  bg="#fff"
-                  size="32"
-                  string={base64url.encode(publicKey)}
-                />
-              </div>
+              <div className="image-wrapper"></div>
               <div className="in">
                 <strong>{base64url.encode(publicKey).slice(0, 20)}...</strong>
                 <div className="text-muted"></div>
