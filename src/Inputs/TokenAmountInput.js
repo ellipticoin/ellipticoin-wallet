@@ -1,54 +1,27 @@
 import { BASE_FACTOR } from "../constants";
-import { formatBigNumAsText } from "./helpers";
-import { BigInt } from "jsbi";
-import { default as React, useMemo } from "react";
+import { stringToBigInt } from "../helpers";
+import { default as React, useState, useRef } from "react";
 import { Form } from "react-bootstrap";
+import NumberFormat from "react-number-format";
+import Cleave from "cleave.js/react";
 
-export default function TokenAmountInput(props) {
-  const { onChange, currency, state } = props;
-
-  const handleOnChange = ({ target }) => {
-    const inputText = target.value;
-    let { groups } = /\$?(?<number>[\d,]*)?(?<decimal>\.\d{0,6})?/.exec(
-      inputText
-    );
-    if (!groups.number && !groups.decimal) {
-      onChange({ value: null, formattedText: "" });
-      return;
-    }
-    const intValue = parseInt((groups.number || "0").replaceAll(",", ""));
-    const floatValue =
-      groups.decimal === "." ? 0 : parseFloat(groups.decimal || "0");
-    const total = BASE_FACTOR * intValue + BASE_FACTOR * floatValue;
-
-    const bigNum = isNaN(total) ? null : new BigInt(Math.round(total));
-
-    let text = inputText;
-    if (bigNum) {
-      text = formatBigNumAsText(bigNum, currency);
-      let split = text.split(".");
-      if (
-        groups.decimal !== undefined &&
-        (split.length < 2 || split[1].length < groups.decimal.length - 1)
-      ) {
-        text = split[0] + groups.decimal;
-      }
-    }
-
-    onChange({ value: bigNum, formattedText: text });
-  };
-
-  const textValue = useMemo(() => {
-    if (state.value && state.formattedText) {
-      return state.formattedText;
-    } else if (state.value) {
-      return formatBigNumAsText(state.value);
-    }
-
-    return "";
-  }, [state]);
-
+export default React.forwardRef((props, ref) => {
+  const { value, onChange } = props;
   return (
-    <Form.Control {...props} onChange={handleOnChange} value={textValue} />
+    <Cleave
+      className="form-control"
+      ref={ref}
+      placeholder="0.0"
+      options={{
+        numeral: true,
+        numeralDecimalScale: 6,
+        numeralThousandsGroupStyle: "thousand",
+      }}
+      onChange={(event) => {
+        props.onChange(
+          BigInt(Number(event.target.cleaveRawValue) * Number(BASE_FACTOR) || 0)
+        );
+      }}
+    ></Cleave>
   );
-}
+});

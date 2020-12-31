@@ -1,4 +1,4 @@
-import { InputState, TokenAmountInput, TokenSelect } from "./Inputs";
+import { InputState, TokenAmountInput, TokenSelect } from "./inputs";
 import {
   BASE_FACTOR,
   ELC,
@@ -10,248 +10,100 @@ import {
 import {
   encodeToken,
   formatTokenBalance,
-  formatTokenExchangeRate,
+  tokenTicker,
+  findToken,
+  Value,
+  formatCurrency,
 } from "./helpers";
 import { usePostTransaction } from "./mutations";
-import { BigInt, EQ, GT, add, divide, multiply, subtract } from "jsbi";
-import { find } from "lodash";
-import { default as React, useMemo } from "react";
-import { Button, Form } from "react-bootstrap";
+import { find, get } from "lodash";
+import { ExchangeCalculator } from "ellipticoin";
+import { default as React, useMemo, useState, useEffect, useRef } from "react";
+import { Button, Form, Collapse } from "react-bootstrap";
 import { ArrowDown } from "react-feather";
 import { ChevronLeft } from "react-feather";
 
 export default function Trade(props) {
   const { onHide, liquidityTokens, userTokens, investorModeEnabled } = props;
-
-  const [fee, setFee] = React.useState(ZERO);
-  const [inputToken, setInputToken] = React.useState(USD);
-  const [outputToken, setOutputToken] = React.useState(ELC);
-  const [inputAmountState, setInputAmountState] = React.useState(
-    new InputState(null, inputToken.ticker)
-  );
-  const [
-    minimumOutputAmountState,
-    setMinimumOutputAmountState,
-  ] = React.useState(new InputState(ZERO, outputToken.ticker));
-  const [inputLiquidityToken, setInputLiquidityToken] = React.useState(
-    liquidityTokens
-  );
-  const [outputLiquidityToken, setOutputLiquidityToken] = React.useState(
-    liquidityTokens
-  );
-  const [userTokenBalance, setUserTokenBalance] = React.useState();
-  const [error, setError] = React.useState("");
-
-  const inputAmount = useMemo(() => {
-    return inputAmountState.value;
-  }, [inputAmountState]);
-
-  const minimumOutputAmount = useMemo(() => {
-    return minimumOutputAmountState.value;
-  }, [minimumOutputAmountState]);
-
+  const [inputToken, setInputToken] = useState(USD);
+  const [outputToken, setOutputToken] = useState(liquidityTokens[0]);
+  const [inputAmount, setInputAmount] = useState();
+  const inputAmountRef = useRef(null);
+  const [error, setError] = useState("");
   const handleSwap = async (evt) => {
     evt.preventDefault();
     let res = await exchange(
       encodeToken(inputToken),
       encodeToken(outputToken),
       Number(inputAmount),
-      Number(minimumOutputAmount)
+      0
     );
 
-    if (!res.returnValue) {
-      clearForm();
-      onHide();
-    } else {
+    if (get(res, "returnValue.Err")) {
       setError(res.returnValue.Err.message);
+    } else {
+      onHide();
     }
   };
   const [exchange] = usePostTransaction({
     contract: "Exchange",
     functionName: "exchange",
   });
-  const clearForm = () => {
-    setInputAmountState(new InputState(null));
-    setMinimumOutputAmountState(new InputState(ZERO));
-    setError("");
-  };
 
-  const setFeeInInputToken = (
-    feeInBaseToken,
-    priceInBaseToken,
-    inputTokenName
-  ) => {
-    setFee(
-      inputTokenName === "USD"
-        ? feeInBaseToken / BASE_FACTOR
-        : feeInBaseToken / priceInBaseToken
+  const setMaxInputAmount = () => {
+    inputAmountRef.current.setRawValue(
+      Number(inputTokenBalance) / Number(BASE_FACTOR)
     );
   };
 
-  const applyFee = (amount) => {
-    return subtract(
-      amount,
-      divide(multiply(amount, LIQUIDITY_FEE), BASE_FACTOR)
-    );
-  };
-
-  const getBaseTokenReserves = (totalSupply, price) => {
-    return divide(multiply(totalSupply, price), BASE_FACTOR);
-  };
-
-  React.useEffect(() => {
-    setInputLiquidityToken(find(liquidityTokens, ["id", inputToken.id]));
-    const userToken = find(userTokens, ["id", inputToken.id]);
-    setUserTokenBalance(userToken.balance);
-  }, [liquidityTokens, inputToken, userTokens]);
-
-  React.useEffect(() => {
-    setOutputLiquidityToken(find(liquidityTokens, ["id", outputToken.id]));
-  }, [liquidityTokens, outputToken]);
-
-  const availableQuantity = useMemo(() => {
-    const quantity =
-      outputToken.name === "USD"
-        ? ((inputLiquidityToken.poolSupplyOfToken / BASE_FACTOR) *
-            inputLiquidityToken.price) /
-          BASE_FACTOR
-        : outputLiquidityToken.poolSupplyOfToken / BASE_FACTOR;
-
-    return isNaN(quantity) ? ZERO : quantity;
-  }, [outputToken, inputLiquidityToken, outputLiquidityToken]);
-
-  const exchangeRate = useMemo(() => {
-    if (inputToken.ticker === outputToken.ticker) {
-      return 1;
-    }
-
-    let outputTokenPrice =
-      outputToken.ticker === "USD"
-        ? BASE_FACTOR
-        : outputLiquidityToken.price || 0;
-    let inputTokenPrice =
-      inputToken.ticker === "USD"
-        ? BASE_FACTOR
-        : inputLiquidityToken.price || 0;
-    if (outputTokenPrice !== 0) {
-      return inputTokenPrice / outputTokenPrice;
-    } else {
-      return null;
-    }
-  }, [inputToken, outputToken, inputLiquidityToken, outputLiquidityToken]);
+  const exchangeRateCalculator = useMemo(() => {
+    if (liquidityTokens.length === 0) return;
+    let exchangeRateCalculator = new ExchangeCalculator({
+      liquidityTokens,
+      baseTokenId: USD.id,
+    });
+    if (!inputAmount || inputAmount == 0n) return;
+    return exchangeRateCalculator;
+  });
 
   const outputAmount = useMemo(() => {
-    const calculateInputAmountInBaseToken = (amount, totalSupply, price) => {
-      if (EQ(totalSupply, ZERO)) return new BigInt(0);
-      const baseTokenReserves = getBaseTokenReserves(totalSupply, price);
-      const invariant = multiply(baseTokenReserves, totalSupply);
-      const newBaseTokenReserves = divide(invariant, add(totalSupply, amount));
-      return baseTokenReserves - newBaseTokenReserves;
-    };
-
-    const calculateAmountInOutputToken = (
-      amountInBaseToken,
-      totalSupply,
-      price
-    ) => {
-      if (EQ(totalSupply, ZERO)) return new BigInt(0);
-      const baseTokenReserves = getBaseTokenReserves(totalSupply, price);
-      const invariant = multiply(baseTokenReserves, totalSupply);
-      const newTokenReserves = divide(
-        invariant,
-        add(baseTokenReserves, amountInBaseToken)
-      );
-      return subtract(totalSupply, newTokenReserves);
-    };
-
-    if (!inputAmount || !inputLiquidityToken.poolSupplyOfToken) {
-      setFee(ZERO);
-      return;
-    }
-    if (inputToken.name === outputToken.name) {
-      setFee(ZERO);
-      if (investorModeEnabled) {
-        setMinimumOutputAmountState(
-          new InputState(inputAmount, inputToken.name)
-        );
-      }
-      return inputAmount;
-    }
-
-    let feeInBaseToken = 0;
-    let inputAmountInBaseToken;
-    if (inputToken.name === "USD") {
-      inputAmountInBaseToken = inputAmount;
-    } else {
-      const inputAmountAfterFee = applyFee(inputAmount);
-      feeInBaseToken =
-        (inputAmount - inputAmountAfterFee) * inputLiquidityToken.price;
-
-      inputAmountInBaseToken = calculateInputAmountInBaseToken(
-        inputAmountAfterFee,
-        new BigInt(inputLiquidityToken.poolSupplyOfToken),
-        new BigInt(inputLiquidityToken.price)
-      );
-    }
-
-    if (outputToken.name === "USD") {
-      setFeeInInputToken(
-        feeInBaseToken,
-        inputLiquidityToken.price,
-        inputToken.name
-      );
-      if (investorModeEnabled) {
-        setMinimumOutputAmountState(
-          new InputState(inputAmountInBaseToken, "USD")
-        );
-      }
-
-      return inputAmountInBaseToken;
-    }
-
-    const outputAmountInBaseToken = applyFee(
-      new BigInt(inputAmountInBaseToken)
+    if (!outputToken) return;
+    if (!exchangeRateCalculator) return;
+    return exchangeRateCalculator.getOutputAmount(
+      inputAmount,
+      inputToken.id,
+      outputToken.id
     );
-    const outputFeeInBaseToken =
-      (inputAmountInBaseToken - outputAmountInBaseToken) * BASE_FACTOR;
-    feeInBaseToken += Number(outputFeeInBaseToken);
-
-    setFeeInInputToken(
-      feeInBaseToken,
-      inputLiquidityToken.price,
-      inputToken.name
+  });
+  const exchangeRate = useMemo(() => {
+    if (!outputToken) return;
+    if (!exchangeRateCalculator) return;
+    return exchangeRateCalculator.getExchangeRate(
+      inputAmount,
+      inputToken.id,
+      outputToken.id
     );
-    const amount = calculateAmountInOutputToken(
-      outputAmountInBaseToken,
-      new BigInt(outputLiquidityToken.poolSupplyOfToken),
-      new BigInt(outputLiquidityToken.price)
+  });
+  const fee = useMemo(() => {
+    if (!outputToken) return;
+    if (!exchangeRateCalculator) return;
+    return exchangeRateCalculator.getFee(
+      inputAmount,
+      inputToken.id,
+      outputToken.id
     );
-    if (investorModeEnabled) {
-      setMinimumOutputAmountState(new InputState(amount));
-    }
-    return amount;
-  }, [
-    investorModeEnabled,
-    inputAmount,
-    inputToken,
-    inputLiquidityToken,
-    outputToken,
-    outputLiquidityToken,
-  ]);
+  });
+  const disabled = useMemo(
+    () =>
+      !inputAmount ||
+      !outputToken ||
+      inputAmount == 0n ||
+      findToken(inputToken).ticker === findToken(outputToken).ticker
+  );
 
-  const maxInputAmount = () => {
-    if (userTokenBalance) {
-      setInputAmountState(
-        new InputState(new BigInt(userTokenBalance), inputToken.ticker)
-      );
-    }
-  };
-
-  const inputTokenChanged = (token) => {
-    setInputToken(token);
-    setInputAmountState(new InputState(null));
-    setMinimumOutputAmountState(new InputState(ZERO));
-  };
+  const inputTokenBalance = useMemo(
+    () => find(userTokens, ["id", inputToken.id]).balance
+  );
 
   return (
     <div className="section">
@@ -278,37 +130,39 @@ export default function Trade(props) {
                   <div className="labels">
                     <Form.Label>From</Form.Label>
                     <Form.Label
-                      onClick={() => maxInputAmount()}
-                      className={userTokenBalance ? "cursor-pointer" : ""}
+                      onClick={() => setMaxInputAmount()}
+                      className="cursor-pointer"
                     >
-                      Your Balance:{" "}
-                      {inputAmount &&
-                      (!userTokenBalance ||
-                        GT(inputAmount, userTokenBalance)) ? (
-                        <span className="text-danger">
-                          {formatTokenBalance(userTokenBalance)}
-                        </span>
-                      ) : (
-                        formatTokenBalance(userTokenBalance)
-                      )}
+                      <u>
+                        Your Balance:{" "}
+                        <Value token={inputToken}>{inputTokenBalance}</Value>
+                      </u>
                     </Form.Label>
                   </div>
                   <div className="row">
                     <div className="col-6">
+                      <TokenSelect
+                        tokens={[USD, ...liquidityTokens]}
+                        defaultValue={USD}
+                        onChange={(token) => setInputToken(token)}
+                        token={inputToken}
+                      />
+                    </div>
+                    <div className="col-4">
                       <TokenAmountInput
-                        onChange={(state) => setInputAmountState(state)}
-                        currency={inputToken.ticker}
-                        state={inputAmountState}
+                        ref={inputAmountRef}
+                        value={inputAmount}
+                        onChange={(value) => setInputAmount(value)}
                         placeholder="0.0"
                       />
                     </div>
-                    <div className="col-6">
-                      <TokenSelect
-                        tokens={TOKENS}
-                        defaultValue={USD}
-                        onChange={(token) => inputTokenChanged(token)}
-                        token={inputToken}
-                      />
+                    <div className="col-2">
+                      <Button
+                        style={{ width: "100%" }}
+                        onClick={() => setMaxInputAmount()}
+                      >
+                        Max
+                      </Button>
                     </div>
                   </div>
                 </Form.Group>
@@ -319,83 +173,39 @@ export default function Trade(props) {
                   <Form.Label>To</Form.Label>
                   <TokenSelect
                     onChange={setOutputToken}
-                    defaultValue={ELC}
-                    tokens={TOKENS}
+                    defaultValue={liquidityTokens[0]}
+                    tokens={liquidityTokens}
                     disabledTokens={[inputToken]}
                   />
                 </Form.Group>
-                {investorModeEnabled ? (
-                  <>
-                    <Form.Group className="basic">
-                      <Form.Label>
-                        Minimum Output Token Amount (slippage protection)
-                      </Form.Label>
-                      <TokenAmountInput
-                        onChange={(state) => setMinimumOutputAmountState(state)}
-                        state={minimumOutputAmountState}
-                        currency={outputToken.ticker}
-                        placeholder="Output Token Amount"
-                      />
-                    </Form.Group>
-                    <Form.Group className="basic">
-                      <Form.Label>Current Rate</Form.Label>
-                      <span>
-                        {exchangeRate
-                          ? formatTokenExchangeRate(exchangeRate)
-                          : "N/A"}{" "}
-                        {outputToken.ticker} / {inputToken.ticker}
-                      </span>
-                    </Form.Group>
-                    <Form.Group className="basic">
-                      <Form.Label>Available Quantity</Form.Label>
-                      <span>
-                        {formatTokenBalance(availableQuantity * BASE_FACTOR)}
-                      </span>
-                    </Form.Group>
-                  </>
-                ) : null}
-                <ul className="listview flush transparent simple-listview no-space mt-3">
-                  <li>
-                    <strong>Transaction Fee</strong>
-                    <span className="text-success">Free while in Beta</span>
-                  </li>
-                  <li>
-                    <strong>Liquidity Fee</strong>
-                    <span>
-                      {inputAmount ? inputAmount / BASE_FACTOR : 0} *{" "}
-                      {inputToken.ticker === outputToken.ticker
-                        ? "0"
-                        : inputToken.ticker !== "USD" &&
-                          outputToken.ticker !== "USD"
-                        ? `~${(LIQUIDITY_FEE / BASE_FACTOR) * 2}`
-                        : LIQUIDITY_FEE / BASE_FACTOR}{" "}
-                      ={" "}
-                      {fee
-                        ? formatTokenExchangeRate(
-                            Number(fee) / Number(BASE_FACTOR)
-                          )
-                        : 0}{" "}
-                      {inputToken.ticker}
-                    </span>
-                  </li>
-                  <li>
-                    <strong>Output Amount</strong>
-                    <h3 className="m-0">
-                      {outputAmount
-                        ? `${formatTokenBalance(outputAmount)} ${
-                            outputToken.ticker
-                          }`
-                        : null}
-                      <small>
-                        {outputAmount
-                          ? ` @ ${formatTokenExchangeRate(
-                              outputAmount / inputAmount
-                            )} ${outputToken.ticker} / ${inputToken.ticker}`
-                          : ""}
-                      </small>
-                    </h3>
-                  </li>
-                </ul>
+                <Collapse in={!disabled}>
+                  <ul className="listview flush transparent simple-listview no-space mt-3">
+                    <li>
+                      <strong>Transaction Fee</strong>
+                      <span className="text-success">Free while in Beta</span>
+                    </li>
+                    <li>
+                      <strong>Liquidity Fee</strong>
+                      <Value token={inputToken}>{fee}</Value>
+                    </li>
+                    <li>
+                      <strong>Output Amount</strong>
+                      <h3 className="m-0">
+                        <Value>{outputAmount}</Value>{" "}
+                        {outputToken && tokenTicker(outputToken)}
+                        <small>
+                          {outputAmount && outputToken.ticker !== "USD" ? (
+                            <>
+                              {" "}
+                              @ <Value token={USD}>{exchangeRate}</Value> /{" "}
+                              {tokenTicker(outputToken)}
+                            </>
+                          ) : null}
+                        </small>
+                      </h3>
+                    </li>
+                  </ul>
+                </Collapse>
                 {error ? (
                   <div id="error-message">
                     <span className="text-danger">
@@ -408,14 +218,7 @@ export default function Trade(props) {
                   className="btn btn-lg btn-block btn-primary m-1"
                   variant="contained"
                   color="primary"
-                  disabled={
-                    !outputAmount ||
-                    EQ(outputAmount, ZERO) ||
-                    !inputAmount ||
-                    EQ(inputAmount, ZERO) ||
-                    inputToken.ticker === outputToken.ticker ||
-                    inputAmount / userTokenBalance > 1
-                  }
+                  disabled={disabled}
                 >
                   Trade
                 </Button>

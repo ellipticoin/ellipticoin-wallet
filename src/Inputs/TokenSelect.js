@@ -1,4 +1,4 @@
-import { tokenName } from "../helpers";
+import { findToken } from "../helpers";
 import { default as React } from "react";
 import Select from "react-select";
 
@@ -7,7 +7,7 @@ export default function TokenSelect(props) {
   const defaultValue = props.defaultValue || tokens[0];
   const options = tokens.map((token) => ({
     value: token,
-    label: nameProperty === "ethName" ? token.ethName : tokenName(token),
+    label: nameProperty === "ethName" ? token.ethName : findToken(token).name,
     disabled: (disabledTokens || [])
       .map((token) => token.id)
       .includes(token.id),
@@ -21,7 +21,7 @@ export default function TokenSelect(props) {
         label:
           nameProperty === "ethName"
             ? defaultValue.ethName
-            : tokenName(defaultValue),
+            : defaultValue && findToken(defaultValue).name,
         value: defaultValue,
       }}
       options={options}

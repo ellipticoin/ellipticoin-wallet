@@ -1,15 +1,14 @@
 import base64url from "base64url";
 import { BigInt } from "jsbi";
 
-export const BASE_FACTOR = BigInt(1_000_000);
-export const BLOCKS_PER_ERA = 8_000_000;
-export const NUMBER_OF_ERAS = 8;
+export const BASE_FACTOR = 1000000n;
+export const BLOCKS_PER_ERA = 8000000n;
+export const NUMBER_OF_ERAS = 8n;
 export const NETWORK_ID = 1_793_045_504; // hello-world-0
 export const PROD = process.env.NODE_ENV === "production";
 export const ETH_BRIDGE_ADDRESS = "0x861B3289E2432138324aB593090E0805f9337DAe";
-//export const ETH_BRIDGE_ADDRESS = "0x30CB2293C7b138aF8C9A45589D4577C2Faf91732";
-export const LIQUIDITY_FEE = BigInt(3000);
-export const ZERO = new BigInt(0);
+export const LIQUIDITY_FEE = 3000n;
+export const ZERO = 0n;
 export const BRIDGE_ADDRESS = base64url.toBuffer(
   "OaKmwCWrUhdCCsIMN_ViVcu1uBF0VM3FW3Mi1z_VTNs"
 );
@@ -21,6 +20,8 @@ export const ELC = {
   name: "Ellipticoin",
   issuer: "Ellipticoin",
   id: Buffer.from("ELC", "utf8").toString("base64"),
+  balance: 0n,
+  totalSupply: 0n,
 };
 export const WETH = {
   ticker: "ETH",
@@ -33,6 +34,8 @@ export const WETH = {
   id: Buffer.from("c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", "hex").toString(
     "base64"
   ),
+  balance: 0n,
+  totalSupply: 0n,
 };
 export const BTC = {
   ticker: "BTC",
@@ -43,6 +46,8 @@ export const BTC = {
   id: Buffer.from("eb4c2781e4eba804ce9a9803c67d0893436bb27d", "hex").toString(
     "base64"
   ),
+  balance: 0n,
+  totalSupply: 0n,
 };
 export const USD = {
   ticker: "USD",
@@ -55,7 +60,9 @@ export const USD = {
   id: Buffer.from("6b175474e89094c44da98b954eedeac495271d0f", "hex").toString(
     "base64"
   ),
+  balance: 0n,
+  totalSupply: 0n,
 };
-export const LIQUIDITY_TOKENS = [BTC, ELC, USD, WETH];
+export const LIQUIDITY_TOKENS = [BTC, ELC, WETH];
 export const BRIDGE_TOKENS = [WETH, BTC, USD];
 export const TOKENS = [ELC, WETH, BTC, USD];

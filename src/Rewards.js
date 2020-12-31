@@ -1,17 +1,21 @@
-import { formatTokenBalance } from "./helpers";
 import { usePostTransaction } from "./mutations";
+import { Value } from "./helpers";
+import { ELC } from "./constants";
 import { useGetIssuanceRewards } from "./queries";
 import React from "react";
+import useSound from "use-sound";
+import chaChing from "./chaching.wav";
 
 export default function Rewards(props) {
-  const { data: { issuanceRewards } = 0 } = useGetIssuanceRewards();
+  const { data: { issuanceRewards } = 0n } = useGetIssuanceRewards();
   const [harvest] = usePostTransaction({
     contract: "Ellipticoin",
     functionName: "harvest",
   });
+  const [playChaChing] = useSound(chaChing);
   const handleHarvest = async function () {
-    const chaChing = new Audio("/chaching.wav");
-    chaChing.play();
+    playChaChing();
+
     await harvest();
   };
   return (
@@ -28,7 +32,7 @@ export default function Rewards(props) {
           </button>
           <div className="title">Mature Liquidity Rewards</div>
           <div className="value text-success">
-            {formatTokenBalance(issuanceRewards)} ELC
+            <Value token={ELC}>{issuanceRewards}</Value>
           </div>
         </div>
       </div>

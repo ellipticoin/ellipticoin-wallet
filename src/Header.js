@@ -3,7 +3,6 @@ import Logo from "./logo.svg";
 import base64url from "base64url";
 import React from "react";
 import { Menu, X } from "react-feather";
-import Identicon from "react-identicons";
 
 export default function WalletMenu(props) {
   const {
@@ -59,9 +58,6 @@ export default function WalletMenu(props) {
         <div className="pageTitle">
           <img src={Logo} alt="logo" className="logo" />
           Ellipticoin Wallet
-        </div>
-        <div className="right">
-          <Identicon bg="#fff" size="32" string={base64url.encode(publicKey)} />
         </div>
       </div>
     </>

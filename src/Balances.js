@@ -1,11 +1,9 @@
-import { BASE_FACTOR } from "./constants";
-import { formatCurrency, formatTokenBalance, tokenName } from "./helpers";
+import { BASE_FACTOR, USD } from "./constants";
+import { findToken, Value, tokenTicker, Price } from "./helpers";
 import { default as React } from "react";
 
 export default function Balances(props) {
-  const { tokens, total } = props;
-
-  if (tokens.length === 0) return <></>;
+  const { tokens, totalBalance } = props;
 
   return (
     <div className="section mt-2">
@@ -18,8 +16,12 @@ export default function Balances(props) {
             <thead>
               <tr>
                 <th scope="col">Token</th>
-                <th scope="col">Number of Tokens</th>
-                <th scope="col">Price</th>
+                <th scope="col" className="text-right">
+                  Number of Tokens
+                </th>
+                <th scope="col" className="text-right">
+                  Price
+                </th>
                 <th scope="col" className="text-right">
                   Balance
                 </th>
@@ -28,27 +30,25 @@ export default function Balances(props) {
             <tbody>
               {tokens.map((token) => (
                 <tr key={token.id}>
-                  <th scope="row">{tokenName(token)}</th>
-                  <td>{formatTokenBalance(token.balance)}</td>
-                  <td>
-                    {formatCurrency(
-                      tokenName(token) === "USD" ? 1 * BASE_FACTOR : token.price
-                    )}
+                  <th scope="row">{findToken(token).name}</th>
+                  <td className="text-right">
+                    <Value>{token.balance}</Value>
+                  </td>
+                  <td className="text-right">
+                    <Price>{token.price}</Price>
                   </td>
                   <td className="text-right text-primary">
-                    {formatCurrency(
-                      token.balance *
-                        ((tokenName(token) === "USD"
-                          ? 1 * BASE_FACTOR
-                          : token.price) /
-                          BASE_FACTOR)
-                    )}
+                    <Value token={USD}>
+                      {(token.balance * token.price) / BASE_FACTOR}
+                    </Value>
                   </td>
                 </tr>
               ))}
               <tr>
                 <td colSpan="5" className="text-right text-primary">
-                  <strong>Total: {formatCurrency(total)}</strong>
+                  <strong>
+                    Total: <Value token={USD}>{totalBalance}</Value>
+                  </strong>
                 </td>
               </tr>
             </tbody>

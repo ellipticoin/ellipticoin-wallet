@@ -1,7 +1,7 @@
 import btcLogo from "./BTC-logo.png";
 import ethLogo from "./ETH-logo.png";
 import { BASE_FACTOR, BTC, USD, WETH } from "./constants";
-import { formatCurrency, formatTokenBalance, tokenName } from "./helpers";
+import { Value, findToken } from "./helpers";
 import { find, sumBy } from "lodash";
 import { default as React, useMemo } from "react";
 
@@ -11,17 +11,12 @@ export default function LockedValue(props) {
 
   const btc = useMemo(() => find(tokens, ["id", BTC.id]), [tokens]);
   const usd = useMemo(() => find(tokens, ["id", USD.id]), [tokens]);
-  const totalLockedValue = useMemo(
-    () =>
-      sumBy([weth, btc, usd], (token) => {
-        let price = tokenName(token) === "USD" ? BASE_FACTOR : token.price;
-        return (
-          (parseInt(token.totalSupply) * parseInt(price) || 0) / BASE_FACTOR
-        );
-      }),
-    [btc, usd, weth]
-  );
-
+  const totalLockedValue = tokens.reduce((sum, token) => {
+    if (findToken(token).name === "Ellipticoin") return sum;
+    const price = findToken(token).name === "USD" ? BASE_FACTOR : token.price;
+    let total = (token.totalSupply * price) / BASE_FACTOR;
+    return sum + total;
+  }, 0n);
   return (
     <div className="section mt-2">
       <div className="row">
@@ -56,12 +51,12 @@ export default function LockedValue(props) {
                       </td>
                       <td className="text-right">
                         {" "}
-                        {formatTokenBalance(btc.totalSupply)} BTC
+                        <Value token={BTC}>{btc.totalSupply}</Value>
                       </td>
                       <td className="text-right">
-                        {formatCurrency(
-                          (btc.totalSupply * btc.price) / BASE_FACTOR
-                        )}
+                        <Value token={BTC}>
+                          {(btc.totalSupply * btc.price) / BASE_FACTOR}
+                        </Value>
                       </td>
                     </tr>
                     <tr>
@@ -79,29 +74,29 @@ export default function LockedValue(props) {
                       </td>
                       <td className="text-right">
                         {" "}
-                        {formatTokenBalance(weth.totalSupply)} ETH
+                        <Value token={WETH}>{weth.totalSupply}</Value>
                       </td>
                       <td className="text-right">
                         {" "}
-                        {formatCurrency(
-                          (weth.totalSupply * weth.price) / BASE_FACTOR
-                        )}
+                        <Value token={WETH}>
+                          {(weth.totalSupply * weth.price) / BASE_FACTOR}
+                        </Value>
                       </td>
                     </tr>
                     <tr>
                       <td>US Dollar</td>
                       <td className="text-right">
                         {" "}
-                        {formatTokenBalance(usd.totalSupply)} USD
+                        <Value token={USD}>{usd.totalSupply}</Value>
                       </td>
                       <td className="text-right">
-                        {formatCurrency(usd.totalSupply)}
+                        <Value token={USD}>{usd.totalSupply}</Value>
                       </td>
                     </tr>
                     <tr>
                       <th colspan="2">Total Locked Value</th>
                       <th className="value text-success text-right">
-                        {formatCurrency(totalLockedValue)}
+                        <Value token={USD}>{totalLockedValue}</Value>
                       </th>
                     </tr>
                   </tbody>
