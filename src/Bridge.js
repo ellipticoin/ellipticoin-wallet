@@ -1,6 +1,6 @@
 import BridgeJSON from "./Bridge.json";
-import TokenSelect from "./inputs/TokenSelect.js";
-import TokenAmountInput from "./inputs/TokenAmountInput.js";
+import TokenSelect from "./Inputs/TokenSelect.js";
+import TokenAmountInput from "./Inputs/TokenAmountInput.js";
 import ReleaseTransactions from "./ReleaseTransactions";
 import {
   BASE_FACTOR,

@@ -40,6 +40,7 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-testing-library": "^3.9.2",
     "eslint-webpack-plugin": "^2.1.0",
+    "ethereumjs-util": "^7.0.7",
     "ethers": "^5.0.24",
     "file-loader": "6.1.1",
     "file-saver": "^2.0.5",

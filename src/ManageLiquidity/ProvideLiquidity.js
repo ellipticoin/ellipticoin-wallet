@@ -1,5 +1,5 @@
-import TokenAmountInput from "../inputs/TokenAmountInput";
-import TokenSelect from "../inputs/TokenSelect";
+import TokenAmountInput from "../Inputs/TokenAmountInput";
+import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, USD, LIQUIDITY_TOKENS, TOKENS } from "../constants";
 import { encodeToken, tokenName, ValueUSD, Value } from "../helpers";
 import { usePostTransaction } from "../mutations";

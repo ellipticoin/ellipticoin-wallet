@@ -27,19 +27,12 @@ export default function LiquidityBalances(props) {
 
   const totalLiquidityBalance = liquidityTokens.reduce(
     (sum, liquidityToken) => {
-<<<<<<< HEAD
-      const price =
-        findToken(liquidityToken).name === "USD"
-          ? BASE_FACTOR
-          : liquidityToken.price;
-      let total = liquidityToken.balance * ((price * 2n) / BASE_FACTOR);
-=======
+      if(liquidityToken.balance == 0n) return sum
       let total =
         ((liquidityToken.poolSupplyOfBaseToken * liquidityToken.balance) /
           liquidityToken.totalSupply) *
         2n;
 
->>>>>>> mainnet
       return sum + total;
     },
     0n
@@ -80,7 +73,7 @@ export default function LiquidityBalances(props) {
               </tr>
             </thead>
             <tbody>
-              {liquidityTokens.map((liquidityToken) => (
+              {liquidityTokens.filter((liquidityToken) => liquidityToken.balance !== 0n).map((liquidityToken) => (
                 <React.Fragment key={liquidityToken.id}>
                   <tr>
                     <th scope="row" rowSpan="2">

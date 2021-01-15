@@ -1,4 +1,4 @@
-import { InputState, TokenAmountInput, TokenSelect } from "./inputs";
+import { InputState, TokenAmountInput, TokenSelect } from "./Inputs";
 import {
   BASE_FACTOR,
   ELC,

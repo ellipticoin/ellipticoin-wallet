@@ -138,7 +138,7 @@ function App(props) {
         }
         return (
           <Trade
-            liquidityTokens={liquidityTokens}
+            liquidityTokens={liquidityTokens.filter((liquidityToken) => liquidityToken.totalSupply !== 0n)}
             investorModeEnabled={investorModeEnabled}
             userTokens={tokens}
             onHide={() => setShowPage(null)}
