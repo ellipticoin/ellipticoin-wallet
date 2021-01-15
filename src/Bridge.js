@@ -96,7 +96,7 @@ export default function Bridge(props) {
   }, [signer, inboundToken, setAllowance]);
 
   const exitFundsToEthereum = React.useCallback(
-    (txId, tokenAddress, quantity) => {
+    (txId, tokenAddress, amount) => {
       return async () => {
         const signature = await getSignature(txId);
         let tx;
@@ -105,7 +105,7 @@ export default function Bridge(props) {
         if (tokenAddress === WETH.address) {
           tx = await bridge.releaseWETH(
             ethAccount,
-            parseUnits(quantity, decimals),
+            parseUnits((Number(amount)/Number(BASE_FACTOR)).toString(), decimals),
             parseInt(txId),
             hexlify(signature)
           );
@@ -113,7 +113,7 @@ export default function Bridge(props) {
           tx = await bridge.release(
             tokenAddress,
             ethAccount,
-            parseUnits(quantity, decimals),
+            parseUnits((Number(amount)/Number(BASE_FACTOR)).toString(), decimals),
             parseInt(txId),
             hexlify(signature)
           );
@@ -226,22 +226,17 @@ export default function Bridge(props) {
     return amt.replace(/[^0-9.,]+/g, "");
   };
 
-  const handleAmountChange = (event) => {
-    let amount = event.target.value;
-    setAmount(formatAmount(amount));
-  };
-
   const handleReplayReleaseTransaction = async (
     evt,
     txId,
     tokenContractAddress,
-    quantity
+    amount
   ) => {
     evt.preventDefault();
     await exitFundsToEthereum(
       txId,
       tokenContractAddress,
-      formatAmount(quantity.toString())
+      formatAmount(amount.toString())
     )();
   };
 
@@ -278,8 +273,6 @@ export default function Bridge(props) {
                   <Form.Label>Amount</Form.Label>
                   <TokenAmountInput
                     onChange={(amount) => setAmount(amount)}
-                    state={amount}
-                    currency={outboundToken.name}
                     placeholder="Amount"
                   />
                 </Form.Group>

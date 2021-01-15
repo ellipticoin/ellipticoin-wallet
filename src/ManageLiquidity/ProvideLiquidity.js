@@ -125,7 +125,6 @@ export default function ProvideLiquidity(props) {
         <Form.Label>Amount</Form.Label>
         <TokenAmountInput
           onChange={(amount) => setAmount(amount)}
-          state={amount}
           ref={amountRef}
           currency={token.name}
           placeholder="Amount"

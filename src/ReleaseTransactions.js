@@ -1,4 +1,5 @@
 import { BASE_FACTOR, TOKENS } from "./constants";
+import { Value } from "./helpers";
 import { useGetTransactionsByContractFunction } from "./queries";
 import cbor from "cbor";
 import { toChecksumAddress } from "ethereumjs-util";
@@ -103,7 +104,7 @@ function ReleaseTransactions({ onReplayTransaction }) {
               <tr className="d-flex" key={tx.id}>
                 <td className="col-4">{tx.blockNumber}</td>
                 <td className="col-3">{tx.arguments.token.ticker}</td>
-                <td className="col-4">{tx.arguments.amount}</td>
+                <td className="col-4"><Value>{tx.arguments.amount}</Value></td>
                 <td className="col-1">
                   <Form
                     noValidate
