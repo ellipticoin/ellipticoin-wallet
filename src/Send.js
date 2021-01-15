@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import TokenAmountInput from "./inputs/TokenAmountInput";
-=======
 import TokenAmountInput from "./Inputs/TokenAmountInput";
->>>>>>> @{-1}
 import { BASE_FACTOR, TOKENS } from "./constants";
 import { tokenToString } from "./helpers";
 import { usePostTransaction } from "./mutations";

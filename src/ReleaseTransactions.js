@@ -11,7 +11,7 @@ const decodeReleaseTxArgs = (txArgs) => {
   return {
     token: TOKENS.find((token) => token.id === decoded[0].toString("base64")),
     address: toChecksumAddress("0x" + decoded[1].toString("hex")),
-    amount: BigInt(decoded[2] * Number(BASE_FACTOR)) / BASE_FACTOR,
+    amount: BigInt(isNaN(decoded[2]) ? 0: decoded[2] * Number(BASE_FACTOR)) / BASE_FACTOR,
   };
 };
 
