@@ -27,6 +27,7 @@ export default function LiquidityBalances(props) {
 
   const totalLiquidityBalance = liquidityTokens.reduce(
     (sum, liquidityToken) => {
+      if(liquidityToken.balance == 0n) return sum
       let total =
         ((liquidityToken.poolSupplyOfBaseToken * liquidityToken.balance) /
           liquidityToken.totalSupply) *
@@ -72,7 +73,7 @@ export default function LiquidityBalances(props) {
               </tr>
             </thead>
             <tbody>
-              {liquidityTokens.map((liquidityToken) => (
+              {liquidityTokens.filter((liquidityToken) => liquidityToken.balance !== 0n).map((liquidityToken) => (
                 <React.Fragment key={liquidityToken.id}>
                   <tr>
                     <th scope="row" rowSpan="2">
