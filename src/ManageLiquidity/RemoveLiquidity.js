@@ -1,6 +1,6 @@
-import { InputState } from "../inputs";
-import TokenAmountInput from "../inputs/TokenAmountInput";
-import TokenSelect from "../inputs/TokenSelect";
+import { InputState } from "../Inputs";
+import TokenAmountInput from "../Inputs/TokenAmountInput";
+import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, ZERO, LIQUIDITY_TOKENS, TOKENS } from "../constants";
 import { stringToBigInt, encodeToken, Value } from "../helpers";
 import { usePostTransaction } from "../mutations";

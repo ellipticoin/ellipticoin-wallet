@@ -1,4 +1,4 @@
-import CopyButton from "./inputs/CopyButton.js";
+import CopyButton from "./Inputs/CopyButton.js";
 import { USD } from "./constants";
 import { Value } from "./helpers";
 import base64url from "base64url";

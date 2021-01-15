@@ -107,7 +107,6 @@ export function useGetLiquidityTokens() {
       },
     }
   );
-
   liquidityTokens = liquidityTokens
     .map((liquidityToken) => ({
       ...liquidityToken,
@@ -116,8 +115,8 @@ export function useGetLiquidityTokens() {
       totalSupply: BigInt(liquidityToken.totalSupply),
       poolSupplyOfToken: BigInt(liquidityToken.poolSupplyOfToken),
       poolSupplyOfBaseToken: BigInt(liquidityToken.poolSupplyOfBaseToken),
-    }))
-    .filter((liquidityToken) => liquidityToken.balance !== 0n);
+    }));
+
 
   return { data: { liquidityTokens }, error };
 }
