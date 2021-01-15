@@ -4,13 +4,14 @@ import { BASE_FACTOR, USD, LIQUIDITY_TOKENS, TOKENS } from "../constants";
 import { encodeToken, tokenName, ValueUSD, Value } from "../helpers";
 import { usePostTransaction } from "../mutations";
 import { find, get } from "lodash";
-import { default as React, useMemo, useState } from "react";
+import { default as React, useMemo, useState, useRef } from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
 
 export default function ProvideLiquidity(props) {
   const { userTokens, liquidityTokens, onHide } = props;
   const [error, setError] = useState();
   const [amount, setAmount] = useState(null);
+  const amountRef = useRef(null);
   const [initialPrice, setInitialPrice] = useState(null);
   const [token, setToken] = useState(TOKENS[0]);
   const liquidityToken = useMemo(
@@ -80,7 +81,8 @@ export default function ProvideLiquidity(props) {
   };
   const maxProvideAmount = () => {
     if (tokenBalance) {
-      setAmount(new InputState(tokenBalance, token.ticker));
+      setAmount(tokenBalance);
+      amountRef.current.setRawValue(Number(tokenBalance) / Number(BASE_FACTOR));
     }
   };
   const handleProvideSubmit = async (evt) => {
@@ -124,6 +126,7 @@ export default function ProvideLiquidity(props) {
         <TokenAmountInput
           onChange={(amount) => setAmount(amount)}
           state={amount}
+          ref={amountRef}
           currency={token.name}
           placeholder="Amount"
         />
