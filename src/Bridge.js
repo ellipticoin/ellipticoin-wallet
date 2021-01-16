@@ -208,7 +208,7 @@ export default function Bridge(props) {
     let tx;
     if (inboundToken.address === WETH.address) {
       tx = await bridge.mintWETH(hexlify(publicKey), {
-        value: parseUnits(Number(amount) / Number(BASE_FACTOR)),
+        value: parseUnits((Number(amount) / Number(BASE_FACTOR)).toString()),
       });
     } else {
       const inboundTokenContract = erc20FromAddress(
@@ -219,7 +219,7 @@ export default function Bridge(props) {
       tx = await bridge.mint(
         inboundToken.address,
         hexlify(publicKey),
-        parseUnits(Number(amount) / Number(BASE_FACTOR), decimals)
+        parseUnits((Number(amount) / Number(BASE_FACTOR)).toString(), decimals)
       );
     }
     setTransactionPending(true);
