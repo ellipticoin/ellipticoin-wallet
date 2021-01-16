@@ -174,7 +174,7 @@ export default function Trade(props) {
                   <TokenSelect
                     onChange={setOutputToken}
                     defaultValue={liquidityTokens[0]}
-                    tokens={liquidityTokens}
+                    tokens={[USD, ...liquidityTokens]}
                     disabledTokens={[inputToken]}
                   />
                 </Form.Group>
