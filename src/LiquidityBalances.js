@@ -27,7 +27,7 @@ export default function LiquidityBalances(props) {
 
   const totalLiquidityBalance = liquidityTokens.reduce(
     (sum, liquidityToken) => {
-      if(liquidityToken.balance == 0n) return sum
+      if (liquidityToken.balance == 0n) return sum;
       let total =
         ((liquidityToken.poolSupplyOfBaseToken * liquidityToken.balance) /
           liquidityToken.totalSupply) *
@@ -73,76 +73,78 @@ export default function LiquidityBalances(props) {
               </tr>
             </thead>
             <tbody>
-              {liquidityTokens.filter((liquidityToken) => liquidityToken.balance !== 0n).map((liquidityToken) => (
-                <React.Fragment key={liquidityToken.id}>
-                  <tr>
-                    <th scope="row" rowSpan="2">
-                      {findToken(liquidityToken).name}
-                    </th>
-                    <td className="text-right" rowSpan="2">
-                      <Percentage
-                        numerator={liquidityToken.balance}
-                        denomiator={liquidityToken.totalSupply}
-                      />
-                    </td>
-                    <td className="text-right" rowSpan="2">
-                      {blockReward(blockNumber)}{" "}
-                      {liquidityToken.balance ? (
-                        <Value>
-                          {((blockReward(blockNumber) *
-                            BASE_FACTOR *
-                            liquidityToken.balance) /
-                            liquidityToken.totalSupply) *
-                            3n}
-                        </Value>
-                      ) : (
-                        0
-                      )}
-                    </td>
-                    <td className="text-right no-padding-bottom">
-                      <Value>
-                        {liquidityToken.totalSupply
-                          ? (liquidityToken.poolSupplyOfToken *
-                              liquidityToken.balance) /
-                            liquidityToken.totalSupply
-                          : 0n}
-                      </Value>{" "}
-                      {tokenTicker(liquidityToken)}
-                    </td>
-                    <td className="text-right" rowSpan="2">
-                      <Price>
-                        {liquidityToken.poolSupplyOfBaseToken
-                          ? (liquidityToken.poolSupplyOfBaseToken *
-                              BASE_FACTOR) /
-                            liquidityToken.poolSupplyOfToken
-                          : 0n}
-                      </Price>
-                    </td>
-                    <td className="text-right" rowSpan="2">
-                      <Price>
-                        {liquidityToken.balance
-                          ? ((liquidityToken.poolSupplyOfBaseToken *
+              {liquidityTokens
+                .filter((liquidityToken) => liquidityToken.balance !== 0n)
+                .map((liquidityToken) => (
+                  <React.Fragment key={liquidityToken.id}>
+                    <tr>
+                      <th scope="row" rowSpan="2">
+                        {findToken(liquidityToken).name}
+                      </th>
+                      <td className="text-right" rowSpan="2">
+                        <Percentage
+                          numerator={liquidityToken.balance}
+                          denomiator={liquidityToken.totalSupply}
+                        />
+                      </td>
+                      <td className="text-right" rowSpan="2">
+                        {blockReward(blockNumber)}{" "}
+                        {liquidityToken.balance ? (
+                          <Value>
+                            {((blockReward(blockNumber) *
+                              BASE_FACTOR *
                               liquidityToken.balance) /
                               liquidityToken.totalSupply) *
-                            2n
-                          : 0n}
-                      </Price>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-right no-border no-padding-top">
-                      +{" "}
-                      <Value token={USD}>
-                        {liquidityToken.poolSupplyOfBaseToken
-                          ? (liquidityToken.poolSupplyOfBaseToken *
-                              liquidityToken.balance) /
-                            liquidityToken.totalSupply
-                          : 0n}
-                      </Value>
-                    </td>
-                  </tr>
-                </React.Fragment>
-              ))}
+                              3n}
+                          </Value>
+                        ) : (
+                          0
+                        )}
+                      </td>
+                      <td className="text-right no-padding-bottom">
+                        <Value>
+                          {liquidityToken.totalSupply
+                            ? (liquidityToken.poolSupplyOfToken *
+                                liquidityToken.balance) /
+                              liquidityToken.totalSupply
+                            : 0n}
+                        </Value>{" "}
+                        {tokenTicker(liquidityToken)}
+                      </td>
+                      <td className="text-right" rowSpan="2">
+                        <Price>
+                          {liquidityToken.poolSupplyOfBaseToken
+                            ? (liquidityToken.poolSupplyOfBaseToken *
+                                BASE_FACTOR) /
+                              liquidityToken.poolSupplyOfToken
+                            : 0n}
+                        </Price>
+                      </td>
+                      <td className="text-right" rowSpan="2">
+                        <Price>
+                          {liquidityToken.balance
+                            ? ((liquidityToken.poolSupplyOfBaseToken *
+                                liquidityToken.balance) /
+                                liquidityToken.totalSupply) *
+                              2n
+                            : 0n}
+                        </Price>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-right no-border no-padding-top">
+                        +{" "}
+                        <Value token={USD}>
+                          {liquidityToken.poolSupplyOfBaseToken
+                            ? (liquidityToken.poolSupplyOfBaseToken *
+                                liquidityToken.balance) /
+                              liquidityToken.totalSupply
+                            : 0n}
+                        </Value>
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                ))}
               <tr>
                 <td></td>
                 <td colSpan="5" className="text-right text-primary">

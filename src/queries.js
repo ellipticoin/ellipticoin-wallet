@@ -107,16 +107,14 @@ export function useGetLiquidityTokens() {
       },
     }
   );
-  liquidityTokens = liquidityTokens
-    .map((liquidityToken) => ({
-      ...liquidityToken,
-      balance: BigInt(liquidityToken.balance),
-      price: BigInt(liquidityToken.price),
-      totalSupply: BigInt(liquidityToken.totalSupply),
-      poolSupplyOfToken: BigInt(liquidityToken.poolSupplyOfToken),
-      poolSupplyOfBaseToken: BigInt(liquidityToken.poolSupplyOfBaseToken),
-    }));
-
+  liquidityTokens = liquidityTokens.map((liquidityToken) => ({
+    ...liquidityToken,
+    balance: BigInt(liquidityToken.balance),
+    price: BigInt(liquidityToken.price),
+    totalSupply: BigInt(liquidityToken.totalSupply),
+    poolSupplyOfToken: BigInt(liquidityToken.poolSupplyOfToken),
+    poolSupplyOfBaseToken: BigInt(liquidityToken.poolSupplyOfBaseToken),
+  }));
 
   return { data: { liquidityTokens }, error };
 }

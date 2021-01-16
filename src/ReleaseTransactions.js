@@ -12,7 +12,9 @@ const decodeReleaseTxArgs = (txArgs) => {
   return {
     token: TOKENS.find((token) => token.id === decoded[0].toString("base64")),
     address: toChecksumAddress("0x" + decoded[1].toString("hex")),
-    amount: BigInt(isNaN(decoded[2]) ? 0: decoded[2] * Number(BASE_FACTOR)) / BASE_FACTOR,
+    amount:
+      BigInt(isNaN(decoded[2]) ? 0 : decoded[2] * Number(BASE_FACTOR)) /
+      BASE_FACTOR,
   };
 };
 
@@ -104,7 +106,9 @@ function ReleaseTransactions({ onReplayTransaction }) {
               <tr className="d-flex" key={tx.id}>
                 <td className="col-4">{tx.blockNumber}</td>
                 <td className="col-3">{tx.arguments.token.ticker}</td>
-                <td className="col-4"><Value>{tx.arguments.amount}</Value></td>
+                <td className="col-4">
+                  <Value>{tx.arguments.amount}</Value>
+                </td>
                 <td className="col-1">
                   <Form
                     noValidate

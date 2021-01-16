@@ -105,7 +105,10 @@ export default function Bridge(props) {
         if (tokenAddress === WETH.address) {
           tx = await bridge.releaseWETH(
             ethAccount,
-            parseUnits((Number(amount)/Number(BASE_FACTOR)).toString(), decimals),
+            parseUnits(
+              (Number(amount) / Number(BASE_FACTOR)).toString(),
+              decimals
+            ),
             parseInt(txId),
             hexlify(signature)
           );
@@ -113,7 +116,10 @@ export default function Bridge(props) {
           tx = await bridge.release(
             tokenAddress,
             ethAccount,
-            parseUnits((Number(amount)/Number(BASE_FACTOR)).toString(), decimals),
+            parseUnits(
+              (Number(amount) / Number(BASE_FACTOR)).toString(),
+              decimals
+            ),
             parseInt(txId),
             hexlify(signature)
           );
@@ -202,7 +208,7 @@ export default function Bridge(props) {
     let tx;
     if (inboundToken.address === WETH.address) {
       tx = await bridge.mintWETH(hexlify(publicKey), {
-        value: parseUnits(amount),
+        value: parseUnits(Number(amount) / Number(BASE_FACTOR)),
       });
     } else {
       const inboundTokenContract = erc20FromAddress(
@@ -213,7 +219,7 @@ export default function Bridge(props) {
       tx = await bridge.mint(
         inboundToken.address,
         hexlify(publicKey),
-        parseUnits(amount, decimals)
+        parseUnits(Number(amount) / Number(BASE_FACTOR), decimals)
       );
     }
     setTransactionPending(true);
