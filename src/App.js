@@ -72,7 +72,7 @@ function App(props) {
     if (!signer) return;
     (async () => {
       signer.provider.on("block", (blockNumber) => {
-        setEthBlockNumber(BigInt(blockNumber));
+        setEthBlockNumber(blockNumber);
       });
     })();
   }, [signer]);
