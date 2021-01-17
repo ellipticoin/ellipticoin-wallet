@@ -23,7 +23,9 @@ export default function RemoveLiquidity(props) {
     liquidityTokens[0]
   );
   const tokensInPool = useMemo(() => {
-    if (!removeLiquidityToken || removeLiquidityToken.balance === 0n) return 0n;
+    if (!removeLiquidityToken || removeLiquidityToken.balance === 0n) {
+        return 0n
+    }
 
     return (
       (removeLiquidityToken.balance * removeLiquidityToken.poolSupplyOfToken) /
@@ -31,7 +33,9 @@ export default function RemoveLiquidity(props) {
     );
   }, [removeLiquidityToken]);
   const baseTokensInPool = useMemo(() => {
-    if (!removeLiquidityToken || removeLiquidityToken.balance === 0n) return 0n;
+    if (!removeLiquidityToken || removeLiquidityToken.balance === 0n) {
+        return 0n;
+    }
 
     return (
       (removeLiquidityToken.balance *
