@@ -1,5 +1,6 @@
 import { InputState, TokenAmountInput, TokenSelect } from "./Inputs";
 import {
+  TOKEN_METADATA,
   BASE_FACTOR,
   ELC,
   LIQUIDITY_FEE,
@@ -11,44 +12,47 @@ import {
   encodeToken,
   formatTokenBalance,
   tokenTicker,
-  findToken,
   Value,
   formatCurrency,
 } from "./helpers";
 import { usePostTransaction } from "./mutations";
 import { find, get } from "lodash";
 import { ExchangeCalculator } from "ellipticoin";
-import { default as React, useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Button, Form, Collapse } from "react-bootstrap";
 import { ArrowDown } from "react-feather";
 import { ChevronLeft } from "react-feather";
+import { actions } from "ellipticoin";
 
 export default function Trade(props) {
-  const { onHide, liquidityTokens, userTokens, investorModeEnabled } = props;
+  const { onHide, liquidityTokens, tokens, address } = props;
   const [inputToken, setInputToken] = useState(USD);
-  const [outputToken, setOutputToken] = useState(liquidityTokens[0]);
+  const [outputToken, setOutputToken] = useState(tokens[0]);
   const [inputAmount, setInputAmount] = useState();
   const inputAmountRef = useRef(null);
   const [error, setError] = useState("");
-  const handleSwap = async (evt) => {
-    evt.preventDefault();
-    let res = await exchange(
-      encodeToken(inputToken),
-      encodeToken(outputToken),
-      Number(inputAmount),
-      0
+  const inputLiquidityToken = useMemo(() =>
+    find(liquidityTokens, ["tokenAddress", inputToken.address])
+  );
+  const outputLiquidityToken = useMemo(() =>
+    find(liquidityTokens, ["tokenAddress", outputToken.address])
+  );
+  const [trade] = usePostTransaction(actions.Trade, address);
+  const handleTrade = async (e) => {
+    e.preventDefault();
+    let result = await trade(
+      inputAmount,
+      inputToken.address,
+      outputAmount,
+      outputToken.address
     );
 
-    if (get(res, "returnValue.Err")) {
-      setError(res.returnValue.Err.message);
+    if (result) {
+      setError(result);
     } else {
       onHide();
     }
   };
-  const [exchange] = usePostTransaction({
-    contract: "Exchange",
-    functionName: "exchange",
-  });
 
   const setMaxInputAmount = () => {
     inputAmountRef.current.setRawValue(
@@ -60,7 +64,7 @@ export default function Trade(props) {
     if (liquidityTokens.length === 0) return;
     let exchangeRateCalculator = new ExchangeCalculator({
       liquidityTokens,
-      baseTokenId: USD.id,
+      baseTokenAddress: USD.address,
     });
     if (!inputAmount || inputAmount == 0n) return;
     return exchangeRateCalculator;
@@ -71,8 +75,8 @@ export default function Trade(props) {
     if (!exchangeRateCalculator) return;
     return exchangeRateCalculator.getOutputAmount(
       inputAmount,
-      inputToken.id,
-      outputToken.id
+      inputToken.address,
+      outputToken.address
     );
   });
   const exchangeRate = useMemo(() => {
@@ -80,8 +84,8 @@ export default function Trade(props) {
     if (!exchangeRateCalculator) return;
     return exchangeRateCalculator.getExchangeRate(
       inputAmount,
-      inputToken.id,
-      outputToken.id
+      inputToken.address,
+      outputToken.address
     );
   });
   const fee = useMemo(() => {
@@ -89,8 +93,8 @@ export default function Trade(props) {
     if (!exchangeRateCalculator) return;
     return exchangeRateCalculator.getFee(
       inputAmount,
-      inputToken.id,
-      outputToken.id
+      inputToken.address,
+      outputToken.address
     );
   });
   const disabled = useMemo(
@@ -98,11 +102,11 @@ export default function Trade(props) {
       !inputAmount ||
       !outputToken ||
       inputAmount == 0n ||
-      findToken(inputToken).ticker === findToken(outputToken).ticker
+      inputToken.address.toString("hex") === outputToken.address.toString("hex")
   );
 
   const inputTokenBalance = useMemo(
-    () => find(userTokens, ["id", inputToken.id]).balance
+    () => find(tokens, ["address", inputToken.address]).balance
   );
 
   return (
@@ -124,7 +128,7 @@ export default function Trade(props) {
               <Form
                 noValidate
                 autoComplete="off"
-                onSubmit={(evt) => handleSwap(evt)}
+                onSubmit={(e) => handleTrade(e)}
               >
                 <Form.Group className="basic">
                   <div className="labels">
@@ -142,7 +146,7 @@ export default function Trade(props) {
                   <div className="row">
                     <div className="col-6">
                       <TokenSelect
-                        tokens={[USD, ...liquidityTokens]}
+                        tokens={tokens}
                         defaultValue={USD}
                         onChange={(token) => setInputToken(token)}
                         token={inputToken}
@@ -173,8 +177,7 @@ export default function Trade(props) {
                   <Form.Label>To</Form.Label>
                   <TokenSelect
                     onChange={setOutputToken}
-                    defaultValue={liquidityTokens[0]}
-                    tokens={[USD, ...liquidityTokens]}
+                    tokens={tokens}
                     disabledTokens={[inputToken]}
                   />
                 </Form.Group>
@@ -192,13 +195,14 @@ export default function Trade(props) {
                       <strong>Output Amount</strong>
                       <h3 className="m-0">
                         <Value>{outputAmount}</Value>{" "}
-                        {outputToken && tokenTicker(outputToken)}
+                        {outputToken &&
+                          TOKEN_METADATA[outputToken.address].ticker}
                         <small>
                           {outputAmount && outputToken.ticker !== "USD" ? (
                             <>
                               {" "}
                               @ <Value token={USD}>{exchangeRate}</Value> /{" "}
-                              {tokenTicker(outputToken)}
+                              {TOKEN_METADATA[outputToken.address].ticker}
                             </>
                           ) : null}
                         </small>

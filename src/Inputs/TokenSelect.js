@@ -1,5 +1,4 @@
-import { findToken } from "../helpers";
-import { default as React } from "react";
+import { TOKEN_METADATA } from "../constants";
 import Select from "react-select";
 
 export default function TokenSelect(props) {
@@ -7,10 +6,13 @@ export default function TokenSelect(props) {
   const defaultValue = props.defaultValue || tokens[0];
   const options = tokens.map((token) => ({
     value: token,
-    label: nameProperty === "ethName" ? token.ethName : findToken(token).name,
+    label:
+      nameProperty === "ethName"
+        ? token.ethName
+        : TOKEN_METADATA[token.address.toString("base64")].name,
     disabled: (disabledTokens || [])
-      .map((token) => token.id)
-      .includes(token.id),
+      .map((token) => token.address)
+      .includes(token.address),
   }));
   return (
     <Select
@@ -21,7 +23,8 @@ export default function TokenSelect(props) {
         label:
           nameProperty === "ethName"
             ? defaultValue.ethName
-            : defaultValue && findToken(defaultValue).name,
+            : defaultValue &&
+              TOKEN_METADATA[defaultValue.address.toString("base64")].name,
         value: defaultValue,
       }}
       options={options}

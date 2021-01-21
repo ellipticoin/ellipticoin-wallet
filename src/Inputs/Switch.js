@@ -1,5 +1,3 @@
-import { default as React } from "react";
-
 export default function Switch(props) {
   const { checked, setChecked } = props;
   return (

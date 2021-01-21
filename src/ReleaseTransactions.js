@@ -3,7 +3,7 @@ import { Value } from "./helpers";
 import { useGetTransactionsByContractFunction } from "./queries";
 import cbor from "cbor";
 import { toChecksumAddress } from "ethereumjs-util";
-import { default as React } from "react";
+import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 
 const decodeReleaseTxArgs = (txArgs) => {
@@ -21,8 +21,8 @@ const decodeReleaseTxArgs = (txArgs) => {
 const pageSize = 10;
 
 function ReleaseTransactions({ onReplayTransaction }) {
-  const [page, setPage] = React.useState(0);
-  const [releasing, setReleasing] = React.useState(false);
+  const [page, setPage] = useState(0);
+  const [releasing, setReleasing] = useState(false);
 
   const {
     data: { transactionsByContractFunction } = {

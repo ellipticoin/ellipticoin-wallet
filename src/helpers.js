@@ -3,8 +3,9 @@ import {
   BLOCKS_PER_ERA,
   BRIDGE_TOKENS,
   TOKENS,
-  ELC,
+  MNS,
   USD,
+  TOKEN_METADATA,
   NETWORK_ID,
   NUMBER_OF_ERAS,
 } from "./constants";
@@ -13,10 +14,11 @@ import Sign1 from "./cose/Sign1";
 import CBOR from "cbor";
 import { ethers } from "ethers";
 import { saveAs } from "file-saver";
-import { find, get } from "lodash";
+import { find, get, sumBy } from "lodash";
 import { useState } from "react";
-import { NumeralFormatter } from "cleave.js";
 import nacl from "tweetnacl";
+
+const { arrayify } = ethers.utils;
 
 export function parseUnits(value, units) {
   try {
@@ -37,6 +39,13 @@ export function sign(message, secretKey) {
   return CBOR.encode(signer.sign(Buffer.from(message)));
 }
 
+export function encodeAddress(address) {
+  if (address.startsWith("0x")) {
+    return Array.from(arrayify(address));
+  } else {
+    return Array.from(Buffer.from(address, "base64"));
+  }
+}
 export function padBuffer(buffer, len) {
   return Buffer.concat([
     buffer,
@@ -58,51 +67,43 @@ export function Percentage({ numerator, denomiator }) {
 }
 
 export function Value({ children, token }) {
-  const digits = BASE_FACTOR.toString().length - 1;
-  const numeralFormatter = new NumeralFormatter(undefined, undefined, digits);
   return (
     <>
-      {token && token.id === USD.id ? "$ " : null}
-      {children === 0n
-        ? "0"
-        : numeralFormatter.format(
-            bigIntToNumber(children).toFixed(digits).toString()
-          )}
-      {token ? ` ${findToken(token).ticker}` : null}
+      {token && token.address === USD.address ? "$ " : null}
+      {children === 0n ? "0" : formatBigInt(children)}
+      {token ? ` ${TOKEN_METADATA[token.address].ticker}` : null}
     </>
   );
+}
+
+function formatBigInt(n) {
+  const [number, decimal] = (Number(n) / Number(BASE_FACTOR))
+    .toFixed(6)
+    .toString()
+    .split(".");
+  return `${numberWithCommas(number)}.${decimal}`;
+}
+
+function numberWithCommas(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function bigIntToNumber(n) {
   return Number(n) / Number(BASE_FACTOR);
 }
 
-export function Price({ children }) {
-  const digits = BASE_FACTOR.toString().length - 1;
-  const numeralFormatter = new NumeralFormatter(undefined, undefined, digits);
+export function USDValue({ children }) {
   if (children !== 0n && children < BASE_FACTOR) {
-    return `$ ${numeralFormatter.format(
-      bigIntToNumber(children)
-        .toFixed(digits)
-        .replace(/0{1,4}$/, "")
-    )}`;
+    return `$ ${formatBigInt(children)} USD`;
   } else {
-    return `$ ${numeralFormatter.format(bigIntToNumber(children).toFixed(2))}`;
+    return `$ ${bigIntToNumber(children).toFixed(2)} USD`;
   }
-}
-
-export function findToken(token) {
-  return find(
-    TOKENS,
-    ({ issuer, id }) =>
-      issuer === token.issuer && id.toString("base64") === token.id
-  );
 }
 
 export function tokenTicker(token) {
   return get(
     find(
-      [ELC, ...BRIDGE_TOKENS],
+      [MNS, ...BRIDGE_TOKENS],
       ({ issuer, id }) =>
         issuer === token.issuer && id.toString("base64") === token.id
     ),
@@ -116,18 +117,6 @@ export function stringToBigInt(string) {
     BigInt(integerValue) * BASE_FACTOR +
     BigInt(decimaValue.padEnd(BASE_FACTOR.toString().length - 1, "0"))
   );
-}
-
-export function encodeAddress(address) {
-  if (typeof address === "string") {
-    return {
-      Contract: address,
-    };
-  } else {
-    return {
-      PublicKey: address,
-    };
-  }
 }
 
 export function useLocalStorage(key, initialValue) {
@@ -158,6 +147,16 @@ export function useLocalStorage(key, initialValue) {
   };
 
   return [storedValue, setValue];
+}
+
+export function concatTypedArrays(arrays) {
+  var result = new arrays[0].constructor(sumBy(arrays, "length"));
+  var index = 0;
+  for (var array of arrays) {
+    result.set(array, index);
+    index += array.length;
+  }
+  return result;
 }
 
 export function downloadSecretKey(secretKey, noConfirm) {

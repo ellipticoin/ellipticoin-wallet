@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { default as React, useEffect } from "react";
+import { useEffect } from "react";
 import Spinner from "react-bootstrap/Spinner";
 import { ExternalLink } from "react-feather";
 

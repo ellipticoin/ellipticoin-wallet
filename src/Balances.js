@@ -1,6 +1,5 @@
-import { BASE_FACTOR, USD } from "./constants";
-import { findToken, Value, tokenTicker, Price } from "./helpers";
-import { default as React } from "react";
+import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
+import { findToken, Value, tokenTicker, USDValue } from "./helpers";
 
 export default function Balances(props) {
   const { tokens, totalBalance } = props;
@@ -29,17 +28,17 @@ export default function Balances(props) {
             </thead>
             <tbody>
               {tokens.map((token) => (
-                <tr key={token.id}>
-                  <th scope="row">{findToken(token).name}</th>
+                <tr key={token.address}>
+                  <th scope="row">{TOKEN_METADATA[token.address].name}</th>
                   <td className="text-right">
                     <Value>{token.balance}</Value>
                   </td>
                   <td className="text-right">
-                    <Price>{token.price}</Price>
+                    <USDValue>{token.price}</USDValue>
                   </td>
                   <td className="text-right text-primary">
                     <Value token={USD}>
-                      {(token.balance * token.price) / BASE_FACTOR}
+                      {token.balance * token.price/ BASE_FACTOR}
                     </Value>
                   </td>
                 </tr>
@@ -47,7 +46,7 @@ export default function Balances(props) {
               <tr>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: <Value token={USD}>{totalBalance}</Value>
+                    Total: <USDValue>{totalBalance}</USDValue>
                   </strong>
                 </td>
               </tr>

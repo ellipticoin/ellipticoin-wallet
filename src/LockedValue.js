@@ -1,19 +1,23 @@
 import btcLogo from "./BTC-logo.png";
 import ethLogo from "./ETH-logo.png";
-import { BASE_FACTOR, BTC, USD, WETH } from "./constants";
-import { Value, findToken } from "./helpers";
+import { BASE_FACTOR, BTC, USD, WETH, MNS, TOKEN_META_DATA } from "./constants";
+import { Value } from "./helpers";
 import { find, sumBy } from "lodash";
-import { default as React, useMemo } from "react";
+import { useMemo } from "react";
 
 export default function LockedValue(props) {
   const { tokens } = props;
-  const weth = useMemo(() => find(tokens, ["id", WETH.id]), [tokens]);
+  const weth = useMemo(() => find(tokens, ["address", WETH.address]), [tokens]);
 
-  const btc = useMemo(() => find(tokens, ["id", BTC.id]), [tokens]);
-  const usd = useMemo(() => find(tokens, ["id", USD.id]), [tokens]);
+  const btc = useMemo(() => find(tokens, ["address", BTC.address]), [tokens]);
+  const usd = useMemo(() => find(tokens, ["address", USD.address]), [tokens]);
   const totalLockedValue = tokens.reduce((sum, token) => {
-    if (findToken(token).name === "Ellipticoin") return sum;
-    const price = findToken(token).name === "USD" ? BASE_FACTOR : token.price;
+    if (token.address.toString("hex") === MNS.address.toString("hex"))
+      return sum;
+    const price =
+      token.address.toString("hex") === USD.toString("hex")
+        ? BASE_FACTOR
+        : token.price;
     let total = (token.totalSupply * price) / BASE_FACTOR;
     return sum + total;
   }, 0n);

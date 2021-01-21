@@ -1,11 +1,11 @@
 import { BASE_FACTOR } from "../constants";
 import { stringToBigInt } from "../helpers";
-import { default as React, useState, useRef } from "react";
+import { useState, useRef, forwardRef } from "react";
 import { Form } from "react-bootstrap";
 import NumberFormat from "react-number-format";
 import Cleave from "cleave.js/react";
 
-export default React.forwardRef((props, ref) => {
+export default forwardRef((props, ref) => {
   const { value, onChange } = props;
   return (
     <Cleave
@@ -18,10 +18,11 @@ export default React.forwardRef((props, ref) => {
         numeralThousandsGroupStyle: "thousand",
       }}
       onChange={(event) => {
-        props.onChange(
-          BigInt(Number(event.target.cleaveRawValue) * Number(BASE_FACTOR) || 0)
+        onChange(
+          BigInt(Math.round(Number(event.target.rawValue) * Number(BASE_FACTOR)) || 0)
         );
       }}
     ></Cleave>
   );
 });
+// };

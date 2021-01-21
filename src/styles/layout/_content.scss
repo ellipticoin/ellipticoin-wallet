@@ -7,7 +7,9 @@
 
 .actions-top {
   margin-bottom: 12px;
-  .row { justify-content: space-between; }
+  .row {
+    justify-content: space-between;
+  }
 }
 .your-address {
   display: flex;

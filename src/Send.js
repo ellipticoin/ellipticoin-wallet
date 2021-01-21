@@ -1,44 +1,40 @@
 import TokenAmountInput from "./Inputs/TokenAmountInput";
 import { BASE_FACTOR, TOKENS } from "./constants";
-import { tokenToString } from "./helpers";
+import { tokenToString, encodeAddress } from "./helpers";
 import { usePostTransaction } from "./mutations";
 import base64url from "base64url";
-import React from "react";
+import { ethers } from "ethers";
+import { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
+import { actions } from "ellipticoin";
+
+const { arrayify } = ethers.utils;
 
 export default function Send(props) {
-  const { show, setShow, setHost } = props;
-  const [amount, setAmount] = React.useState(
-    // "1"
-    ""
+  const { show, setShow, setHost, address } = props;
+  const [amount, setAmount] = useState(
+    12345n * BASE_FACTOR
+    // ""
   );
-  const [toAddress, setToAddress] = React.useState(
-    // "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
-    // "JZoYzwPNn_k82INoA-auebXqRvZwBWiqYUKLMWUpXCQ"
-    ""
+  const [toAddress, setToAddress] = useState(
+    "0x1D6bB7047Fd6e47a935D816297e0b4f9113ed023"
   );
-  const [token, setToken] = React.useState(TOKENS[0]);
+  const [token, setToken] = useState(TOKENS[0]);
+  const [postTransfer] = usePostTransaction(actions.Transfer, address);
   const handleTokenChange = (tokenString) => {
     const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
   };
   const send = async (event) => {
     event.preventDefault();
-    postTransfer(
-      [{ Contract: token.issuer }, Array.from(Buffer.from(token.id, "base64"))],
-      base64url.toBuffer(toAddress),
-      Number(amount)
-    );
-    setShow(false);
+    const result = await postTransfer(amount, token.address, toAddress);
+    if (result == null) {
+      setShow(false);
+    } else {
+      console.log(result);
+    }
   };
 
-  const [postTransfer] = usePostTransaction(
-    {
-      contract: "Token",
-      functionName: "transfer",
-    },
-    setHost
-  );
   return (
     <Modal show={show} className="action-sheet" onHide={() => setShow(false)}>
       <div className="modal-dialog" role="document">

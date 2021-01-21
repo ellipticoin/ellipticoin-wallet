@@ -4,19 +4,19 @@ import { BASE_FACTOR, USD, LIQUIDITY_TOKENS, TOKENS } from "../constants";
 import { encodeToken, tokenName, ValueUSD, Value } from "../helpers";
 import { usePostTransaction } from "../mutations";
 import { find, get } from "lodash";
-import { default as React, useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
+import { actions } from "ellipticoin";
 
 export default function ProvideLiquidity(props) {
-  const { userTokens, liquidityTokens, onHide } = props;
+  const { tokens, liquidityTokens, onHide, address } = props;
   const [error, setError] = useState();
   const [amount, setAmount] = useState(null);
   const amountRef = useRef(null);
   const [initialPrice, setInitialPrice] = useState(null);
   const [token, setToken] = useState(TOKENS[0]);
-  const liquidityToken = useMemo(
-    () => find(liquidityTokens, ["id", token.id]),
-    [token, userTokens]
+  const liquidityToken = useMemo(() =>
+    find(liquidityTokens, ["tokenAddress", token.address])
   );
   const providePoolExists = useMemo(
     () => liquidityToken && liquidityToken.totalSupply > 0n,
@@ -36,12 +36,11 @@ export default function ProvideLiquidity(props) {
   }, [initialPrice, amount, providePoolExists, liquidityToken]);
 
   const tokenBalance = useMemo(
-    () => find(userTokens, ["id", token.id]).balance,
-    [token, userTokens]
+    () => find(tokens, ["address", token.address]).balance
   );
   const baseTokenBalance = useMemo(
-    () => get(find(userTokens, ["id", USD.id]), "balance"),
-    [userTokens]
+    () => get(find(tokens, ["address", USD.address]), "balance"),
+    [tokens]
   );
   const disabled = useMemo(
     () =>
@@ -51,32 +50,22 @@ export default function ProvideLiquidity(props) {
     [amount, baseTokenBalance, baseTokenAmount, tokenBalance]
   );
 
-  const [createPool] = usePostTransaction({
-    contract: "Exchange",
-    functionName: "create_pool",
-  });
-  const [addLiquidity] = usePostTransaction({
-    contract: "Exchange",
-    functionName: "add_liquidity",
-  });
+  const [createPool] = usePostTransaction(actions.CreatePool, address);
+  const [addLiquidity] = usePostTransaction(actions.AddLiquidity, address);
   const handleAddLiquidity = async () => {
-    const res = await addLiquidity(encodeToken(token), Number(amount));
-    if (!res.returnValue) {
+    const result = await addLiquidity(amount, token.address);
+    if (result == null) {
       onHide();
     } else {
-      setError(res.returnValue.Err.message);
+      setError(result);
     }
   };
   const handleCreatePool = async () => {
-    const res = await createPool(
-      encodeToken(token),
-      Number(amount),
-      Number(initialPrice)
-    );
-    if (res.returnValue == null) {
+    const result = await createPool(amount, token.address, initialPrice);
+    if (result == null) {
       onHide();
     } else {
-      setError(res.returnValue.Err.message);
+      setError(result);
     }
   };
   const maxProvideAmount = () => {
@@ -124,7 +113,7 @@ export default function ProvideLiquidity(props) {
       <Form.Group className="basic">
         <Form.Label>Amount</Form.Label>
         <TokenAmountInput
-          onChange={(amount) => setAmount(amount)}
+          onChange={setAmount}
           ref={amountRef}
           currency={token.name}
           placeholder="Amount"

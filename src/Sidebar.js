@@ -1,26 +1,26 @@
 import { downloadSecretKey } from "./helpers";
+import { useSignAndMigrate } from "./mutations";
 import base64url from "base64url";
-import React from "react";
 import { Modal } from "react-bootstrap";
+import { useRef } from "react";
 import { BarChart, Download, Settings, Upload, X } from "react-feather";
+import { ethers } from "ethers";
+
+
+const { getAddress } = ethers.utils;
+
 
 export default function Sidebar(props) {
   let {
     showSidebar,
     setShowSidebar,
     setShowPage,
-    publicKey,
-    secretKey,
-    setSecretKey,
-    setSecretKeyDownloaded,
+secretKey, publicKey, setMigrated, address 
   } = props;
+  const signAndMigrate = useSignAndMigrate({ secretKey, publicKey, setMigrated, address })
 
-  const downloadPrivateKey = (option) => {
-    downloadSecretKey(secretKey, true);
-    setSecretKeyDownloaded(true);
-  };
 
-  const uploadPrivateKey = (option) => {
+  const migrate = (option) => {
     inputEl.current.click();
   };
   const handleFileUpload = (event) => {
@@ -31,11 +31,11 @@ export default function Sidebar(props) {
     let fr = new FileReader();
     fr.onload = (event) => {
       event.preventDefault();
-      setSecretKey(Buffer.from(event.target.result, "base64"));
+      signAndMigrate(Buffer.from(event.target.result, "base64"));
     };
     fr.readAsText(file);
   };
-  const inputEl = React.useRef(null);
+  const inputEl = useRef(null);
   return (
     <>
       <input
@@ -55,7 +55,7 @@ export default function Sidebar(props) {
             <div className="profileBox pt-2 pb-2">
               <div className="image-wrapper"></div>
               <div className="in">
-                <strong>{base64url.encode(publicKey).slice(0, 20)}...</strong>
+                <strong>{getAddress(address).slice(0,5)}..{getAddress(address).slice(39)}</strong>
                 <div className="text-muted"></div>
               </div>
               <button
@@ -67,19 +67,11 @@ export default function Sidebar(props) {
             </div>
             <ul className="listview flush transparent no-line image-listview">
               <li>
-                <button className="item" onClick={() => downloadPrivateKey()}>
-                  <div className="icon-box">
-                    <Download color="#333" />
-                  </div>
-                  <div className="in">Download Private Key</div>
-                </button>
-              </li>
-              <li>
-                <button className="item" onClick={() => uploadPrivateKey()}>
+                <button className="item" onClick={() => migrate()}>
                   <div className="icon-box">
                     <Upload color="#333" />
                   </div>
-                  <div className="in">Load Private Key</div>
+                  <div className="in">Migrate Legacy Private Key</div>
                 </button>
               </li>
               <li>

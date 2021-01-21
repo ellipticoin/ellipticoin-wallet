@@ -5,7 +5,7 @@ import { Tab, Tabs } from "react-bootstrap";
 import { ChevronLeft } from "react-feather";
 
 export default function ManageLiquidity(props) {
-  const { onHide, liquidityTokens, userTokens } = props;
+  const { onHide, liquidityTokens, tokens, address } = props;
 
   return (
     <div style={{ backgroundColor: "white", height: "100%" }}>
@@ -21,16 +21,18 @@ export default function ManageLiquidity(props) {
         <Tabs defaultActiveKey="provideLiquidity" className="nav-tabs lined">
           <Tab eventKey="provideLiquidity" title="Provide Liquidity">
             <ProvideLiquidity
+              address={address}
               liquidityTokens={liquidityTokens}
               onHide={onHide}
-              userTokens={userTokens}
+              tokens={tokens}
             />
           </Tab>
           <Tab eventKey="removeLiquidity" title="Remove Liquidity">
             <RemoveLiquidity
+              address={address}
               liquidityTokens={liquidityTokens}
               onHide={onHide}
-              userTokens={userTokens}
+              tokens={tokens}
             />
           </Tab>
         </Tabs>

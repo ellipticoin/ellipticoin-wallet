@@ -1,22 +1,20 @@
 import { usePostTransaction } from "./mutations";
 import { Value } from "./helpers";
-import { ELC } from "./constants";
+import { MNS } from "./constants";
 import { useGetIssuanceRewards } from "./queries";
-import React from "react";
-import useSound from "use-sound";
+import { useRef } from "react";
 import chaChing from "./chaching.wav";
+import { actions } from "ellipticoin";
 
 export default function Rewards(props) {
-  const { data: { issuanceRewards } = 0n } = useGetIssuanceRewards();
-  const [harvest] = usePostTransaction({
-    contract: "Ellipticoin",
-    functionName: "harvest",
-  });
-  const [playChaChing] = useSound(chaChing);
+  const { address } = props;
+  const { data: { issuanceRewards } = 0n } = useGetIssuanceRewards(address);
+  const chaChingRef = useRef();
+  const [harvest] = usePostTransaction(actions.Harvest, address);
   const handleHarvest = async function () {
-    playChaChing();
-
     await harvest();
+    chaChingRef.current.currentTime = 0;
+    await chaChingRef.current.play();
   };
   return (
     <div className="row mt-2 mb-2">
@@ -28,11 +26,14 @@ export default function Rewards(props) {
             style={{ float: "right" }}
             className="btn btn-success btn-lg mr-1"
           >
+            <audio ref={chaChingRef} preload="true">
+              <source src={chaChing} />
+            </audio>
             Harvest
           </button>
           <div className="title">Mature Liquidity Rewards</div>
           <div className="value text-success">
-            <Value token={ELC}>{issuanceRewards}</Value>
+            <Value token={MNS}>{issuanceRewards}</Value>
           </div>
         </div>
       </div>

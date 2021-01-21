@@ -1,11 +1,12 @@
 import CopyButton from "./Inputs/CopyButton.js";
 import { USD } from "./constants";
-import { Value } from "./helpers";
+import { USDValue } from "./helpers";
+import { ethers } from "ethers";
 import base64url from "base64url";
-import { default as React } from "react";
+const { getAddress } = ethers.utils;
 
 export default function Total(props) {
-  const { totalBalance, publicKey } = props;
+  const { totalBalance, address } = props;
 
   return (
     <div className="actions-top">
@@ -13,8 +14,8 @@ export default function Total(props) {
         <div className="col-lg-8 col-md-12">
           <span className="title">Your Address</span>
           <div className="your-address">
-            <CopyButton content={base64url.encode(publicKey)}>
-              <h1>{base64url.encode(publicKey)}</h1>
+            <CopyButton content={address}>
+              <h1>{getAddress(address)}</h1>
             </CopyButton>
           </div>
         </div>
@@ -22,7 +23,7 @@ export default function Total(props) {
           <div>Total Balance</div>
           <div>
             <h1>
-              <Value token={USD}>{totalBalance}</Value>
+              <USDValue>{totalBalance}</USDValue>
             </h1>
           </div>
         </div>

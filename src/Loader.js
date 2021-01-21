@@ -1,5 +1,4 @@
 import Logo from "./logo.svg";
-import React from "react";
 import { animated, useTransition } from "react-spring";
 
 export default function Loader(props) {
