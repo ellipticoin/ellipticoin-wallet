@@ -1,6 +1,6 @@
 import base64url from "base64url";
 import copy from "copy-to-clipboard";
-import React, { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Table from "react-bootstrap/Table";
@@ -9,10 +9,10 @@ const bytesToNumber = (bytes) =>
   Number(new DataView(new Uint8Array(bytes).buffer).getBigUint64(0, true));
 export default function Wallet(props) {
   const { publicKey, ellipticoin, ethereumAccount } = props;
-  const [amountUnlocked, setAmountUnlocked] = React.useState();
-  const [isUnlocked, setUnlocked] = React.useState();
-  const [unlockableBalance, setUnlockableBalance] = React.useState();
-  const [open, setOpen] = React.useState(false);
+  const [amountUnlocked, setAmountUnlocked] = useState();
+  const [isUnlocked, setUnlocked] = useState();
+  const [unlockableBalance, setUnlockableBalance] = useState();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!ellipticoin || !ethereumAccount) {

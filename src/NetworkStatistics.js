@@ -1,5 +1,4 @@
 import LockedValue from "./LockedValue.js";
-import { default as React } from "react";
 import { ChevronLeft } from "react-feather";
 
 export default function NetworkStatistics(props) {

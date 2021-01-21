@@ -1,12 +1,6 @@
-import ApolloWrapper from "./ApolloWrapper";
+import AppWrapper from "./AppWrapper";
 import "./styles/style.scss";
 import React from "react";
 import ReactDOM from "react-dom";
 
-if (
-  localStorage.getItem("secretKey") &&
-  localStorage.getItem("secretKey").startsWith("[")
-) {
-  localStorage.clear();
-}
-ReactDOM.render(<ApolloWrapper />, document.getElementById("root"));
+ReactDOM.render(<AppWrapper />, document.getElementById("root"));

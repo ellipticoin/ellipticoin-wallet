@@ -1,44 +1,43 @@
 import TokenAmountInput from "./Inputs/TokenAmountInput";
+import TokenSelect from "./Inputs/TokenSelect";
 import { BASE_FACTOR, TOKENS } from "./constants";
-import { tokenToString } from "./helpers";
 import { usePostTransaction } from "./mutations";
 import base64url from "base64url";
-import React from "react";
+import { ethers } from "ethers";
+import { useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
+import { actions } from "ellipticoin";
+
+const { arrayify } = ethers.utils;
 
 export default function Send(props) {
-  const { show, setShow, setHost } = props;
-  const [amount, setAmount] = React.useState(
-    // "1"
-    ""
-  );
-  const [toAddress, setToAddress] = React.useState(
-    // "jLs9_OvUYqOzGiTzVcRLB3laE3Hp8CZIpdRB5lqrSew"
-    // "JZoYzwPNn_k82INoA-auebXqRvZwBWiqYUKLMWUpXCQ"
-    ""
-  );
-  const [token, setToken] = React.useState(TOKENS[0]);
+  const { show, setShow, setHost, address, tokens } = props;
+  const [amount, setAmount] = useState("");
+  const [toAddress, setToAddress] = useState("");
+  const [token, setToken] = useState(TOKENS[0]);
+  const [post] = usePostTransaction(actions.Pay, address);
   const handleTokenChange = (tokenString) => {
     const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
   };
-  const send = async (event) => {
-    event.preventDefault();
-    postTransfer(
-      [{ Contract: token.issuer }, Array.from(Buffer.from(token.id, "base64"))],
-      base64url.toBuffer(toAddress),
-      Number(amount)
-    );
-    setShow(false);
+
+  const clearForm = () => {
+    setAmount(0);
+    setToAddress(null);
+    setToken(tokens[0]);
   };
 
-  const [postTransfer] = usePostTransaction(
-    {
-      contract: "Token",
-      functionName: "transfer",
-    },
-    setHost
-  );
+  const send = async (event) => {
+    event.preventDefault();
+    const result = await post(toAddress, amount, token.address);
+    if (result == null) {
+      clearForm();
+      setShow(false);
+    } else {
+      alert(result);
+    }
+  };
+
   return (
     <Modal show={show} className="action-sheet" onHide={() => setShow(false)}>
       <div className="modal-dialog" role="document">
@@ -51,20 +50,12 @@ export default function Send(props) {
               <Form noValidate autoComplete="off" onSubmit={(evt) => send(evt)}>
                 <Form.Group className="basic">
                   <Form.Label>Token</Form.Label>
-                  <Form.Control
-                    as="select"
-                    onChange={(event) => {
-                      handleTokenChange(event.target.value);
-                    }}
-                    value={tokenToString(token)}
-                    custom
-                  >
-                    {TOKENS.map((token) => (
-                      <option key={token.name} value={tokenToString(token)}>
-                        {token.name}
-                      </option>
-                    ))}
-                  </Form.Control>
+                  <TokenSelect
+                    tokens={tokens}
+                    onChange={(token) => setToken(token)}
+                    default={TOKENS[0]}
+                    token={token}
+                  />
                 </Form.Group>
                 <Form.Group className="basic">
                   <Form.Label>To Address</Form.Label>
@@ -80,7 +71,6 @@ export default function Send(props) {
                   <TokenAmountInput
                     onChange={(state) => setAmount(state)}
                     state={amount}
-                    currency={token.name}
                     placeholder="Amount"
                   />
                 </Form.Group>

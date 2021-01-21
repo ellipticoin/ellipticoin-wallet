@@ -1,68 +1,61 @@
 import { InputState } from "../Inputs";
 import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, ZERO, LIQUIDITY_TOKENS, TOKENS } from "../constants";
-import { stringToBigInt, encodeToken, Value } from "../helpers";
+import { value } from "../helpers";
 import { usePostTransaction } from "../mutations";
 import { find, get } from "lodash";
-import { default as React, useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
 import NumberFormat from "react-number-format";
+import { actions } from "ellipticoin";
 
 export default function RemoveLiquidity(props) {
-  const { userTokens, liquidityTokens, onHide } = props;
+  const { address, tokens, liquidityTokens, onHide } = props;
   const [error, setError] = useState("");
   const [percentage, setPercentage] = useState({
-    value: 100n * BASE_FACTOR,
+    value: BASE_FACTOR,
   });
-  const [removeToken, setRemoveToken] = useState(TOKENS[0]);
-  const [removeLiquidity] = usePostTransaction({
-    contract: "Exchange",
-    functionName: "remove_liquidity",
-  });
-  const [removeLiquidityToken, setRemoveLiquidityToken] = useState(
-    liquidityTokens[0]
+  const [token, setToken] = useState(TOKENS[0]);
+  const liquidityToken = useMemo(() =>
+    find(liquidityTokens, ["tokenAddress", token.address])
+  );
+  const [removeLiquidity] = usePostTransaction(
+    actions.RemoveLiquidity,
+    address
   );
   const tokensInPool = useMemo(() => {
-    if (!removeLiquidityToken || removeLiquidityToken.balance === 0n) {
-        return 0n
+    if (!liquidityToken || liquidityToken.balance === 0n) {
+      return 0n;
     }
 
     return (
-      (removeLiquidityToken.balance * removeLiquidityToken.poolSupplyOfToken) /
-      removeLiquidityToken.totalSupply
+      (liquidityToken.balance * liquidityToken.poolSupplyOfToken) /
+      liquidityToken.totalSupply
     );
-  }, [removeLiquidityToken]);
+  }, [liquidityToken]);
   const baseTokensInPool = useMemo(() => {
-    if (!removeLiquidityToken || removeLiquidityToken.balance === 0n) {
-        return 0n;
+    if (!liquidityToken || liquidityToken.balance === 0n) {
+      return 0n;
     }
 
     return (
-      (removeLiquidityToken.balance *
-        removeLiquidityToken.poolSupplyOfBaseToken) /
-      removeLiquidityToken.totalSupply
+      (liquidityToken.balance * liquidityToken.poolSupplyOfBaseToken) /
+      liquidityToken.totalSupply
     );
-  }, [removeLiquidityToken]);
+  }, [liquidityToken]);
   const handleRemoveLiquidity = async (event) => {
     event.preventDefault();
 
-    const res = await removeLiquidity(
-      encodeToken(removeToken),
-      Number(percentage.value / 100n)
-    );
-    if (get(res, "returnValue.Err")) {
-      setError(res.returnValue.Err.message);
-    } else {
+    const result = await removeLiquidity(percentage.value, token.address);
+    if (result == null) {
       onHide();
+    } else {
+      setError(result);
     }
   };
-  useEffect(() => {
-    setRemoveLiquidityToken(find(liquidityTokens, ["id", removeToken.id]));
-  }, [removeToken, liquidityTokens]);
 
   const removePoolExists = useMemo(
-    () => removeLiquidityToken && removeLiquidityToken.totalSupply > 0n,
-    [removeLiquidityToken]
+    () => liquidityToken && liquidityToken.totalSupply > 0n
   );
 
   return (
@@ -78,15 +71,14 @@ export default function RemoveLiquidity(props) {
           <Form.Label>
             Tokens in Pool:{" "}
             <span className={false ? "text-danger" : ""}>
-              <Value>{tokensInPool}</Value>
+              {value(tokensInPool)}
             </span>
           </Form.Label>
         </div>
         <TokenSelect
           tokens={LIQUIDITY_TOKENS}
-          onChange={(token) => setRemoveToken(token)}
-          token={removeToken}
-          defaultValue={TOKENS[0]}
+          onChange={(token) => setToken(token)}
+          token={token}
         />
       </Form.Group>
       <Form.Group className="basic">
@@ -101,28 +93,26 @@ export default function RemoveLiquidity(props) {
           decimalScale={2}
           placeholder="Amount"
           onValueChange={(values) => {
-            values.value = stringToBigInt(values.value);
+            console.log(values.value);
+            values.value =
+              (BigInt(parseInt(values.value)) * BASE_FACTOR) / 100n;
             setPercentage(values);
           }}
         />
       </Form.Group>
       <Form.Group className="basic">
-        <Form.Label>{removeToken.name} to Remove</Form.Label>
+        <Form.Label>{token.name} to Remove</Form.Label>
         <div>
-          <Value>
-            {(percentage.value * tokensInPool) / (BASE_FACTOR * 100n)}
-          </Value>{" "}
-          of <Value>{tokensInPool}</Value>
+          {value((percentage.value * tokensInPool) / BASE_FACTOR)}
+          of {value(tokensInPool)}
         </div>
         <hr className="mt-0" />
       </Form.Group>
       <Form.Group className="basic">
         <Form.Label>USD To Remove</Form.Label>
         <div>
-          <Value>
-            {(percentage.value * baseTokensInPool) / (BASE_FACTOR * 100n)}
-          </Value>{" "}
-          of <Value>{baseTokensInPool}</Value>
+          {value((percentage.value * baseTokensInPool) / BASE_FACTOR)}
+          of {value(baseTokensInPool)}
         </div>
       </Form.Group>
       {error ? (

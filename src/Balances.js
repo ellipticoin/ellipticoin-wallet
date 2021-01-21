@@ -1,9 +1,22 @@
-import { BASE_FACTOR, USD } from "./constants";
-import { findToken, Value, tokenTicker, Price } from "./helpers";
-import { default as React } from "react";
+import { useContext } from "react";
+import USDBalance from "./USDBalance";
+import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
+import {
+  value,
+  value2,
+  Value,
+  formatBigInt,
+  formatPercentage,
+} from "./helpers";
 
 export default function Balances(props) {
-  const { tokens, totalBalance } = props;
+  const { tokens } = props;
+
+  const totalBalance = tokens.reduce((sum, token) => {
+    const price = token.address === USD.address ? BASE_FACTOR : token.price;
+    let total = (token.balance * price) / BASE_FACTOR;
+    return sum + total;
+  }, 0n);
 
   return (
     <div className="section mt-2">
@@ -29,25 +42,31 @@ export default function Balances(props) {
             </thead>
             <tbody>
               {tokens.map((token) => (
-                <tr key={token.id}>
-                  <th scope="row">{findToken(token).name}</th>
+                <tr key={token.address}>
+                  <th scope="row">{TOKEN_METADATA[token.address].name}</th>
+                  <td className="text-right">{formatBigInt(token.balance)}</td>
                   <td className="text-right">
-                    <Value>{token.balance}</Value>
-                  </td>
-                  <td className="text-right">
-                    <Price>{token.price}</Price>
+                    {token.address === USD.address
+                      ? "$ 1.00"
+                      : value(token.price, USD.address, {
+                          showCurrency: true,
+                          decimals: 2,
+                        })}
                   </td>
                   <td className="text-right text-primary">
-                    <Value token={USD}>
-                      {(token.balance * token.price) / BASE_FACTOR}
-                    </Value>
+                    {value(
+                      (token.balance * token.price) / BASE_FACTOR,
+                      USD.address,
+                      { showCurrency: true }
+                    )}
                   </td>
                 </tr>
               ))}
               <tr>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: <Value token={USD}>{totalBalance}</Value>
+                    Total:{" "}
+                    {value(totalBalance, USD.address, { showCurrency: true })}
                   </strong>
                 </td>
               </tr>
@@ -58,3 +77,28 @@ export default function Balances(props) {
     </div>
   );
 }
+//     <td className="text-right">
+//       {token.address === USD.address
+//         ? "$ 1.00"
+//         : value(token.price, USD.address, {
+//             showCurrency: true,
+//             decimals: 2,
+//           })}
+//     </td>
+//     <td className="text-right text-primary">
+//       {value(
+//         (token.balance * token.price) / BASE_FACTOR,
+//         USD.address,
+//         { showCurrency: true }
+//       )}
+//     </td>
+//   </tr>
+// ))}
+// <tr>
+//   <td colSpan="5" className="text-right text-primary">
+//     <strong>
+//       Total:{" "}
+//       {value(totalBalance, USD.address, { showCurrency: true })}
+//     </strong>
+//   </td>
+// </tr>

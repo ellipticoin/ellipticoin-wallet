@@ -1,5 +1,3 @@
-import { default as React } from "react";
-
 export default function Switch(props) {
   const { checked, setChecked } = props;
   return (
@@ -8,10 +6,10 @@ export default function Switch(props) {
         type="checkbox"
         className="custom-control-input"
         id="customSwitch4"
-        onClick={() => setChecked(!checked)}
+        onChange={() => setChecked(!checked)}
         checked={checked}
       />
-      <label className="custom-control-label" for="customSwitch4"></label>
+      <label className="custom-control-label" htmlFor="customSwitch4"></label>
     </div>
   );
 }

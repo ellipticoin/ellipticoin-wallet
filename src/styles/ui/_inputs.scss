@@ -1,11 +1,11 @@
 .labels {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 
 .inputs {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 textarea,
 .form-control {
@@ -81,6 +81,11 @@ textarea,
     &:focus {
       border-bottom-color: $colorPrimary;
       box-shadow: inset 0 -1px 0 0 $colorPrimary;
+    }
+
+    &.is-invalid {
+        border-bottom: 1px solid $colorDanger;
+        box-shadow: inset 0 -1px 0 0 $colorDanger;
     }
   }
   textarea.form-control {

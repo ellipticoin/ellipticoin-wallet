@@ -1,5 +1,5 @@
 import copy from "copy-to-clipboard";
-import { default as React, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Overlay, Tooltip } from "react-bootstrap";
 
 export default function CopyButton(props) {

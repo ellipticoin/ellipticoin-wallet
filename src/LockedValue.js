@@ -1,19 +1,23 @@
 import btcLogo from "./BTC-logo.png";
 import ethLogo from "./ETH-logo.png";
-import { BASE_FACTOR, BTC, USD, WETH } from "./constants";
-import { Value, findToken } from "./helpers";
+import { BASE_FACTOR, BTC, USD, WETH, MS, TOKEN_META_DATA } from "./constants";
+import { value } from "./helpers";
 import { find, sumBy } from "lodash";
-import { default as React, useMemo } from "react";
+import { useMemo } from "react";
 
 export default function LockedValue(props) {
   const { tokens } = props;
-  const weth = useMemo(() => find(tokens, ["id", WETH.id]), [tokens]);
+  const weth = useMemo(() => find(tokens, ["address", WETH.address]), [tokens]);
 
-  const btc = useMemo(() => find(tokens, ["id", BTC.id]), [tokens]);
-  const usd = useMemo(() => find(tokens, ["id", USD.id]), [tokens]);
+  const btc = useMemo(() => find(tokens, ["address", BTC.address]), [tokens]);
+  const usd = useMemo(() => find(tokens, ["address", USD.address]), [tokens]);
   const totalLockedValue = tokens.reduce((sum, token) => {
-    if (findToken(token).name === "Ellipticoin") return sum;
-    const price = findToken(token).name === "USD" ? BASE_FACTOR : token.price;
+    if (token.address.toString("hex") === MS.address.toString("hex"))
+      return sum;
+    const price =
+      token.address.toString("hex") === USD.toString("hex")
+        ? BASE_FACTOR
+        : token.price;
     let total = (token.totalSupply * price) / BASE_FACTOR;
     return sum + total;
   }, 0n);
@@ -51,12 +55,13 @@ export default function LockedValue(props) {
                       </td>
                       <td className="text-right">
                         {" "}
-                        <Value token={BTC}>{btc.totalSupply}</Value>
+                        {value(btc.totalSupply, BTC.address)}
                       </td>
                       <td className="text-right">
-                        <Value token={BTC}>
-                          {(btc.totalSupply * btc.price) / BASE_FACTOR}
-                        </Value>
+                        {value(
+                          (btc.totalSupply * btc.price) / BASE_FACTOR,
+                          BTC.address
+                        )}
                       </td>
                     </tr>
                     <tr>
@@ -74,29 +79,25 @@ export default function LockedValue(props) {
                       </td>
                       <td className="text-right">
                         {" "}
-                        <Value token={WETH}>{weth.totalSupply}</Value>
+                        {value(weth.totalSupply, WETH.address)}
                       </td>
                       <td className="text-right">
                         {" "}
-                        <Value token={WETH}>
-                          {(weth.totalSupply * weth.price) / BASE_FACTOR}
-                        </Value>
+                        {value(
+                          (weth.totalSupply * weth.price) / BASE_FACTOR,
+                          WETH.address
+                        )}
                       </td>
                     </tr>
                     <tr>
                       <td>US Dollar</td>
-                      <td className="text-right">
-                        {" "}
-                        <Value token={USD}>{usd.totalSupply}</Value>
-                      </td>
-                      <td className="text-right">
-                        <Value token={USD}>{usd.totalSupply}</Value>
-                      </td>
+                      <td className="text-right"> {value(usd.totalSupply)}</td>
+                      <td className="text-right">{value(usd.totalSupply)}</td>
                     </tr>
                     <tr>
                       <th colspan="2">Total Locked Value</th>
                       <th className="value text-success text-right">
-                        <Value token={USD}>{totalLockedValue}</Value>
+                        {value(totalLockedValue, USD.address)}
                       </th>
                     </tr>
                   </tbody>

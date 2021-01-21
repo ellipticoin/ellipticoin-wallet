@@ -1,7 +1,8 @@
 .icon-wrapper {
   background: $colorPrimary;
-  width: 48px;
-  height: 48px;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -29,6 +30,7 @@ button {
     color: darken(#fff, 5%);
   }
   &:active {
+    background: none;
     svg {
       &.filled {
         fill: darken(#fff, 10%) !important;
@@ -40,18 +42,17 @@ button {
 }
 
 .btn {
+  border-radius: 5px;
   height: 36px;
   padding: 3px 18px;
   font-size: $fontSizeSub;
   line-height: 1.2em;
   font-weight: $medium;
-  box-shadow: none !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: 0.2s all;
   text-decoration: none !important;
-  border-radius: $borderRadius;
   border-width: 2px;
   i.icon,
   ion-icon {
@@ -65,11 +66,8 @@ button {
   &.square {
     border-radius: 0 !important;
   }
-  &.shadowed {
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14),
-      0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2) !important;
-  }
 }
+
 .btn-lg {
   height: 52px;
   padding: 3px 24px;
@@ -107,22 +105,46 @@ button {
 }
 
 @mixin buttonStyle($color) {
-  background: $color !important;
-  border-color: $color !important;
   color: #ffffff !important;
-  &:hover,
-  &:focus,
-  &:active,
-  &.active {
-    background: darken($color, 5%);
-    border-color: darken($color, 5%);
-  }
   &.disabled,
   &:disabled {
     background: $color;
     border-color: $color;
     opacity: 0.5;
   }
+
+  &:focus {
+    box-shadow: 0 0 3pt 2pt lighten($color, 20); 
+  }
+
+  border: 0;
+  background-size: 100%;
+  font-family: Proxima Nova Regular, sans-serif;
+  text-transform: uppercase;
+  color: white;
+  background-color: transparent;
+  background-image: linear-gradient(-225deg, darken($color, 5), lighten($color, 10));
+  position: relative;
+  z-index: 2;
+
+    &:before {
+  border-radius: inherit;
+  background-image: linear-gradient(-45deg, darken($color, 5), lighten($color, 10));
+  content: "";
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 100%;
+  z-index: -1;
+  transition: opacity 0.4s ease-in-out;
+}
+
+    &:hover:before {
+    opacity: 1;
+    }
 }
 .btn-primary {
   @include buttonStyle($colorPrimary);
@@ -152,110 +174,4 @@ button {
 .btn-light {
   @include buttonStyle(rgba(255, 255, 255, 0.5));
   color: $colorHeading !important;
-}
-@mixin buttonOutlineStyle($color) {
-  background: transparent;
-  border-color: $color;
-  color: $color;
-  transition: 0.2s all;
-  &:hover,
-  &:active {
-    background: rgba($color, 0.15) !important;
-    border-color: $color !important;
-    color: $color !important;
-  }
-  &.active {
-    background: $color !important;
-    color: #fff !important;
-    border-color: $color !important;
-  }
-  &.disabled,
-  &:disabled {
-    color: $color !important;
-    border-color: $color !important;
-    background: transparent !important;
-    opacity: 0.5;
-  }
-}
-.btn-outline-primary {
-  @include buttonOutlineStyle($colorPrimary);
-}
-.btn-outline-secondary {
-  @include buttonOutlineStyle($colorSecondary);
-}
-.btn-outline-success {
-  @include buttonOutlineStyle($colorSuccess);
-}
-.btn-outline-danger {
-  @include buttonOutlineStyle($colorDanger);
-}
-.btn-outline-warning {
-  @include buttonOutlineStyle($colorWarning);
-}
-.btn-outline-info {
-  @include buttonOutlineStyle($colorInfo);
-}
-.btn-outline-light {
-  @include buttonOutlineStyle(#fff);
-  &:active {
-    color: $colorHeading !important;
-  }
-}
-@mixin buttonTextStyle($color) {
-  background: transparent;
-  border-color: transparent;
-  color: $color !important;
-  transition: 0.2s all;
-  &:hover {
-    background: transparent;
-  }
-  &:active,
-  &.active {
-    background: rgba($color, 0.15) !important;
-    border-color: transparent !important;
-    color: $color !important;
-  }
-  &.disabled,
-  &:disabled {
-    color: $color !important;
-    border-color: $color !important;
-    background: transparent !important;
-    opacity: 0.5;
-  }
-}
-.btn-text-primary {
-  @include buttonTextStyle($colorPrimary);
-}
-.btn-text-secondary {
-  @include buttonTextStyle($colorSecondary);
-}
-.btn-text-success {
-  @include buttonTextStyle($colorSuccess);
-}
-.btn-text-danger {
-  @include buttonTextStyle($colorDanger);
-}
-.btn-text-warning {
-  @include buttonTextStyle($colorWarning);
-}
-.btn-text-info {
-  @include buttonTextStyle($colorInfo);
-}
-.btn-text-light {
-  background: transparent;
-  color: #fff;
-  &:hover,
-  &:active,
-  &.active {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-.btn-text-dark {
-  @include buttonTextStyle($colorHeading);
-}
-.btn-group {
-  .btn {
-    margin-left: -2px !important;
-  }
 }

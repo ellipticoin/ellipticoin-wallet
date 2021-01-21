@@ -1,28 +1,22 @@
 import Rewards from "./Rewards";
-import { BASE_FACTOR, USD } from "./constants";
-import {
-  Percentage,
-  formatPercentage,
-  Value,
-  Price,
-  tokenName,
-  findToken,
-  tokenTicker,
-} from "./helpers";
+import { BASE_FACTOR, USD, MS, TOKEN_METADATA } from "./constants";
+import CompoundContext from "./CompoundContext";
+import { Percentage, formatPercentage, value, tokenTicker } from "./helpers";
 import { sumBy } from "lodash";
+import { Button } from "react-bootstrap";
 import { blockReward } from "ellipticoin";
+import { Fragment } from "react";
 
-import { default as React } from "react";
-import { NumeralFormatter } from "cleave.js";
-
-const numeralFormatter = new NumeralFormatter();
 export default function LiquidityBalances(props) {
   const {
-    liquidityTokens,
+    address,
     blockNumber,
-    publicKey,
-    setIssuanceRewards,
     issuanceRewards,
+    liquidityTokens,
+    publicKey,
+    zeroLiquidityBalance,
+    setIssuanceRewards,
+    setShowPage,
   } = props;
 
   const totalLiquidityBalance = liquidityTokens.reduce(
@@ -37,18 +31,36 @@ export default function LiquidityBalances(props) {
     },
     0n
   );
-
-  return (
+  return zeroLiquidityBalance ? (
+    <div className="section mt-4">
+      <h2 className="text-center">Add Liquidity</h2>
+      <div className="text-center muted">
+        Add liquidity to start earning Moonshine tokens
+      </div>
+      <Button
+        type="submit"
+        style={{ display: "block" }}
+        className="btn mt-2 btn-lg btn-primary w-50 mx-auto"
+        onClick={() => setShowPage("AddLiquidity")}
+      >
+        Add Liquidity
+      </Button>
+    </div>
+  ) : (
     <div className="section mt-2">
       <div className="section-heading">
         <h2 className="title">Your Liquidity</h2>
       </div>
-      <Rewards
-        publicKey={publicKey}
-        setIssuanceRewards={setIssuanceRewards}
-        issuanceRewards={issuanceRewards}
-        blockNumber={blockNumber}
-      />
+      {address && (
+        <Rewards
+          address={address}
+          publicKey={publicKey}
+          setIssuanceRewards={setIssuanceRewards}
+          issuanceRewards={issuanceRewards}
+          setShowPage={setShowPage}
+          blockNumber={blockNumber}
+        />
+      )}
       <div className="card">
         <div className="table-responsive">
           <table className="table rounded">
@@ -56,16 +68,10 @@ export default function LiquidityBalances(props) {
               <tr>
                 <th scope="col">Token</th>
                 <th scope="col" className="text-right">
-                  Share of Pool
-                </th>
-                <th scope="col" className="text-right">
-                  ELC Issuance Per Block
+                  Share of Pool (MS Issuance Per Block)
                 </th>
                 <th scope="col" className="text-right">
                   Tokens In Pool
-                </th>
-                <th scope="col" className="text-right">
-                  Token Price
                 </th>
                 <th scope="col" className="text-right">
                   Total Value In Pool
@@ -76,80 +82,80 @@ export default function LiquidityBalances(props) {
               {liquidityTokens
                 .filter((liquidityToken) => liquidityToken.balance !== 0n)
                 .map((liquidityToken) => (
-                  <React.Fragment key={liquidityToken.id}>
+                  <Fragment key={liquidityToken.tokenAddress}>
                     <tr>
                       <th scope="row" rowSpan="2">
-                        {findToken(liquidityToken).name}
+                        {TOKEN_METADATA[liquidityToken.tokenAddress].name}
                       </th>
                       <td className="text-right" rowSpan="2">
                         <Percentage
                           numerator={liquidityToken.balance}
                           denomiator={liquidityToken.totalSupply}
                         />
-                      </td>
-                      <td className="text-right" rowSpan="2">
-                        {blockReward(blockNumber)}{" "}
-                        {liquidityToken.balance ? (
-                          <Value>
-                            {((blockReward(blockNumber) *
-                              BASE_FACTOR *
-                              liquidityToken.balance) /
-                              liquidityToken.totalSupply) *
-                              3n}
-                          </Value>
-                        ) : (
-                          0
-                        )}
+                        {liquidityToken.totalSupply &&
+                        blockReward(blockNumber, liquidityToken.tokenAddress)
+                          ? ` (${value(
+                              (liquidityToken.poolSupplyOfToken *
+                                blockReward(
+                                  blockNumber,
+                                  liquidityToken.tokenAddress
+                                )) /
+                                liquidityToken.totalSupply,
+                              MS.address,
+                              { showCurrency: true, zeroString: "N/A" }
+                            )})`
+                          : null}
                       </td>
                       <td className="text-right no-padding-bottom">
-                        <Value>
-                          {liquidityToken.totalSupply
+                        {value(
+                          liquidityToken.totalSupply
                             ? (liquidityToken.poolSupplyOfToken *
                                 liquidityToken.balance) /
-                              liquidityToken.totalSupply
-                            : 0n}
-                        </Value>{" "}
-                        {tokenTicker(liquidityToken)}
+                                liquidityToken.totalSupply
+                            : 0n,
+                          liquidityToken.tokenAddress,
+                          { showCurrency: true }
+                        )}
                       </td>
                       <td className="text-right" rowSpan="2">
-                        <Price>
-                          {liquidityToken.poolSupplyOfBaseToken
-                            ? (liquidityToken.poolSupplyOfBaseToken *
-                                BASE_FACTOR) /
-                              liquidityToken.poolSupplyOfToken
-                            : 0n}
-                        </Price>
-                      </td>
-                      <td className="text-right" rowSpan="2">
-                        <Price>
-                          {liquidityToken.balance
-                            ? ((liquidityToken.poolSupplyOfBaseToken *
-                                liquidityToken.balance) /
-                                liquidityToken.totalSupply) *
-                              2n
-                            : 0n}
-                        </Price>
+                        {value(
+                          liquidityToken.poolSupplyOfBaseToken
+                            ? Number(
+                                (liquidityToken.poolSupplyOfBaseToken *
+                                  liquidityToken.balance *
+                                  2n) /
+                                  liquidityToken.totalSupply
+                              )
+                            : 0n,
+                          USD.address,
+                          { showCurrency: true }
+                        )}
                       </td>
                     </tr>
                     <tr>
                       <td className="text-right no-border no-padding-top">
-                        +{" "}
-                        <Value token={USD}>
-                          {liquidityToken.poolSupplyOfBaseToken
-                            ? (liquidityToken.poolSupplyOfBaseToken *
-                                liquidityToken.balance) /
-                              liquidityToken.totalSupply
-                            : 0n}
-                        </Value>
+                        {liquidityToken.totalSupply &&
+                          value(
+                            liquidityToken.balance
+                              ? (liquidityToken.poolSupplyOfBaseToken *
+                                  liquidityToken.balance) /
+                                  liquidityToken.totalSupply
+                              : 0n,
+                            USD.address,
+                            { showCurrency: true }
+                          )}
                       </td>
                     </tr>
-                  </React.Fragment>
+                  </Fragment>
                 ))}
               <tr>
                 <td></td>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: <Value token={USD}>{totalLiquidityBalance}</Value>
+                    Total:{" "}
+                    {value(totalLiquidityBalance, USD.address, {
+                      showCurrency: true,
+                    })}
                   </strong>
                 </td>
               </tr>

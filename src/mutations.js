@@ -1,37 +1,63 @@
 import CurrentMinerContext from "./CurrentMinerContext";
-import HostContext from "./HostContext";
-import { signTransaction, useLocalStorage } from "./helpers";
-import { useGetNextNonce } from "./queries";
+import AppContext from "./AppContext";
+import {
+  signTransaction,
+  useLocalStorage,
+  concatTypedArrays,
+  formatBigInt,
+} from "./helpers";
+import { useGetNextTransactionNumber } from "./queries";
 import { gql, useMutation } from "@apollo/client";
 import cbor from "cbor";
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useEffect } from "react";
 import nacl from "tweetnacl";
+import { ethers } from "ethers";
+import { useWeb3 } from "./web3";
+import { useEthereumAccounts } from "./ethereum";
+import { NETWORK_ID, TOKEN_META_DATA } from "./constants";
+import { Transaction, actions } from "ellipticoin";
+
+const { arrayify, hexlify, getAddress } = ethers.utils;
 
 const POST_TRASACTION = gql`
   mutation($transaction: Bytes!) {
-    postTransaction(transaction: $transaction) {
-      id
-      blockNumber
-      returnValue
-    }
+    postTransaction(transaction: $transaction)
   }
 `;
-export function usePostTransfer() {
-  return usePostTransaction({ contract: "Token", functionName: "transfer" });
+
+export function useSignAndMigrate({ setMigrated, address }) {
+  const [migrate] = usePostTransaction(actions.Migrate, address);
+  const [_, accounts] = useEthereumAccounts();
+  return async (secretKey) => {
+    const publicKey = Buffer.from(
+      nacl.sign.keyPair.fromSecretKey(secretKey).publicKey
+    );
+    let legacySignature = nacl
+      .sign(ethers.utils.arrayify(accounts[0]), Buffer.from(secretKey))
+      .slice(0, 64);
+    const result = await migrate(publicKey, legacySignature);
+    if (result !== null) {
+      alert(result);
+    }
+  };
 }
-export function usePostTransaction({ contract, functionName }) {
-  const currentMiner = useContext(CurrentMinerContext)[0];
-  const setHost = useContext(HostContext)[1];
-  const [secretKey] = useLocalStorage(
-    "secretKey",
-    () => nacl.sign.keyPair().secretKey
-  );
-  const publicKey = useMemo(
-    () => Buffer.from(nacl.sign.keyPair.fromSecretKey(secretKey).publicKey),
-    [secretKey]
-  );
+export function usePostTransaction(actionType, address) {
+  const refetchQueriesByActionType = {
+    CreateProposal: ["proposals"],
+    CreateOrder: ["orders"],
+    Vote: ["proposals"],
+    AddLiquidity: ["liquidityTokens"],
+    FillOrder: ["tokens", "orders"],
+    Harvest: ["issuanceRewards"],
+  };
+  // const currentMiner = useContext(CurrentMinerContext)[0];
+  const { setHost, currentMiner } = useContext(AppContext);
   const [postTransaction, { loading }] = useMutation(POST_TRASACTION, {
-    refetchQueries: ["tokens", "issuanceRewards", "liquidityTokens"],
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      "nextTransactionNumber",
+      ...(refetchQueriesByActionType[actionType.name] || []),
+    ],
     awaitRefetchQueries: true,
     update(cache, { data: { postTransaction } }) {
       cache.modify({
@@ -43,19 +69,32 @@ export function usePostTransaction({ contract, functionName }) {
       });
     },
   });
-  const { data: { nextNonce } = { nextNonce: 0 } } = useGetNextNonce();
+  const {
+    data: { nextTransactionNumber } = { nextTransactionNumber: 1 },
+  } = useGetNextTransactionNumber(address);
+  const accounts = useEthereumAccounts();
 
   const postTransactionFn = async (...args) => {
     setHost(currentMiner);
-    let transaction = signTransaction(
-      {
-        nonce: parseInt(nextNonce),
-        sender: Array.from(publicKey),
-        contract,
-        function: functionName,
-        arguments: args,
-      },
-      Buffer.from(secretKey)
+
+    const action = new actionType(...args);
+    const transaction = new Transaction({
+      networkId: NETWORK_ID,
+      transactionNumber: nextTransactionNumber,
+      action,
+    });
+    const signature = await ethereum.request({
+      method: "personal_sign",
+      params: [address, transaction.toSignatureString()],
+      from: address,
+    });
+    const encodedTransaction = cbor.encodeOne(transaction, {
+      collapseBigIntegers: true,
+    });
+
+    const signedTransaction = cbor.encodeOne(
+      [transaction, Array.from(arrayify(signature))],
+      { collapseBigIntegers: true }
     );
     return new Promise((resolve, reject) => {
       (async () => {
@@ -65,22 +104,12 @@ export function usePostTransaction({ contract, functionName }) {
           error,
         } = await postTransaction({
           variables: {
-            transaction: transaction.toString("base64"),
+            transaction: signedTransaction.toString("base64"),
           },
         });
         if (!loading) {
           if (error) reject(error);
-          const returnValueMap = cbor.decode(
-            Buffer.from(postTransactionResult.returnValue, "base64")
-          );
-          const returnValue =
-            returnValueMap && returnValueMap.hasOwnProperty("Ok")
-              ? returnValueMap.Ok
-              : returnValueMap;
-          resolve({
-            ...postTransactionResult,
-            returnValue,
-          });
+          resolve(postTransactionResult);
         }
       })();
     });

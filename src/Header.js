@@ -1,7 +1,5 @@
-import { downloadSecretKey } from "./helpers";
 import Logo from "./logo.svg";
 import base64url from "base64url";
-import React from "react";
 import { Menu, X } from "react-feather";
 
 export default function WalletMenu(props) {
@@ -14,17 +12,6 @@ export default function WalletMenu(props) {
     secretKeyDownloaded,
     setSecretKeyDownloaded,
   } = props;
-
-  const hideWarning = () => {
-    if (secretKeyDownloaded) {
-      setShowWarning(false);
-      return true;
-    }
-    const res = downloadSecretKey(secretKey);
-    setSecretKeyDownloaded(res);
-    setShowWarning(!res);
-    return res;
-  };
 
   return (
     <>
@@ -57,7 +44,7 @@ export default function WalletMenu(props) {
         </div>
         <div className="pageTitle">
           <img src={Logo} alt="logo" className="logo" />
-          Ellipticoin Wallet
+          Moonshine Wallet
         </div>
       </div>
     </>
