@@ -1,6 +1,6 @@
 import TokenAmountInput from "./Inputs/TokenAmountInput";
+import TokenSelect from "./Inputs/TokenSelect";
 import { BASE_FACTOR, TOKENS } from "./constants";
-import { tokenToString, encodeAddress } from "./helpers";
 import { usePostTransaction } from "./mutations";
 import base64url from "base64url";
 import { ethers } from "ethers";
@@ -11,24 +11,27 @@ import { actions } from "ellipticoin";
 const { arrayify } = ethers.utils;
 
 export default function Send(props) {
-  const { show, setShow, setHost, address } = props;
-  const [amount, setAmount] = useState(
-    12345n * BASE_FACTOR
-    // ""
-  );
-  const [toAddress, setToAddress] = useState(
-    "0x1D6bB7047Fd6e47a935D816297e0b4f9113ed023"
-  );
-  const [token, setToken] = useState(TOKENS[0]);
+  const { show, setShow, setHost, address, tokens } = props;
+  const [amount, setAmount] = useState();
+  const [toAddress, setToAddress] = useState();
+  const [token, setToken] = useState(tokens[0]);
   const [postTransfer] = usePostTransaction(actions.Transfer, address);
   const handleTokenChange = (tokenString) => {
     const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
   };
+
+  const clearForm = () => {
+    setAmount(0);
+    setToAddress(null);
+    setToken(tokens[0]);
+  };
+
   const send = async (event) => {
     event.preventDefault();
     const result = await postTransfer(amount, token.address, toAddress);
     if (result == null) {
+      clearForm();
       setShow(false);
     } else {
       console.log(result);
@@ -47,20 +50,11 @@ export default function Send(props) {
               <Form noValidate autoComplete="off" onSubmit={(evt) => send(evt)}>
                 <Form.Group className="basic">
                   <Form.Label>Token</Form.Label>
-                  <Form.Control
-                    as="select"
-                    onChange={(event) => {
-                      handleTokenChange(event.target.value);
-                    }}
-                    value={tokenToString(token)}
-                    custom
-                  >
-                    {TOKENS.map((token) => (
-                      <option key={token.name} value={tokenToString(token)}>
-                        {token.name}
-                      </option>
-                    ))}
-                  </Form.Control>
+                  <TokenSelect
+                    tokens={tokens}
+                    onChange={(token) => setToken(token)}
+                    token={token}
+                  />
                 </Form.Group>
                 <Form.Group className="basic">
                   <Form.Label>To Address</Form.Label>

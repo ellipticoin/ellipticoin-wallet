@@ -1,4 +1,3 @@
-import { downloadSecretKey } from "./helpers";
 import Logo from "./logo.svg";
 import base64url from "base64url";
 import { Menu, X } from "react-feather";
@@ -13,17 +12,6 @@ export default function WalletMenu(props) {
     secretKeyDownloaded,
     setSecretKeyDownloaded,
   } = props;
-
-  const hideWarning = () => {
-    if (secretKeyDownloaded) {
-      setShowWarning(false);
-      return true;
-    }
-    const res = downloadSecretKey(secretKey);
-    setSecretKeyDownloaded(res);
-    setShowWarning(!res);
-    return res;
-  };
 
   return (
     <>

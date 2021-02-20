@@ -86,16 +86,10 @@ export default function LiquidityBalances(props) {
                         />
                       </td>
                       <td className="text-right" rowSpan="2">
-                        {liquidityToken.balance ? (
-                          <Value>{0n}</Value>
-                        ) : (
-                          0
-                        )}
+                        {liquidityToken.balance ? <Value>{0n}</Value> : 0}
                       </td>
                       <td className="text-right no-padding-bottom">
-                        <Value>
-                          {liquidityToken.totalSupply}
-                        </Value>{" "}
+                        <Value>{liquidityToken.totalSupply}</Value>{" "}
                         <Value>
                           {liquidityToken.totalSupply
                             ? (liquidityToken.poolSupplyOfToken *

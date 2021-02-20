@@ -16,7 +16,9 @@ export default function TokenSelect(props) {
   }));
   return (
     <Select
-      styles={{ menu: (provided, state) => ({ ...provided, color: "#000" }) }}
+      styles={{
+        menu: (provided, state) => ({ ...provided, color: "#000", zIndex: 3 }),
+      }}
       onChange={({ value }) => onChange(value)}
       isOptionDisabled={(option) => option.disabled}
       defaultValue={{

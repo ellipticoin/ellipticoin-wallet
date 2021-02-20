@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { parseUnits } from "./helpers";
 import { ethers } from "ethers";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
 

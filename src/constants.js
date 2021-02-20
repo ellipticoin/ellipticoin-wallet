@@ -51,14 +51,15 @@ export const BTC = {
 export const USD = {
   ticker: "USD",
   name: "USD",
-  ethName: "DAI",
+  ethName: "cDAI",
   address: Buffer.from(
-    "6b175474e89094c44da98b954eedeac495271d0f",
+    "6d7f0754ffeb405d23c51ce938289d4835be3b14",
+    // "6b175474e89094c44da98b954eedeac495271d0f",
     // "5596ac7380a934802e782e0ff6471d642e488674",
     "hex"
   ).toString("base64"),
   balance: 0n,
-  decimals: 18,
+  decimals: 8,
   totalSupply: 0n,
 };
 

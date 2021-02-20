@@ -19,7 +19,9 @@ export default forwardRef((props, ref) => {
       }}
       onChange={(event) => {
         onChange(
-          BigInt(Math.round(Number(event.target.rawValue) * Number(BASE_FACTOR)) || 0)
+          BigInt(
+            Math.round(Number(event.target.rawValue) * Number(BASE_FACTOR)) || 0
+          )
         );
       }}
     ></Cleave>

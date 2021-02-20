@@ -9,57 +9,13 @@ import {
   NETWORK_ID,
   NUMBER_OF_ERAS,
 } from "./constants";
-import Ed25519Signer from "./cose/Ed25519Signer";
-import Sign1 from "./cose/Sign1";
-import CBOR from "cbor";
 import { ethers } from "ethers";
-import { saveAs } from "file-saver";
+import CompoundContext, {isCompoundToken} from "./CompoundContext";
 import { find, get, sumBy } from "lodash";
-import { useState } from "react";
-import nacl from "tweetnacl";
+import { useState, useEffect, useContext } from "react";
+import cTokenAbi from "./contracts/cDAIABI.json";
 
 const { arrayify } = ethers.utils;
-
-export function parseUnits(value, units) {
-  try {
-    return ethers.utils.parseUnits(value, units);
-  } catch {
-    return ethers.utils.parseUnits("0");
-  }
-}
-export function signTransaction(transaction, secretKey) {
-  return sign(
-    CBOR.encode({ ...transaction, network_id: NETWORK_ID }),
-    secretKey
-  );
-}
-export function sign(message, secretKey) {
-  const { publicKey } = nacl.sign.keyPair.fromSecretKey(secretKey);
-  const signer = new Ed25519Signer(publicKey, secretKey);
-  return CBOR.encode(signer.sign(Buffer.from(message)));
-}
-
-export function encodeAddress(address) {
-  if (address.startsWith("0x")) {
-    return Array.from(arrayify(address));
-  } else {
-    return Array.from(Buffer.from(address, "base64"));
-  }
-}
-export function padBuffer(buffer, len) {
-  return Buffer.concat([
-    buffer,
-    Buffer.from(Array(len - buffer.length).fill(0)),
-  ]);
-}
-
-export function tokenToString({ id }) {
-  return id;
-}
-
-export function encodeToken(token) {
-  return [encodeAddress(token.issuer), Buffer(token.id, "base64")];
-}
 
 export function Percentage({ numerator, denomiator }) {
   if (numerator === 0n) return (0).toFixed(4);
@@ -67,17 +23,18 @@ export function Percentage({ numerator, denomiator }) {
 }
 
 export function Value({ children, token }) {
-  return (
-    <>
-      {token && token.address === USD.address ? "$ " : null}
-      {children === 0n ? "0" : formatBigInt(children)}
-      {token ? ` ${TOKEN_METADATA[token.address].ticker}` : null}
-    </>
-  );
+  const {cDAIExchangeRate} = useContext(CompoundContext);
+  if (token && isCompoundToken(token)) {
+    if (!cDAIExchangeRate) return null
+    return formatBigInt(children, cDAIExchangeRate)
+  } else {
+    return formatBigInt(children)
+  }
 }
 
-function formatBigInt(n) {
-  const [number, decimal] = (Number(n) / Number(BASE_FACTOR))
+
+function formatBigInt(n, exchangeRate = 1) {
+  const [number, decimal] = ((Number(n) * exchangeRate) / Number(BASE_FACTOR))
     .toFixed(6)
     .toString()
     .split(".");
@@ -93,32 +50,11 @@ function bigIntToNumber(n) {
 }
 
 export function USDValue({ children }) {
-  if (children !== 0n && children < BASE_FACTOR) {
-    return `$ ${formatBigInt(children)} USD`;
-  } else {
-    return `$ ${bigIntToNumber(children).toFixed(2)} USD`;
-  }
-}
+  const {cDAIExchangeRate} = useContext(CompoundContext);
+  if (!cDAIExchangeRate) return null
 
-export function tokenTicker(token) {
-  return get(
-    find(
-      [MNS, ...BRIDGE_TOKENS],
-      ({ issuer, id }) =>
-        issuer === token.issuer && id.toString("base64") === token.id
-    ),
-    "ticker"
-  );
+  return `$ ${formatBigInt(children, cDAIExchangeRate)} USD`;
 }
-
-export function stringToBigInt(string) {
-  const [integerValue, decimaValue = "0"] = string.split(".");
-  return (
-    BigInt(integerValue) * BASE_FACTOR +
-    BigInt(decimaValue.padEnd(BASE_FACTOR.toString().length - 1, "0"))
-  );
-}
-
 export function useLocalStorage(key, initialValue) {
   const [storedValue, setStoredValue] = useState(() => {
     const item = window.localStorage.getItem(key);
@@ -147,32 +83,4 @@ export function useLocalStorage(key, initialValue) {
   };
 
   return [storedValue, setValue];
-}
-
-export function concatTypedArrays(arrays) {
-  var result = new arrays[0].constructor(sumBy(arrays, "length"));
-  var index = 0;
-  for (var array of arrays) {
-    result.set(array, index);
-    index += array.length;
-  }
-  return result;
-}
-
-export function downloadSecretKey(secretKey, noConfirm) {
-  if (!noConfirm) {
-    // eslint-disable-next-line no-restricted-globals
-    let res = confirm(
-      "You will be asked to download your private key to prevent loss of funds."
-    );
-    if (!res) {
-      return false;
-    }
-  }
-
-  let blob = new Blob([Buffer.from(secretKey).toString("base64")], {
-    type: "text/plain;charset=utf-8",
-  });
-  saveAs(blob, "ellipticoin-private-key.txt");
-  return true;
 }

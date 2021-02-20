@@ -120,8 +120,10 @@ export function usePublicKey() {
 }
 
 export function useGetBlockNumber() {
-    const {data: {blockNumber}={blockNumber: null}} = useQuery(GET_BLOCK_NUMBER);
-  return blockNumber ? BigInt(blockNumber) : null
+  const { data: { blockNumber } = { blockNumber: null } } = useQuery(
+    GET_BLOCK_NUMBER
+  );
+  return blockNumber ? BigInt(blockNumber) : null;
 }
 export function useGetIssuanceRewards(address) {
   let { data: { issuanceRewards } = 0n } = useQuery(GET_ISSUANCE_REWARDS, {

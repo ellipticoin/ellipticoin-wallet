@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { Value } from "../helpers";
+import { USDValue, Value } from "../helpers";
 import { sendETH, sendTokens } from "../ethereum";
 import TokenSelect from "../Inputs/TokenSelect.js";
 import TokenAmountInput from "../Inputs/TokenAmountInput.js";
 import { ArrowDown } from "react-feather";
 import Spinner from "react-bootstrap/Spinner";
-import { parseUnits } from "../helpers";
 import { useBridge } from "../queries";
 import {
+  USD,
   BASE_FACTOR,
   BRIDGE_TOKENS,
   TOKEN_METADATA,
@@ -29,7 +29,6 @@ export default function Mint(props) {
 
     try {
       if (token.address === WETH.address) {
-        console.log("weth")
         await sendETH({
           to: "ellipticoin.eth",
           value: parseUnits((Number(amount) / Number(BASE_FACTOR)).toString()),
@@ -44,7 +43,7 @@ export default function Mint(props) {
       onHide();
       setLoading(false);
     } catch (e) {
-      console.log(e)
+      console.log(e);
       setLoading(false);
     }
   };
@@ -89,6 +88,15 @@ export default function Mint(props) {
         </div>
         <hr className="mt-0" />
       </Form.Group>
+      {token.address == USD.address ? (
+        <Form.Group className="basic">
+          <Form.Label>Underlying Amount</Form.Label>
+          <div className="mt-1">
+            <USDValue>{amount}</USDValue>
+          </div>
+          <hr className="mt-0" />
+        </Form.Group>
+      ) : null}
       <Button
         type="submit"
         disabled={loading}

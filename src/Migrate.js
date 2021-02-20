@@ -104,7 +104,12 @@ export default function Migrate() {
 
 function SignAndMigrate(props) {
   const { secretKey, publicKey, setMigrated, address } = props;
-  const signAndMigrate = useSignAndMigrate({ secretKey, publicKey, setMigrated, address })
+  const signAndMigrate = useSignAndMigrate({
+    secretKey,
+    publicKey,
+    setMigrated,
+    address,
+  });
   return (
     <Button
       onClick={() => signAndMigrate()}

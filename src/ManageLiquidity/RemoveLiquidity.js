@@ -1,7 +1,7 @@
 import { InputState } from "../Inputs";
 import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, ZERO, LIQUIDITY_TOKENS, TOKENS } from "../constants";
-import { stringToBigInt, encodeToken, Value } from "../helpers";
+import { Value } from "../helpers";
 import { usePostTransaction } from "../mutations";
 import { find, get } from "lodash";
 import { useMemo, useState, useEffect } from "react";
@@ -19,7 +19,10 @@ export default function RemoveLiquidity(props) {
   const liquidityToken = useMemo(() =>
     find(liquidityTokens, ["tokenAddress", token.address])
   );
-  const [removeLiquidity] = usePostTransaction(actions.RemoveLiquidity, address);
+  const [removeLiquidity] = usePostTransaction(
+    actions.RemoveLiquidity,
+    address
+  );
   const tokensInPool = useMemo(() => {
     if (!liquidityToken || liquidityToken.balance === 0n) {
       return 0n;
@@ -36,18 +39,14 @@ export default function RemoveLiquidity(props) {
     }
 
     return (
-      (liquidityToken.balance *
-        liquidityToken.poolSupplyOfBaseToken) /
+      (liquidityToken.balance * liquidityToken.poolSupplyOfBaseToken) /
       liquidityToken.totalSupply
     );
   }, [liquidityToken]);
   const handleRemoveLiquidity = async (event) => {
     event.preventDefault();
 
-    const result = await removeLiquidity(
-      percentage.value,
-      token.address
-    );
+    const result = await removeLiquidity(percentage.value, token.address);
     if (result == null) {
       onHide();
     } else {
@@ -56,7 +55,7 @@ export default function RemoveLiquidity(props) {
   };
 
   const removePoolExists = useMemo(
-    () => liquidityToken && liquidityToken.totalSupply > 0n,
+    () => liquidityToken && liquidityToken.totalSupply > 0n
   );
 
   return (

@@ -49,13 +49,13 @@ export default function Redeem(props) {
     return tokens.find((token) => token.address === redeemToken.address)
       .balance;
   }, [tokens, redeemToken]);
-  const [createRedeemRequest, { loading: createRedeemRequestLoading }] = usePostTransaction(
-    actions.CreateRedeemRequest,
-    address
-  );
+  const [
+    createRedeemRequest,
+    { loading: createRedeemRequestLoading },
+  ] = usePostTransaction(actions.CreateRedeemRequest, address);
   const completeRedeem = async (pendingRedemption) => {
     setLoading(true);
-    console.log(bridge.address)
+    console.log(bridge.address);
     // let tx = await bridge.undoTransactions(1);
     // await tx.wait();
     const tx = await bridge.redeem(
@@ -72,7 +72,10 @@ export default function Redeem(props) {
   };
   const handleRedeem = async (e) => {
     e.preventDefault();
-    const result = await createRedeemRequest(Number(amount), redeemToken.address);
+    const result = await createRedeemRequest(
+      Number(amount),
+      redeemToken.address
+    );
     if (result == null) {
     } else {
       alert(result);

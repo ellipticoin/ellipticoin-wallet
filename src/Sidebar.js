@@ -6,19 +6,24 @@ import { useRef } from "react";
 import { BarChart, Download, Settings, Upload, X } from "react-feather";
 import { ethers } from "ethers";
 
-
 const { getAddress } = ethers.utils;
-
 
 export default function Sidebar(props) {
   let {
     showSidebar,
     setShowSidebar,
     setShowPage,
-secretKey, publicKey, setMigrated, address 
+    secretKey,
+    publicKey,
+    setMigrated,
+    address,
   } = props;
-  const signAndMigrate = useSignAndMigrate({ secretKey, publicKey, setMigrated, address })
-
+  const signAndMigrate = useSignAndMigrate({
+    secretKey,
+    publicKey,
+    setMigrated,
+    address,
+  });
 
   const migrate = (option) => {
     inputEl.current.click();
@@ -55,7 +60,10 @@ secretKey, publicKey, setMigrated, address
             <div className="profileBox pt-2 pb-2">
               <div className="image-wrapper"></div>
               <div className="in">
-                <strong>{getAddress(address).slice(0,5)}..{getAddress(address).slice(39)}</strong>
+                <strong>
+                  {getAddress(address).slice(0, 5)}..
+                  {getAddress(address).slice(39)}
+                </strong>
                 <div className="text-muted"></div>
               </div>
               <button

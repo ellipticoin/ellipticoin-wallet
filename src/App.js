@@ -8,7 +8,7 @@ import NetworkStatistics from "./NetworkStatistics";
 import PendingTransactions from "./PendingTransactions";
 import Send from "./Send";
 import Sidebar from "./Sidebar";
-import Total from "./Total";
+import ActionsHeader from "./ActionsHeader";
 import Trade from "./Trade";
 import Migrate from "./Migrate";
 import { BASE_FACTOR, USD } from "./constants";
@@ -22,8 +22,8 @@ import {
 import { Buffer } from "buffer/";
 import { ethers } from "ethers";
 import { compact } from "lodash";
-import { sumBy, find } from "lodash";
-import { useMemo, useState } from "react";
+import { sumBy, find, get } from "lodash";
+import { useMemo, useState, useEffect } from "react";
 import { animated, useTransition } from "react-spring";
 import nacl from "tweetnacl";
 import { price } from "./selectors";
@@ -47,8 +47,7 @@ function App(props) {
   } = useGetLiquidityTokens(address);
   const blockNumber = useGetBlockNumber();
 
-  const errors = useMemo(
-    () => compact([tokenError, liquidityTokenError]));
+  const errors = useMemo(() => compact([tokenError, liquidityTokenError]));
   const pageTransition = useTransition(showPage, null, {
     enter: { transform: "translate3d(0,0,0)" },
     from: { transform: "translate3d(-100%,0,0)" },
@@ -102,7 +101,11 @@ function App(props) {
 
       case "NetworkStatistics":
         return (
-          <NetworkStatistics onHide={() => setShowPage(null)} tokens={tokens} liquidityTokens={liquidityTokens} />
+          <NetworkStatistics
+            onHide={() => setShowPage(null)}
+            tokens={tokens}
+            liquidityTokens={liquidityTokens}
+          />
         );
 
       default:
@@ -122,10 +125,13 @@ function App(props) {
     let total = (token.balance * price) / BASE_FACTOR;
     return sum + total;
   }, 0n);
+  const usdBalance = get(find(tokens, ["address", USD.address]), "balance")
+ 
   const totalLiquidityBalance = liquidityTokens.reduce(
     (sum, liquidityToken) => {
       let total =
-        liquidityToken.balance * ((price(liquidityToken) * BigInt(2)) / BASE_FACTOR);
+        liquidityToken.balance *
+        ((price(liquidityToken) * BigInt(2)) / BASE_FACTOR);
       return sum + total;
     },
     0n
@@ -151,13 +157,11 @@ function App(props) {
         ) : null
       )}
       <div style={{ display: showPage ? "none" : "block" }}>
-        <Header
-          setShowSidebar={setShowSidebar}
-        />
+        <Header setShowSidebar={setShowSidebar} />
         <div id="appCapsule">
           <div className="section wallet-card-section pt-1 mb-2">
             <div className="wallet-card">
-              <Total totalBalance={totalBalance} address={address} />
+              <ActionsHeader usdBalance={usdBalance} totalBalance={totalBalance} address={address} />
               <Actions setShowModal={setShowModal} setShowPage={setShowPage} />
             </div>
           </div>
@@ -178,6 +182,7 @@ function App(props) {
           show={showModal === "send"}
           address={address}
           setHost={setHost}
+          tokens={tokens}
         />
         <Sidebar
           address={address}
