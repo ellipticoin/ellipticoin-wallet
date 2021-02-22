@@ -1,4 +1,4 @@
-import {useContext} from "react";
+import {useContext, useMemo} from "react";
 import CopyButton from "./Inputs/CopyButton.js";
 import { USD } from "./constants";
 import { USDValue } from "./helpers";
@@ -12,7 +12,7 @@ export default function ActionsHeader(props) {
   const { usdBalance, totalBalance, address } = props;
   const {cDAIAPY} = useContext(CompoundContext);
 
-  const blendedAPY = Number(usdBalance) * cDAIAPY / Number(totalBalance)
+  const blendedAPY = useMemo(() => {return totalBalance ? Number(usdBalance) * cDAIAPY / Number(totalBalance): null})
   return (
     <div className="actions-top">
       <div className="row">
@@ -25,7 +25,7 @@ export default function ActionsHeader(props) {
           </div>
         </div>
         <div className="col-lg-4 col-md-12 total-balance align-self-end">
-          <div>Total Balance (earning {(blendedAPY).toFixed(2)}% APY)</div>
+          <div>Total Balance {blendedAPY && `(earning {(${blendedAPY}).toFixed(2)}% APY)`}</div>
           <div>
             <h1>
               <TotalBalance>{totalBalance}</TotalBalance>

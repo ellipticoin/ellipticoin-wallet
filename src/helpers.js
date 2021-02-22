@@ -41,7 +41,7 @@ function formatBigInt(n, exchangeRate = 1) {
   return `${numberWithCommas(number)}.${decimal}`;
 }
 
-function numberWithCommas(n) {
+export function numberWithCommas(n) {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 

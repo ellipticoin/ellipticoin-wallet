@@ -126,16 +126,6 @@ function App(props) {
     return sum + total;
   }, 0n);
   const usdBalance = get(find(tokens, ["address", USD.address]), "balance")
- 
-  const totalLiquidityBalance = liquidityTokens.reduce(
-    (sum, liquidityToken) => {
-      let total =
-        liquidityToken.balance *
-        ((price(liquidityToken) * BigInt(2)) / BASE_FACTOR);
-      return sum + total;
-    },
-    0n
-  );
 
   return (
     <>
@@ -166,16 +156,14 @@ function App(props) {
             </div>
           </div>
           <Balances tokens={tokens} totalBalance={totalBalance} />
-          {totalLiquidityBalance && (
-            <LiquidityBalances
+          {liquidityTokens.some(({balance}) => balance> 0n) && <LiquidityBalances
               address={address}
               blockNumber={blockNumber}
               liquidityTokens={liquidityTokens}
-              totalLiquidityBalance={totalLiquidityBalance}
               setIssuanceRewards={setIssuanceRewards}
               issuanceRewards={issuanceRewards}
             />
-          )}
+          }
         </div>
         <Send
           setShow={(show) => (show ? setShowModal("send") : setShowModal(null))}

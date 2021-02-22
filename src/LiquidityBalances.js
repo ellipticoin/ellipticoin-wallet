@@ -1,5 +1,6 @@
 import Rewards from "./Rewards";
 import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
+import CompoundContext from "./CompoundContext";
 import {
   Percentage,
   formatPercentage,
@@ -9,7 +10,7 @@ import {
 } from "./helpers";
 import { sumBy } from "lodash";
 import { blockReward } from "ellipticoin";
-import { Fragment } from "react";
+import { Fragment, useContext } from "react";
 
 export default function LiquidityBalances(props) {
   const {
@@ -21,6 +22,7 @@ export default function LiquidityBalances(props) {
     issuanceRewards,
   } = props;
 
+  const {cDAIExchangeRate} = useContext(CompoundContext);
   const totalLiquidityBalance = liquidityTokens.reduce(
     (sum, liquidityToken) => {
       if (liquidityToken.balance == 0n) return sum;
@@ -89,7 +91,6 @@ export default function LiquidityBalances(props) {
                         {liquidityToken.balance ? <Value>{0n}</Value> : 0}
                       </td>
                       <td className="text-right no-padding-bottom">
-                        <Value>{liquidityToken.totalSupply}</Value>{" "}
                         <Value>
                           {liquidityToken.totalSupply
                             ? (liquidityToken.poolSupplyOfToken *
@@ -122,13 +123,13 @@ export default function LiquidityBalances(props) {
                     <tr>
                       <td className="text-right no-border no-padding-top">
                         +{" "}
-                        <USDValue>
+                        $ <Value>
                           {liquidityToken.poolSupplyOfBaseToken
-                            ? (liquidityToken.poolSupplyOfBaseToken *
+                            ? Number((liquidityToken.poolSupplyOfBaseToken *
                                 liquidityToken.balance) /
-                              liquidityToken.totalSupply
+                              liquidityToken.totalSupply)* cDAIExchangeRate
                             : 0n}
-                        </USDValue>
+                        </Value> USD
                       </td>
                     </tr>
                   </Fragment>

@@ -6,9 +6,11 @@ import {
 } from "react";
 import { ethers } from "ethers";
 import {USD} from "./constants";
+import Compound from "@compound-finance/compound-js"
 
 const {hexlify} = ethers.utils;
-
+// const {address} = constants;
+console.log(Compound.address)
 const CompoundContext = createContext();
 const CDAI = "0x6d7f0754ffeb405d23c51ce938289d4835be3b14"
 const COMPOUND_TOKENS = [CDAI]
@@ -27,7 +29,7 @@ export function useCompoundContext(dependencies) {
             signer
             );
     const exchangeRateCurrent = await cToken.exchangeRateCurrent();
-    console.log(exchangeRateCurrent.toString());
+    // console.log(exchangeRateCurrent.toString())
     const mantissa = 28;
     const cDAIExchangeRate= (exchangeRateCurrent / Math.pow(10, mantissa));
     const supplyRatePerBlock = await cToken.supplyRatePerBlock();
@@ -44,6 +46,19 @@ export function useCompoundContext(dependencies) {
         cDAIAPY,
     })
     },dependencies);
+    (async () => {
+
+    const network = Compound.util.getNetNameWithChainId(await  ethereum.request({ method: 'net_version' }))
+    const cUsdtAddress = Compound.util.getAddress(Compound.cUSDT, network);
+let supplyRatePerBlock = await Compound.eth.read(
+    CDAI,
+    'function exchangeRateCurrent() returns (uint)',
+    [], // [optional] parameters
+    {provider: window.ethereum}  // [optional] call options, provider, network, ethers.js "overrides"
+  );
+//
+  console.log('USDT supplyRatePerBlock:', supplyRatePerBlock.toString());
+})();
     return context
 }
 
