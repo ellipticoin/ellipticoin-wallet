@@ -13,21 +13,37 @@ const COMPOUND_TOKENS = [CDAI];
 export function useCompoundContext(dependencies) {
   const [context, setContext] = useState({});
   useEffect(async () => {
-    const signer = new ethers.providers.Web3Provider(
-      window.ethereum
-    ).getSigner();
-    const cToken = new ethers.Contract(
-      CDAI,
-      [
-        "function exchangeRateCurrent() view returns(uint256)",
-        "function supplyRatePerBlock() constant view returns(uint256)",
-      ],
-      signer
+    if (!window.ethereum) return
+
+    // const signer = new ethers.providers.Web3Provider(
+    //   window.ethereum
+    // ).getSigner();
+    // const cToken = new ethers.Contract(
+    //   CDAI,
+    //   [
+    //     "function exchangeRateCurrent() view returns(uint256)",
+    //     "function supplyRatePerBlock() constant view returns(uint256)",
+    //   ],
+    //   signer
+    // );
+    const network = Compound.util.getNetNameWithChainId(
+      await ethereum.request({ method: "net_version" })
     );
-    const exchangeRateCurrent = await cToken.exchangeRateCurrent();
+    const CDAI = Compound.util.getAddress(Compound.cDAI, network);
+    let exchangeRateCurrent = await Compound.eth.read(
+      CDAI,
+      "function exchangeRateCurrent() returns (uint)",
+      [],
+      { provider: window.ethereum } 
+    );
+    let supplyRatePerBlock = await Compound.eth.read(
+      CDAI,
+      "function supplyRatePerBlock() constant view returns(uint256)",
+      [],
+      { provider: window.ethereum } 
+    );
     const mantissa = 28;
     const cDAIExchangeRate = exchangeRateCurrent / Math.pow(10, mantissa);
-    const supplyRatePerBlock = await cToken.supplyRatePerBlock();
     const ethMantissa = 10 ** 18;
     const blocksPerDay = 4 * 60 * 24;
     const daysPerYear = 365;
@@ -41,20 +57,18 @@ export function useCompoundContext(dependencies) {
       cDAIAPY,
     });
   }, dependencies);
-  (async () => {
-    const network = Compound.util.getNetNameWithChainId(
-      await ethereum.request({ method: "net_version" })
-    );
-    const cUsdtAddress = Compound.util.getAddress(Compound.cUSDT, network);
-    let supplyRatePerBlock = await Compound.eth.read(
-      CDAI,
-      "function exchangeRateCurrent() returns (uint)",
-      [], // [optional] parameters
-      { provider: window.ethereum } // [optional] call options, provider, network, ethers.js "overrides"
-    );
-    //
-    // console.log("USDT supplyRatePerBlock:", supplyRatePerBlock.toString());
-  })();
+  // (async () => {
+  //   const network = Compound.util.getNetNameWithChainId(
+  //     await ethereum.request({ method: "net_version" })
+  //   );
+  //   const cUsdtAddress = Compound.util.getAddress(Compound.cUSDT, network);
+  //   let supplyRatePerBlock = await Compound.eth.read(
+  //     CDAI,
+  //     "function exchangeRateCurrent() returns (uint)",
+  //     [],
+  //     { provider: window.ethereum } 
+  //   );
+  // })();
   return context;
 }
 

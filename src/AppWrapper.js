@@ -27,7 +27,6 @@ export default function AppWrapper() {
   const [host, setHost] = useState(sample(BOOTNODES));
   const [currentMiner, setCurrentMiner] = useState(sample(BOOTNODES));
   const [blockNumber, setBlockNumber] = useState();
-  const [cDAIExchangeRate, setCDAIExchangeRate] = useState();
   const ethereumAcccounts = useEthereumAccounts();
   const uri = useMemo(() => `${PROD ? "https" : "http"}://${host}`, [host]);
   const [apolloClient, setApolloClient] = useState(() => {
