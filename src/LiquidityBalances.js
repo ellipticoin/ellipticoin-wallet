@@ -22,7 +22,7 @@ export default function LiquidityBalances(props) {
     issuanceRewards,
   } = props;
 
-  const {cDAIExchangeRate} = useContext(CompoundContext);
+  const { cDAIExchangeRate } = useContext(CompoundContext);
   const totalLiquidityBalance = liquidityTokens.reduce(
     (sum, liquidityToken) => {
       if (liquidityToken.balance == 0n) return sum;
@@ -122,14 +122,17 @@ export default function LiquidityBalances(props) {
                     </tr>
                     <tr>
                       <td className="text-right no-border no-padding-top">
-                        +{" "}
-                        $ <Value>
+                        + ${" "}
+                        <Value>
                           {liquidityToken.poolSupplyOfBaseToken
-                            ? Number((liquidityToken.poolSupplyOfBaseToken *
-                                liquidityToken.balance) /
-                              liquidityToken.totalSupply)* cDAIExchangeRate
+                            ? Number(
+                                (liquidityToken.poolSupplyOfBaseToken *
+                                  liquidityToken.balance) /
+                                  liquidityToken.totalSupply
+                              ) * cDAIExchangeRate
                             : 0n}
-                        </Value> USD
+                        </Value>{" "}
+                        USD
                       </td>
                     </tr>
                   </Fragment>
@@ -138,7 +141,7 @@ export default function LiquidityBalances(props) {
                 <td></td>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: <Value token={USD}>{totalLiquidityBalance}</Value>
+                    Total: $ <Value token={USD}>{totalLiquidityBalance}</Value>
                   </strong>
                 </td>
               </tr>

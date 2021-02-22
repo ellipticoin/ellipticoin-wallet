@@ -10,7 +10,7 @@ import {
   NUMBER_OF_ERAS,
 } from "./constants";
 import { ethers } from "ethers";
-import CompoundContext, {isCompoundToken} from "./CompoundContext";
+import CompoundContext, { isCompoundToken } from "./CompoundContext";
 import { find, get, sumBy } from "lodash";
 import { useState, useEffect, useContext } from "react";
 import cTokenAbi from "./contracts/cDAIABI.json";
@@ -23,15 +23,14 @@ export function Percentage({ numerator, denomiator }) {
 }
 
 export function Value({ children, token }) {
-  const {cDAIExchangeRate} = useContext(CompoundContext);
+  const { cDAIExchangeRate } = useContext(CompoundContext);
   if (token && isCompoundToken(token)) {
-    if (!cDAIExchangeRate) return null
-    return formatBigInt(children, cDAIExchangeRate)
+    if (!cDAIExchangeRate) return null;
+    return formatBigInt(children, cDAIExchangeRate);
   } else {
-    return formatBigInt(children)
+    return formatBigInt(children);
   }
 }
-
 
 function formatBigInt(n, exchangeRate = 1) {
   const [number, decimal] = ((Number(n) * exchangeRate) / Number(BASE_FACTOR))
@@ -50,8 +49,8 @@ function bigIntToNumber(n) {
 }
 
 export function USDValue({ children }) {
-  const {cDAIExchangeRate} = useContext(CompoundContext);
-  if (!cDAIExchangeRate) return null
+  const { cDAIExchangeRate } = useContext(CompoundContext);
+  if (!cDAIExchangeRate) return null;
 
   return `$ ${formatBigInt(children, cDAIExchangeRate)} USD`;
 }

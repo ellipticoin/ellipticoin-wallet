@@ -1,6 +1,6 @@
 import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
 import { findToken, Value, tokenTicker, USDValue } from "./helpers";
-import { interestRate } from "./CompoundContext";
+import { interestRate, isCompoundToken } from "./CompoundContext";
 
 export default function Balances(props) {
   const { tokens, totalBalance } = props;
@@ -17,7 +17,7 @@ export default function Balances(props) {
               <tr>
                 <th scope="col">Token</th>
                 <th scope="col" className="text-right">
-                  Intrest Rate
+                  Interest Rate
                 </th>
                 <th scope="col" className="text-right">
                   Number of Tokens
@@ -34,9 +34,7 @@ export default function Balances(props) {
               {tokens.map((token) => (
                 <tr key={token.address}>
                   <th scope="row">{TOKEN_METADATA[token.address].name}</th>
-                  <td className="text-right">
-                    {interestRate(token) || "-"}
-                  </td>
+                  <td className="text-right">{interestRate(token) || "-"}</td>
                   <td className="text-right">
                     <Value token={token}>{token.balance}</Value>
                   </td>

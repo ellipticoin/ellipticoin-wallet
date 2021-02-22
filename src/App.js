@@ -125,7 +125,7 @@ function App(props) {
     let total = (token.balance * price) / BASE_FACTOR;
     return sum + total;
   }, 0n);
-  const usdBalance = get(find(tokens, ["address", USD.address]), "balance")
+  const usdBalance = get(find(tokens, ["address", USD.address]), "balance");
 
   return (
     <>
@@ -151,19 +151,24 @@ function App(props) {
         <div id="appCapsule">
           <div className="section wallet-card-section pt-1 mb-2">
             <div className="wallet-card">
-              <ActionsHeader usdBalance={usdBalance} totalBalance={totalBalance} address={address} />
+              <ActionsHeader
+                usdBalance={usdBalance}
+                totalBalance={totalBalance}
+                address={address}
+              />
               <Actions setShowModal={setShowModal} setShowPage={setShowPage} />
             </div>
           </div>
           <Balances tokens={tokens} totalBalance={totalBalance} />
-          {liquidityTokens.some(({balance}) => balance> 0n) && <LiquidityBalances
+          {liquidityTokens.some(({ balance }) => balance > 0n) && (
+            <LiquidityBalances
               address={address}
               blockNumber={blockNumber}
               liquidityTokens={liquidityTokens}
               setIssuanceRewards={setIssuanceRewards}
               issuanceRewards={issuanceRewards}
             />
-          }
+          )}
         </div>
         <Send
           setShow={(show) => (show ? setShowModal("send") : setShowModal(null))}

@@ -17,7 +17,7 @@ import {
   useState,
   createContext,
 } from "react";
-import CompoundContext, {useCompoundContext} from "./CompoundContext";
+import CompoundContext, { useCompoundContext } from "./CompoundContext";
 
 export const CDAIExchangeRateContext = createContext();
 function onEvent(event) {
@@ -81,7 +81,7 @@ export default function AppWrapper() {
       return <App address={ethereumAcccounts[0]} />;
     }
   };
-  if (!compoundContext.cDAIExchangeRate) return null
+  if (!compoundContext.cDAIExchangeRate) return null;
   return (
     <HostContext.Provider value={[host, setHost]}>
       <CompoundContext.Provider value={compoundContext}>
