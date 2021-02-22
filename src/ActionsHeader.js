@@ -1,7 +1,6 @@
 import { useContext, useMemo } from "react";
 import CopyButton from "./Inputs/CopyButton.js";
 import { USD } from "./constants";
-import { USDValue } from "./helpers";
 import { ethers } from "ethers";
 import base64url from "base64url";
 import CompoundContext from "./CompoundContext";

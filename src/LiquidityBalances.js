@@ -5,7 +5,6 @@ import {
   Percentage,
   formatPercentage,
   Value,
-  USDValue,
   tokenTicker,
 } from "./helpers";
 import { sumBy } from "lodash";
@@ -101,23 +100,23 @@ export default function LiquidityBalances(props) {
                         {TOKEN_METADATA[liquidityToken.tokenAddress].ticker}
                       </td>
                       <td className="text-right" rowSpan="2">
-                        <USDValue>
+                        $ <Value token={USD}>
                           {liquidityToken.poolSupplyOfBaseToken
                             ? (liquidityToken.poolSupplyOfBaseToken *
                                 BASE_FACTOR) /
                               liquidityToken.poolSupplyOfToken
                             : 0n}
-                        </USDValue>
+                        </Value> USD
                       </td>
                       <td className="text-right" rowSpan="2">
-                        <USDValue>
+                        $ <Value token={USD}>
                           {liquidityToken.balance
                             ? ((liquidityToken.poolSupplyOfBaseToken *
                                 liquidityToken.balance) /
                                 liquidityToken.totalSupply) *
                               2n
                             : 0n}
-                        </USDValue>
+                        </Value> USD
                       </td>
                     </tr>
                     <tr>

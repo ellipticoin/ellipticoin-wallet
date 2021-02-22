@@ -1,10 +1,10 @@
 import { default as App } from "./App";
-import Migrate from "./Migrate";
 import CurrentMinerContext from "./CurrentMinerContext";
 import HostContext from "./HostContext";
 import { BOOTNODES, PROD } from "./constants";
 import { useEthereumAccounts } from "./ethereum";
-import UnlockMetaMask from "./UnlockMetaMask";
+import InstallMetaMask from "./InstallMetamask";
+import UnlockMetamask from "./UnlockMetamask";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client";
 import { sample } from "lodash";
@@ -67,13 +67,8 @@ export default function AppWrapper() {
   const compoundContext = useCompoundContext([blockNumber]);
 
   const page = () => {
-    if (
-      window.localStorage.getItem("secretKey") &&
-      !window.localStorage.getItem("migrated")
-    ) {
-      return <Migrate />;
-    } else if (!ethereumAcccounts) {
-      return <></>;
+    if (!ethereumAcccounts) {
+      return <InstallMetamask></InstallMetamask>;
     } else if (ethereumAcccounts && ethereumAcccounts.length == 0) {
       return <UnlockMetaMask />;
     } else {

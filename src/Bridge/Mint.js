@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { USDValue, Value } from "../helpers";
+import { Value } from "../helpers";
 import { sendETH, sendTokens } from "../ethereum";
 import TokenSelect from "../Inputs/TokenSelect.js";
 import TokenAmountInput from "../Inputs/TokenAmountInput.js";
@@ -92,7 +92,7 @@ export default function Mint(props) {
         <Form.Group className="basic">
           <Form.Label>Underlying Amount</Form.Label>
           <div className="mt-1">
-            <USDValue>{amount}</USDValue>
+            <Value token={USD}>{amount}</Value>
           </div>
           <hr className="mt-0" />
         </Form.Group>

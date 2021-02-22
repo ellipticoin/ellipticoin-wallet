@@ -1,5 +1,5 @@
 import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
-import { findToken, Value, tokenTicker, USDValue } from "./helpers";
+import { findToken, tokenTicker, Value } from "./helpers";
 import { interestRate, isCompoundToken } from "./CompoundContext";
 
 export default function Balances(props) {
@@ -39,23 +39,20 @@ export default function Balances(props) {
                     <Value token={token}>{token.balance}</Value>
                   </td>
                   <td className="text-right">
-                    {token.address === USD.address ? (
-                      "$ 1.00 USD"
-                    ) : (
-                      <USDValue>{token.price}</USDValue>
-                    )}
+                    $ {token.address === USD.address ? "1.00" :
+                      <Value token={token}>{token.price}</Value>} USD
                   </td>
                   <td className="text-right text-primary">
-                    <USDValue token={USD}>
+                    $ <Value token={USD}>
                       {(token.balance * token.price) / BASE_FACTOR}
-                    </USDValue>
+                    </Value> USD
                   </td>
                 </tr>
               ))}
               <tr>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: <USDValue>{totalBalance}</USDValue>
+                    Total: <Value token={USD}>{totalBalance}</Value>
                   </strong>
                 </td>
               </tr>

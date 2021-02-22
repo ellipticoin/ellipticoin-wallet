@@ -10,7 +10,6 @@ import Send from "./Send";
 import Sidebar from "./Sidebar";
 import ActionsHeader from "./ActionsHeader";
 import Trade from "./Trade";
-import Migrate from "./Migrate";
 import { BASE_FACTOR, USD } from "./constants";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
 import { useLocalStorage } from "./helpers";

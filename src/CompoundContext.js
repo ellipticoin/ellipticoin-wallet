@@ -57,18 +57,6 @@ export function useCompoundContext(dependencies) {
       cDAIAPY,
     });
   }, dependencies);
-  // (async () => {
-  //   const network = Compound.util.getNetNameWithChainId(
-  //     await ethereum.request({ method: "net_version" })
-  //   );
-  //   const cUsdtAddress = Compound.util.getAddress(Compound.cUSDT, network);
-  //   let supplyRatePerBlock = await Compound.eth.read(
-  //     CDAI,
-  //     "function exchangeRateCurrent() returns (uint)",
-  //     [],
-  //     { provider: window.ethereum } 
-  //   );
-  // })();
   return context;
 }
 

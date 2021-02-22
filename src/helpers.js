@@ -48,12 +48,6 @@ function bigIntToNumber(n) {
   return Number(n) / Number(BASE_FACTOR);
 }
 
-export function USDValue({ children }) {
-  const { cDAIExchangeRate } = useContext(CompoundContext);
-  if (!cDAIExchangeRate) return null;
-
-  return `$ ${formatBigInt(children, cDAIExchangeRate)} USD`;
-}
 export function useLocalStorage(key, initialValue) {
   const [storedValue, setStoredValue] = useState(() => {
     const item = window.localStorage.getItem(key);
