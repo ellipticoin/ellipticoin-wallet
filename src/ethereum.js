@@ -6,13 +6,16 @@ const { hexlify } = ethers.utils;
 
 export function useEthereumAccounts() {
   const [accounts, setAccounts] = useState();
+  const [loading, setLoading] = useState(true);
   useEffect(async () => {
     if (window.ethereum) {
       setAccounts(await ethereum.request({ method: "eth_accounts" }));
       window.ethereum.on("accountsChanged", setAccounts);
     }
+
+    setLoading(false)    
   }, []);
-  return accounts;
+  return [loading, accounts];
 }
 
 export async function sendETH({ to, value }) {

@@ -5,27 +5,16 @@ import Compound from "@compound-finance/compound-js";
 
 const { hexlify, getAddress } = ethers.utils;
 // const {address} = constants;
-console.log(Compound.address);
 const CompoundContext = createContext();
 // const CDAI = "0x6d7f0754ffeb405d23c51ce938289d4835be3b14";
 const CDAI = "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643";
 const COMPOUND_TOKENS = [CDAI];
-export function useCompoundContext(dependencies) {
+export function useCompoundContext(props) {
+  const { blockNumber, ethereumAcccounts } = props;
   const [context, setContext] = useState({});
   useEffect(async () => {
-    if (!window.ethereum) return
+    if (!(ethereumAcccounts && ethereumAcccounts.length)) return;
 
-    // const signer = new ethers.providers.Web3Provider(
-    //   window.ethereum
-    // ).getSigner();
-    // const cToken = new ethers.Contract(
-    //   CDAI,
-    //   [
-    //     "function exchangeRateCurrent() view returns(uint256)",
-    //     "function supplyRatePerBlock() constant view returns(uint256)",
-    //   ],
-    //   signer
-    // );
     const network = Compound.util.getNetNameWithChainId(
       await ethereum.request({ method: "net_version" })
     );
@@ -34,13 +23,13 @@ export function useCompoundContext(dependencies) {
       CDAI,
       "function exchangeRateCurrent() returns (uint)",
       [],
-      { provider: window.ethereum } 
+      { provider: window.ethereum }
     );
     let supplyRatePerBlock = await Compound.eth.read(
       CDAI,
       "function supplyRatePerBlock() constant view returns(uint256)",
       [],
-      { provider: window.ethereum } 
+      { provider: window.ethereum }
     );
     const mantissa = 28;
     const cDAIExchangeRate = exchangeRateCurrent / Math.pow(10, mantissa);
@@ -56,7 +45,7 @@ export function useCompoundContext(dependencies) {
       cDAIExchangeRate,
       cDAIAPY,
     });
-  }, dependencies);
+  }, [blockNumber]);
   return context;
 }
 

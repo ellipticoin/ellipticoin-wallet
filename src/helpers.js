@@ -43,37 +43,3 @@ function formatBigInt(n, exchangeRate = 1) {
 export function numberWithCommas(n) {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
-function bigIntToNumber(n) {
-  return Number(n) / Number(BASE_FACTOR);
-}
-
-export function useLocalStorage(key, initialValue) {
-  const [storedValue, setStoredValue] = useState(() => {
-    const item = window.localStorage.getItem(key);
-    if (item) {
-      return CBOR.decode(Buffer.from(item, "base64"));
-    } else {
-      const value =
-        initialValue instanceof Function ? initialValue() : initialValue;
-      window.localStorage.setItem(key, CBOR.encode(value).toString("base64"));
-      return value;
-    }
-  });
-
-  const setValue = (value) => {
-    try {
-      const valueToStore =
-        value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(
-        key,
-        CBOR.encode(valueToStore).toString("base64")
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  return [storedValue, setValue];
-}

@@ -1,10 +1,12 @@
 import { default as App } from "./App";
 import CurrentMinerContext from "./CurrentMinerContext";
 import HostContext from "./HostContext";
+import { useSpring, useTransition, animated } from "react-spring";
 import { BOOTNODES, PROD } from "./constants";
 import { useEthereumAccounts } from "./ethereum";
-import InstallMetaMask from "./InstallMetamask";
+import InstallMetamask from "./InstallMetamask";
 import UnlockMetamask from "./UnlockMetamask";
+import Loading from "./Loading";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client";
 import { sample } from "lodash";
@@ -20,14 +22,11 @@ import {
 import CompoundContext, { useCompoundContext } from "./CompoundContext";
 
 export const CDAIExchangeRateContext = createContext();
-function onEvent(event) {
-  console.log(event);
-}
 export default function AppWrapper() {
   const [host, setHost] = useState(sample(BOOTNODES));
   const [currentMiner, setCurrentMiner] = useState(sample(BOOTNODES));
   const [blockNumber, setBlockNumber] = useState();
-  const ethereumAcccounts = useEthereumAccounts();
+  const [loadingEthereumAcccounts, ethereumAcccounts] = useEthereumAccounts();
   const uri = useMemo(() => `${PROD ? "https" : "http"}://${host}`, [host]);
   const [apolloClient, setApolloClient] = useState(() => {
     const cache = new InMemoryCache();
@@ -64,23 +63,50 @@ export default function AppWrapper() {
   useEffect(() => {
     apolloClient.reFetchObservableQueries();
   }, [apolloClient, blockNumber]);
-  const compoundContext = useCompoundContext([blockNumber]);
+  const compoundContext = useCompoundContext({
+    blockNumber,
+    ethereumAcccounts,
+  });
 
-  const page = () => {
-    if (!ethereumAcccounts) {
+  const [toggle, set] = useState(false)
+  const loading = useMemo(() => 
+    !compoundContext.cDAIExchangeRate
+    || loadingEthereumAcccounts
+)
+  console.log(loading)
+  const fadeIn = useTransition(loading, null, {
+    from: { position: 'absolute', width: "100%", opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
+  });
+    
+  const page = useMemo(() => {
+    if (!loading && !ethereumAcccounts) {
       return <InstallMetamask></InstallMetamask>;
     } else if (ethereumAcccounts && ethereumAcccounts.length == 0) {
-      return <UnlockMetaMask />;
+      return <UnlockMetamask />;
     } else {
-      return <App address={ethereumAcccounts[0]} />;
+      return (
+        <>
+          {fadeIn.map(({ item, key, props }) =>
+            item ? (
+              <animated.div key={key} style={props}>
+                <Loading onClick={() => set(true)}/>
+              </animated.div>
+            ) : 
+              <animated.div key={key} style={props}>
+<App key={key} address={ethereumAcccounts[0]} />
+              </animated.div>
+          )}
+        </>
+      );
     }
-  };
-  if (!compoundContext.cDAIExchangeRate) return null;
+  });
   return (
     <HostContext.Provider value={[host, setHost]}>
       <CompoundContext.Provider value={compoundContext}>
         <CurrentMinerContext.Provider value={[currentMiner, setCurrentMiner]}>
-          <ApolloProvider client={apolloClient}>{page()}</ApolloProvider>
+          <ApolloProvider client={apolloClient}>{page}</ApolloProvider>
         </CurrentMinerContext.Provider>
       </CompoundContext.Provider>
     </HostContext.Provider>

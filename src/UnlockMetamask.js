@@ -1,7 +1,8 @@
 import { ethRequestAccounts } from "./ethereum";
 import Button from "react-bootstrap/Button";
 
-export default function UnlockMetaMask(props) {
+export default function UnlockMetamask(props) {
+  console.log("UnlockMetamask");
   return (
     <div
       className="d-flex align-content-center flex-wrap"

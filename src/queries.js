@@ -1,10 +1,8 @@
-import nacl from "tweetnacl";
 import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
 import { ethers } from "ethers";
 import { gql, useQuery } from "@apollo/client";
 import BridgeABI from "./BridgeABI.json";
 import { useEthereumAccounts } from "./ethereum";
-import { useLocalStorage } from "./helpers";
 import { useMemo } from "react";
 
 const { arrayify, hexlify } = ethers.utils;

@@ -30,7 +30,7 @@ export default function ActionsHeader(props) {
         <div className="col-lg-4 col-md-12 total-balance align-self-end">
           <div>
             Total Balance{" "}
-            {blendedAPY ? `(earning ${blendedAPY.toFixed(2)}% APY)`: null}
+            {blendedAPY ? `(earning ${blendedAPY.toFixed(2)}% APY)` : null}
           </div>
           <div>
             <h1>

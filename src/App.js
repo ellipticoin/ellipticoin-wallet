@@ -126,6 +126,7 @@ function App(props) {
   }, 0n);
   const usdBalance = get(find(tokens, ["address", USD.address]), "balance");
 
+  console.log("here")
   return (
     <>
       {pageTransition.map(({ item, key, props }) =>

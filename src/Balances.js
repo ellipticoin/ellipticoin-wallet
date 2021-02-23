@@ -39,13 +39,20 @@ export default function Balances(props) {
                     <Value token={token}>{token.balance}</Value>
                   </td>
                   <td className="text-right">
-                    $ {token.address === USD.address ? "1.00" :
-                      <Value token={token}>{token.price}</Value>} USD
+                    ${" "}
+                    {token.address === USD.address ? (
+                      "1.00"
+                    ) : (
+                      <Value token={token}>{token.price}</Value>
+                    )}{" "}
+                    USD
                   </td>
                   <td className="text-right text-primary">
-                    $ <Value token={USD}>
+                    ${" "}
+                    <Value token={USD}>
                       {(token.balance * token.price) / BASE_FACTOR}
-                    </Value> USD
+                    </Value>{" "}
+                    USD
                   </td>
                 </tr>
               ))}

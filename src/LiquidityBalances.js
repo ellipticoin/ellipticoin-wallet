@@ -1,12 +1,7 @@
 import Rewards from "./Rewards";
 import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
 import CompoundContext from "./CompoundContext";
-import {
-  Percentage,
-  formatPercentage,
-  Value,
-  tokenTicker,
-} from "./helpers";
+import { Percentage, formatPercentage, Value, tokenTicker } from "./helpers";
 import { sumBy } from "lodash";
 import { blockReward } from "ellipticoin";
 import { Fragment, useContext } from "react";
@@ -100,23 +95,27 @@ export default function LiquidityBalances(props) {
                         {TOKEN_METADATA[liquidityToken.tokenAddress].ticker}
                       </td>
                       <td className="text-right" rowSpan="2">
-                        $ <Value token={USD}>
+                        ${" "}
+                        <Value token={USD}>
                           {liquidityToken.poolSupplyOfBaseToken
                             ? (liquidityToken.poolSupplyOfBaseToken *
                                 BASE_FACTOR) /
                               liquidityToken.poolSupplyOfToken
                             : 0n}
-                        </Value> USD
+                        </Value>{" "}
+                        USD
                       </td>
                       <td className="text-right" rowSpan="2">
-                        $ <Value token={USD}>
+                        ${" "}
+                        <Value token={USD}>
                           {liquidityToken.balance
                             ? ((liquidityToken.poolSupplyOfBaseToken *
                                 liquidityToken.balance) /
                                 liquidityToken.totalSupply) *
                               2n
                             : 0n}
-                        </Value> USD
+                        </Value>{" "}
+                        USD
                       </td>
                     </tr>
                     <tr>
