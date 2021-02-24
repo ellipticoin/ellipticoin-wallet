@@ -22,14 +22,45 @@ export function Percentage({ numerator, denomiator }) {
   return `${(Number(numerator * 100n) / Number(denomiator)).toFixed(4)}%`;
 }
 
-export function Value({ children, token }) {
+export function price(value, token) {
   const { cDAIExchangeRate } = useContext(CompoundContext);
   if (token && isCompoundToken(token)) {
     if (!cDAIExchangeRate) return null;
-    return formatBigInt(children, cDAIExchangeRate);
+    return formatBigInt(value);
   } else {
-    return formatBigInt(children);
+    return formatBigInt(value, cDAIExchangeRate);
   }
+}
+
+export function Price({ children, token }) {
+  const { cDAIExchangeRate } = useContext(CompoundContext);
+  if (token && isCompoundToken(token)) {
+    if (!cDAIExchangeRate) return null;
+    return formatBigInt(children);
+  } else {
+    return formatBigInt(children, cDAIExchangeRate);
+  }
+}
+
+export function value(value, tokenAddress, options = {}) {
+  const { cDAIExchangeRate } = useContext(CompoundContext);
+  let formattedValue
+  if (tokenAddress && isCompoundToken(tokenAddress)) {
+    if (!cDAIExchangeRate) return null;
+    formattedValue = formatBigInt(value, cDAIExchangeRate);
+  } else {
+    formattedValue = formatBigInt(value);
+  }
+
+  if (options.showCurrency) {
+        if (tokenAddress === USD.address) {
+            return `$ ${formattedValue} USD`
+        } else {
+            return `$ ${formattedValue} ${TOKEN_METADATA[tokenAddress].ticker}`
+        }
+    } else {
+        return formattedValue
+    } 
 }
 
 function formatBigInt(n, exchangeRate = 1) {

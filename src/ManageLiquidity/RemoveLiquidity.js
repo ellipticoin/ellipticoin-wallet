@@ -1,7 +1,7 @@
 import { InputState } from "../Inputs";
 import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, ZERO, LIQUIDITY_TOKENS, TOKENS } from "../constants";
-import { Value } from "../helpers";
+import { value } from "../helpers";
 import { usePostTransaction } from "../mutations";
 import { find, get } from "lodash";
 import { useMemo, useState, useEffect } from "react";
@@ -71,7 +71,7 @@ export default function RemoveLiquidity(props) {
           <Form.Label>
             Tokens in Pool:{" "}
             <span className={false ? "text-danger" : ""}>
-              <Value>{tokensInPool}</Value>
+              {value(tokensInPool)}
             </span>
           </Form.Label>
         </div>

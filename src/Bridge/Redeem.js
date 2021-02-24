@@ -5,7 +5,7 @@ import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
 import TokenSelect from "../Inputs/TokenSelect.js";
 import { usePostTransaction } from "../mutations";
-import { Value } from "../helpers";
+import { value } from "../helpers";
 import { actions } from "ellipticoin";
 import { ArrowDown } from "react-feather";
 import TokenAmountInput from "../Inputs/TokenAmountInput.js";
@@ -92,7 +92,7 @@ export default function Redeem(props) {
       {pendingRedeemRequests.map((pendingRedeemRequest) => (
         <div>
           <Button onClick={() => completeRedeem(pendingRedeemRequest)}>
-            Retry redeem {<Value>{BigInt(pendingRedeemRequest.amount)}</Value>}{" "}
+            Retry redeem {value(BigInt(pendingRedeemRequest.amount))}{" "}
             {TOKEN_METADATA[pendingRedeemRequest.token].ticker}
           </Button>
         </div>

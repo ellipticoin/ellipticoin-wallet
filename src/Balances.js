@@ -1,9 +1,14 @@
+import { useContext } from "react";
 import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
-import { findToken, tokenTicker, Value } from "./helpers";
-import { interestRate, isCompoundToken } from "./CompoundContext";
+import { value } from "./helpers";
+import CompoundContext, {
+  interestRate,
+  isCompoundToken,
+} from "./CompoundContext";
 
 export default function Balances(props) {
   const { tokens, totalBalance } = props;
+  const { cDAIExchangeRate } = useContext(CompoundContext);
 
   return (
     <div className="section mt-2">
@@ -35,31 +40,22 @@ export default function Balances(props) {
                 <tr key={token.address}>
                   <th scope="row">{TOKEN_METADATA[token.address].name}</th>
                   <td className="text-right">{interestRate(token) || "-"}</td>
+                  <td className="text-right">{value(token.balance, token.address)}</td>
                   <td className="text-right">
-                    <Value token={token}>{token.balance}</Value>
-                  </td>
-                  <td className="text-right">
-                    ${" "}
-                    {token.address === USD.address ? (
-                      "1.00"
-                    ) : (
-                      <Value token={token}>{token.price}</Value>
-                    )}{" "}
-                    USD
+                    {token.address === USD.address ? "$ 1.00": value(token.price, USD.address, {showCurrency: true})}
                   </td>
                   <td className="text-right text-primary">
-                    ${" "}
-                    <Value token={USD}>
-                      {(token.balance * token.price) / BASE_FACTOR}
-                    </Value>{" "}
-                    USD
+                    {value(
+                      (token.balance * token.price) / BASE_FACTOR,
+                      USD.address
+                    , {showCurrency: true})}
                   </td>
                 </tr>
               ))}
               <tr>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: <Value token={USD}>{totalBalance}</Value>
+                    Total: {value(totalBalance, USD.address, {showCurrency: true})}
                   </strong>
                 </td>
               </tr>

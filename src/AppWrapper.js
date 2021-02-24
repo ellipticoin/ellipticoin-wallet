@@ -68,45 +68,42 @@ export default function AppWrapper() {
     ethereumAcccounts,
   });
 
-  const [toggle, set] = useState(false)
-  const loading = useMemo(() => 
-    !compoundContext.cDAIExchangeRate
-    || loadingEthereumAcccounts
-)
-  console.log(loading)
+  const [toggle, set] = useState(false);
+  const loading = useMemo(
+    () => !compoundContext.cDAIExchangeRate || loadingEthereumAcccounts
+  );
   const fadeIn = useTransition(loading, null, {
-    from: { position: 'absolute', width: "100%", opacity: 0 },
+    from: { position: "absolute", width: "100%", opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
   });
-    
+
   const page = useMemo(() => {
-    if (!loading && !ethereumAcccounts) {
+    if (!ethereumAcccounts) {
       return <InstallMetamask></InstallMetamask>;
     } else if (ethereumAcccounts && ethereumAcccounts.length == 0) {
       return <UnlockMetamask />;
     } else {
-      return (
-        <>
-          {fadeIn.map(({ item, key, props }) =>
-            item ? (
-              <animated.div key={key} style={props}>
-                <Loading onClick={() => set(true)}/>
-              </animated.div>
-            ) : 
-              <animated.div key={key} style={props}>
-<App key={key} address={ethereumAcccounts[0]} />
-              </animated.div>
-          )}
-        </>
-      );
+      return <App address={ethereumAcccounts[0]} />;
     }
   });
   return (
     <HostContext.Provider value={[host, setHost]}>
       <CompoundContext.Provider value={compoundContext}>
         <CurrentMinerContext.Provider value={[currentMiner, setCurrentMiner]}>
-          <ApolloProvider client={apolloClient}>{page}</ApolloProvider>
+          <ApolloProvider client={apolloClient}>
+            {fadeIn.map(({ item, key, props }) =>
+              item ? (
+                <animated.div key={key} style={props}>
+                  <Loading onClick={() => set(true)} />
+                </animated.div>
+              ) : (
+                <animated.div key={key} style={props}>
+                  {page}
+                </animated.div>
+              )
+            )}
+          </ApolloProvider>
         </CurrentMinerContext.Provider>
       </CompoundContext.Provider>
     </HostContext.Provider>

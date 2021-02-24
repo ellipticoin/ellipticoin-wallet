@@ -1,7 +1,7 @@
 import Rewards from "./Rewards";
 import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
 import CompoundContext from "./CompoundContext";
-import { Percentage, formatPercentage, Value, tokenTicker } from "./helpers";
+import { Percentage, formatPercentage, value, tokenTicker } from "./helpers";
 import { sumBy } from "lodash";
 import { blockReward } from "ellipticoin";
 import { Fragment, useContext } from "react";
@@ -81,56 +81,43 @@ export default function LiquidityBalances(props) {
                           denomiator={liquidityToken.totalSupply}
                         />
                       </td>
-                      <td className="text-right" rowSpan="2">
-                        {liquidityToken.balance ? <Value>{0n}</Value> : 0}
+                      <td className="text-right" rowSpann="2">
+                        {liquidityToken.balance ? value(0n) : 0}
                       </td>
                       <td className="text-right no-padding-bottom">
-                        <Value>
-                          {liquidityToken.totalSupply
+                        {value(
+                          liquidityToken.totalSupply
                             ? (liquidityToken.poolSupplyOfToken *
                                 liquidityToken.balance) /
                               liquidityToken.totalSupply
-                            : 0n}
-                        </Value>{" "}
-                        {TOKEN_METADATA[liquidityToken.tokenAddress].ticker}
+                            : 0n
+                        , liquidityToken.tokenAddress, {showCurrency: true})}
                       </td>
                       <td className="text-right" rowSpan="2">
-                        ${" "}
-                        <Value token={USD}>
-                          {liquidityToken.poolSupplyOfBaseToken
+                          {value(liquidityToken.poolSupplyOfBaseToken
                             ? (liquidityToken.poolSupplyOfBaseToken *
                                 BASE_FACTOR) /
                               liquidityToken.poolSupplyOfToken
-                            : 0n}
-                        </Value>{" "}
-                        USD
+                            : 0n, USD.address, {showCurrency: true})}
                       </td>
                       <td className="text-right" rowSpan="2">
-                        ${" "}
-                        <Value token={USD}>
-                          {liquidityToken.balance
+                          {value(liquidityToken.balance
                             ? ((liquidityToken.poolSupplyOfBaseToken *
                                 liquidityToken.balance) /
                                 liquidityToken.totalSupply) *
                               2n
-                            : 0n}
-                        </Value>{" "}
-                        USD
+                            : 0n, USD.address, {showCurrency: true})}
                       </td>
                     </tr>
                     <tr>
                       <td className="text-right no-border no-padding-top">
-                        + ${" "}
-                        <Value>
-                          {liquidityToken.poolSupplyOfBaseToken
+                          {value(liquidityToken.poolSupplyOfBaseToken
                             ? Number(
                                 (liquidityToken.poolSupplyOfBaseToken *
                                   liquidityToken.balance) /
                                   liquidityToken.totalSupply
                               ) * cDAIExchangeRate
-                            : 0n}
-                        </Value>{" "}
-                        USD
+                            : 0n, USD.address, {showCurrency: true})}
                       </td>
                     </tr>
                   </Fragment>
@@ -139,7 +126,7 @@ export default function LiquidityBalances(props) {
                 <td></td>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: $ <Value token={USD}>{totalLiquidityBalance}</Value>
+                    Total: {value(totalLiquidityBalance, USD.address, {showCurrency: true})}
                   </strong>
                 </td>
               </tr>

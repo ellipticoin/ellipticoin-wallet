@@ -1,7 +1,7 @@
 import btcLogo from "./BTC-logo.png";
 import ethLogo from "./ETH-logo.png";
 import { BASE_FACTOR, BTC, USD, WETH, MNS, TOKEN_META_DATA } from "./constants";
-import { Value } from "./helpers";
+import { value } from "./helpers";
 import { find, sumBy } from "lodash";
 import { useMemo } from "react";
 
@@ -55,12 +55,10 @@ export default function LockedValue(props) {
                       </td>
                       <td className="text-right">
                         {" "}
-                        <Value token={BTC}>{btc.totalSupply}</Value>
+                        {value(btc.totalSupply, BTC.address)}
                       </td>
                       <td className="text-right">
-                        <Value token={BTC}>
-                          {(btc.totalSupply * btc.price) / BASE_FACTOR}
-                        </Value>
+                          {value((btc.totalSupply * btc.price) / BASE_FACTOR, BTC.address)}
                       </td>
                     </tr>
                     <tr>
@@ -78,13 +76,11 @@ export default function LockedValue(props) {
                       </td>
                       <td className="text-right">
                         {" "}
-                        <Value token={WETH}>{weth.totalSupply}</Value>
+                        {value(weth.totalSupply, WETH.address)}
                       </td>
                       <td className="text-right">
                         {" "}
-                        <Value token={WETH}>
-                          {(weth.totalSupply * weth.price) / BASE_FACTOR}
-                        </Value>
+                        {value((weth.totalSupply * weth.price) / BASE_FACTOR, WETH.address)}
                       </td>
                     </tr>
                     <tr>
@@ -100,7 +96,7 @@ export default function LockedValue(props) {
                     <tr>
                       <th colspan="2">Total Locked Value</th>
                       <th className="value text-success text-right">
-                        <Value token={USD}>{totalLockedValue}</Value>
+                        {value(totalLockedValue, USD.address)}
                       </th>
                     </tr>
                   </tbody>

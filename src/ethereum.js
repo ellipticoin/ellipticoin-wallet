@@ -13,7 +13,7 @@ export function useEthereumAccounts() {
       window.ethereum.on("accountsChanged", setAccounts);
     }
 
-    setLoading(false)    
+    setLoading(false);
   }, []);
   return [loading, accounts];
 }

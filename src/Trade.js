@@ -12,7 +12,7 @@ import {
   encodeToken,
   formatTokenBalance,
   tokenTicker,
-  Value,
+  value,
   formatCurrency,
 } from "./helpers";
 import { usePostTransaction } from "./mutations";
@@ -139,7 +139,7 @@ export default function Trade(props) {
                     >
                       <u>
                         Your Balance:{" "}
-                        <Value token={inputToken}>{inputTokenBalance}</Value>
+                        {value(inputToken, inputToken.address)}
                       </u>
                     </Form.Label>
                   </div>
@@ -189,7 +189,7 @@ export default function Trade(props) {
                     </li>
                     <li>
                       <strong>Liquidity Fee</strong>
-                      <Value token={inputToken}>{fee}</Value>
+                      {value(fee, inputToken.address)}
                     </li>
                     <li>
                       <strong>Output Amount</strong>

@@ -27,7 +27,7 @@ const POST_TRASACTION = gql`
 
 export function useSignAndMigrate({ setMigrated, address }) {
   const [migrate] = usePostTransaction(actions.Migrate, address);
-  const accounts = useEthereumAccounts();
+  const [_, accounts] = useEthereumAccounts();
   return async (secretKey) => {
     const publicKey = Buffer.from(
       nacl.sign.keyPair.fromSecretKey(secretKey).publicKey

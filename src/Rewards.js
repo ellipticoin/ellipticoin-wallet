@@ -1,5 +1,5 @@
 import { usePostTransaction } from "./mutations";
-import { Value } from "./helpers";
+import { value } from "./helpers";
 import { MNS } from "./constants";
 import { useGetIssuanceRewards } from "./queries";
 import { useRef } from "react";
@@ -33,7 +33,7 @@ export default function Rewards(props) {
           </button>
           <div className="title">Mature Liquidity Rewards</div>
           <div className="value text-success">
-            <Value token={MNS}>{issuanceRewards}</Value>
+            {value(issuanceRewards, MNS.address)}
           </div>
         </div>
       </div>

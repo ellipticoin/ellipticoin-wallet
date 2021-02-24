@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { Value } from "../helpers";
+import { value } from "../helpers";
 import { sendETH, sendTokens } from "../ethereum";
 import TokenSelect from "../Inputs/TokenSelect.js";
 import TokenAmountInput from "../Inputs/TokenAmountInput.js";
@@ -84,7 +84,7 @@ export default function Mint(props) {
       <Form.Group className="basic">
         <Form.Label>Amount</Form.Label>
         <div className="mt-1">
-          <Value>{amount}</Value>
+          {value(amount)}
         </div>
         <hr className="mt-0" />
       </Form.Group>

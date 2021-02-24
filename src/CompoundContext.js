@@ -56,9 +56,9 @@ export function interestRate(token) {
   }
 }
 
-export function isCompoundToken(token) {
+export function isCompoundToken(address) {
   return COMPOUND_TOKENS.includes(
-    getAddress(hexlify(Buffer.from(token.address, "base64")))
+    getAddress(hexlify(Buffer.from(address, "base64")))
   );
 }
 

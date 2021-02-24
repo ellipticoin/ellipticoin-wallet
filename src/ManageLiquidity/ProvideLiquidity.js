@@ -1,7 +1,7 @@
 import TokenAmountInput from "../Inputs/TokenAmountInput";
 import TokenSelect from "../Inputs/TokenSelect";
 import { BASE_FACTOR, USD, LIQUIDITY_TOKENS, TOKENS } from "../constants";
-import { encodeToken, tokenName, ValueUSD, Value } from "../helpers";
+import { encodeToken, tokenName, value } from "../helpers";
 import { usePostTransaction } from "../mutations";
 import { find, get } from "lodash";
 import { useMemo, useState, useRef } from "react";
@@ -99,7 +99,7 @@ export default function ProvideLiquidity(props) {
           >
             Your Balance:{" "}
             <span className={amount > tokenBalance ? "text-danger" : ""}>
-              <Value>{tokenBalance}</Value>
+              {value(tokenBalance)}
             </span>
           </Form.Label>
         </div>
@@ -138,7 +138,7 @@ export default function ProvideLiquidity(props) {
           <span
             className={baseTokenAmount > baseTokenBalance ? "text-danger" : ""}
           >
-            <Value token={USD}>{baseTokenAmount || 0}</Value>
+            {value(baseTokenAmount || 0, USD.address)}
           </span>{" "}
           of <Value>{baseTokenBalance}</Value>
         </div>
