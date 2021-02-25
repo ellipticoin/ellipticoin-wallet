@@ -16,7 +16,7 @@ import {
   ETH_BRIDGE_ADDRESS,
   WETH,
 } from "../constants";
-import { usePendingRedeemRequests, useBridge } from "../queries";
+import { useBridge } from "../queries";
 
 const { arrayify, hexlify } = ethers.utils;
 

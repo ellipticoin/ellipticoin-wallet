@@ -71,7 +71,7 @@ const GET_BRIDGE = gql`
 
 export function useGetTokens(address) {
   const accounts = useEthereumAccounts();
-  let { data: { tokens } = { tokens: TOKENS }, error } = useQuery(GET_TOKENS, {
+  let { data: { tokens } = { tokens: [] }, error } = useQuery(GET_TOKENS, {
     variables: {
       tokens: TOKENS.map(({ address }) => address.toString("base64")),
       address: Buffer.from(arrayify(address)).toString("base64"),
@@ -165,45 +165,4 @@ export function useBridge() {
       signer
     );
   }
-}
-
-export function usePendingRedeemRequests(address) {
-  const result = useQuery(GET_PENDING_REDEEM_REQUESTS, {
-    variables: {
-      address: Buffer.from(arrayify(address)).toString("base64"),
-    },
-  });
-
-  return {
-    ...result,
-    data: {
-      ...result.data,
-      nextTransactionNumber:
-        (result.data && parseInt(result.data.nextTransactionNumber)) || 0,
-    },
-  };
-}
-
-export function useGetTransactionsByContractFunction(
-  contractName,
-  functionName,
-  page = 0,
-  pageSize = 100
-) {
-  return useQuery(GET_TRANSACTIONS_BY_CONTRACT_FUNCTION, {
-    variables: {
-      senderAddress: publicKey.toString("base64"),
-      contractName,
-      functionName,
-      page: page.toString(),
-      pageSize: pageSize.toString(),
-    },
-  });
-}
-
-export function encodeToken({ id, issuer }) {
-  return {
-    id: id.toString("base64"),
-    issuer,
-  };
 }

@@ -18,10 +18,38 @@ export function Percentage({ numerator, denomiator }) {
   return `${(Number(numerator * 100n) / Number(denomiator)).toFixed(4)}%`;
 }
 
+export function value2(value, tokenAddress, options = {}) {
+  const { decimals } = options;
+  let valueWithInterest;
+  const { cDAIExchangeRate } = useContext(CompoundContext);
+  return <>Hi</>;
+  // const cDAIExchangeRate = options.cDAIExchangeRate || 1
+  // if (tokenAddress && isCompoundToken(tokenAddress)) {
+  //   if (!cDAIExchangeRate) return null;
+  //   valueWithInterest = applyExchangeRate(value, {
+  //     exchangeRate: cDAIExchangeRate,
+  //   });
+  // } else {
+  //   valueWithInterest = applyExchangeRate(value);
+  // }
+  // if (valueWithInterest === 0 && options.zeroString) return options.zeroString;
+  // if (options.showCurrency) {
+  //   if (tokenAddress === USD.address) {
+  //     return `$ ${formatNumber(valueWithInterest, { decimals })} USD`;
+  //   } else {
+  //     return `${formatNumber(valueWithInterest, { decimals })} ${
+  //       TOKEN_METADATA[tokenAddress].ticker
+  //     }`;
+  //   }
+  // } else {
+  //   return formatNumber(valueWithInterest, { decimals });
+  // }
+}
 export function value(value, tokenAddress, options = {}) {
   const { decimals } = options;
-  const { cDAIExchangeRate } = useContext(CompoundContext);
   let valueWithInterest;
+  const { cDAIExchangeRate } = useContext(CompoundContext);
+  // const cDAIExchangeRate = options.cDAIExchangeRate || 1
   if (tokenAddress && isCompoundToken(tokenAddress)) {
     if (!cDAIExchangeRate) return null;
     valueWithInterest = applyExchangeRate(value, {

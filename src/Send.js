@@ -67,12 +67,14 @@ export default function Send(props) {
 
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
-                  <TokenAmountInput
-                    onChange={(state) => setAmount(state)}
-                    state={amount}
-                    currency={token.name}
-                    placeholder="Amount"
-                  />
+                  {token && (
+                    <TokenAmountInput
+                      onChange={(state) => setAmount(state)}
+                      state={amount}
+                      currency={token.name}
+                      placeholder="Amount"
+                    />
+                  )}
                 </Form.Group>
                 <Button
                   type="submit"

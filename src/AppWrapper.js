@@ -5,7 +5,6 @@ import { useSpring, useTransition, animated } from "react-spring";
 import { BOOTNODES, PROD } from "./constants";
 import { useEthereumAccounts } from "./ethereum";
 import UnlockMetamask from "./UnlockMetamask";
-import Loading from "./Loading";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client";
 import { sample } from "lodash";
@@ -28,13 +27,6 @@ export default function AppWrapper() {
   const [loadingEthereumAcccounts, ethereumAcccounts] = useEthereumAccounts();
   const uri = useMemo(() => `${PROD ? "https" : "http"}://${host}`, [host]);
   const [apolloClient, setApolloClient] = useState();
-  // () => {
-  //     const cache = new InMemoryCache();
-  //     return new ApolloClient({
-  //       uri,
-  //       cache,
-  //     });
-  //   });
   const refetchCallback = useCallback(
     (event) => {
       setBlockNumber(parseInt(event.lastEventId) + 1);
@@ -70,45 +62,24 @@ export default function AppWrapper() {
     ethereumAcccounts,
   });
 
-  const [toggle, set] = useState(false);
-  const loading = useMemo(() => compoundContext.loading);
-  const fadeIn = useTransition(loading, null, {
-    from: { position: "absolute", width: "100%", height: "100%", opacity: 0 },
-    immediate: loading,
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-  });
   const metamaskUnlocked = useMemo(
     () => ethereumAcccounts && ethereumAcccounts.length > 0
   );
-
-  return (
-    <>
-      {metamaskUnlocked ? (
-        fadeIn.map(({ item, key, props }) =>
-          item ? (
-            <animated.div key={key} style={props}>
-              <Loading />
-            </animated.div>
-          ) : (
-            <animated.div key={key} style={props}>
-              <HostContext.Provider value={[host, setHost]}>
-                <CompoundContext.Provider value={compoundContext}>
-                  <CurrentMinerContext.Provider
-                    value={[currentMiner, setCurrentMiner]}
-                  >
-                    <ApolloProvider client={apolloClient}>
-                      <App address={ethereumAcccounts[0]} />
-                    </ApolloProvider>
-                  </CurrentMinerContext.Provider>
-                </CompoundContext.Provider>
-              </HostContext.Provider>
-            </animated.div>
-          )
-        )
-      ) : (
-        <UnlockMetamask />
-      )}
-    </>
+  if (loadingEthereumAcccounts) return <></>;
+  return metamaskUnlocked ? (
+    <HostContext.Provider value={[host, setHost]}>
+      <CompoundContext.Provider value={compoundContext}>
+        <CurrentMinerContext.Provider value={[currentMiner, setCurrentMiner]}>
+          <ApolloProvider client={apolloClient}>
+            <App
+              address={ethereumAcccounts[0]}
+              compoundContext={compoundContext}
+            />
+          </ApolloProvider>
+        </CurrentMinerContext.Provider>
+      </CompoundContext.Provider>
+    </HostContext.Provider>
+  ) : (
+    <UnlockMetamask />
   );
 }
