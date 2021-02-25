@@ -40,22 +40,31 @@ export default function Balances(props) {
                 <tr key={token.address}>
                   <th scope="row">{TOKEN_METADATA[token.address].name}</th>
                   <td className="text-right">{interestRate(token) || "-"}</td>
-                  <td className="text-right">{value(token.balance, token.address)}</td>
                   <td className="text-right">
-                    {token.address === USD.address ? "$ 1.00": value(token.price, USD.address, {showCurrency: true})}
+                    {value(token.balance, token.address)}
+                  </td>
+                  <td className="text-right">
+                    {token.address === USD.address
+                      ? "$ 1.00"
+                      : value(token.price, USD.address, {
+                          showCurrency: true,
+                          decimals: 2,
+                        })}
                   </td>
                   <td className="text-right text-primary">
                     {value(
                       (token.balance * token.price) / BASE_FACTOR,
-                      USD.address
-                    , {showCurrency: true})}
+                      USD.address,
+                      { showCurrency: true }
+                    )}
                   </td>
                 </tr>
               ))}
               <tr>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: {value(totalBalance, USD.address, {showCurrency: true})}
+                    Total:{" "}
+                    {value(totalBalance, USD.address, { showCurrency: true })}
                   </strong>
                 </td>
               </tr>

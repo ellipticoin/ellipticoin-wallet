@@ -138,8 +138,7 @@ export default function Trade(props) {
                       className="cursor-pointer"
                     >
                       <u>
-                        Your Balance:{" "}
-                        {value(inputToken, inputToken.address)}
+                        Your Balance: {value(inputTokenBalance, inputToken.address)}
                       </u>
                     </Form.Label>
                   </div>
@@ -194,14 +193,14 @@ export default function Trade(props) {
                     <li>
                       <strong>Output Amount</strong>
                       <h3 className="m-0">
-                        <Value>{outputAmount}</Value>{" "}
+                        {value(outputAmount)}{" "}
                         {outputToken &&
                           TOKEN_METADATA[outputToken.address].ticker}
                         <small>
                           {outputAmount && outputToken.ticker !== "USD" ? (
                             <>
                               {" "}
-                              @ <Value token={USD}>{exchangeRate}</Value> /{" "}
+                              @ {value(exchangeRate, USD.address)} /{" "}
                               {TOKEN_METADATA[outputToken.address].ticker}
                             </>
                           ) : null}

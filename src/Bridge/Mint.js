@@ -83,9 +83,7 @@ export default function Mint(props) {
       </Form.Group>
       <Form.Group className="basic">
         <Form.Label>Amount</Form.Label>
-        <div className="mt-1">
-          {value(amount)}
-        </div>
+        <div className="mt-1">{value(amount)}</div>
         <hr className="mt-0" />
       </Form.Group>
       {token.address == USD.address ? (

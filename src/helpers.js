@@ -11,61 +11,45 @@ import {
 } from "./constants";
 import { ethers } from "ethers";
 import CompoundContext, { isCompoundToken } from "./CompoundContext";
-import { find, get, sumBy } from "lodash";
 import { useState, useEffect, useContext } from "react";
-import cTokenAbi from "./contracts/cDAIABI.json";
-
-const { arrayify } = ethers.utils;
 
 export function Percentage({ numerator, denomiator }) {
   if (numerator === 0n) return (0).toFixed(4);
   return `${(Number(numerator * 100n) / Number(denomiator)).toFixed(4)}%`;
 }
 
-export function price(value, token) {
-  const { cDAIExchangeRate } = useContext(CompoundContext);
-  if (token && isCompoundToken(token)) {
-    if (!cDAIExchangeRate) return null;
-    return formatBigInt(value);
-  } else {
-    return formatBigInt(value, cDAIExchangeRate);
-  }
-}
-
-export function Price({ children, token }) {
-  const { cDAIExchangeRate } = useContext(CompoundContext);
-  if (token && isCompoundToken(token)) {
-    if (!cDAIExchangeRate) return null;
-    return formatBigInt(children);
-  } else {
-    return formatBigInt(children, cDAIExchangeRate);
-  }
-}
-
 export function value(value, tokenAddress, options = {}) {
+  const { decimals } = options;
   const { cDAIExchangeRate } = useContext(CompoundContext);
-  let formattedValue
+  let formattedValue;
   if (tokenAddress && isCompoundToken(tokenAddress)) {
     if (!cDAIExchangeRate) return null;
-    formattedValue = formatBigInt(value, cDAIExchangeRate);
+    formattedValue = formatBigInt(value, {
+      exchangeRate: cDAIExchangeRate,
+      decimals,
+    });
   } else {
-    formattedValue = formatBigInt(value);
+    formattedValue = formatBigInt(value, { exchangeRate: 1, decimals });
   }
 
   if (options.showCurrency) {
-        if (tokenAddress === USD.address) {
-            return `$ ${formattedValue} USD`
-        } else {
-            return `$ ${formattedValue} ${TOKEN_METADATA[tokenAddress].ticker}`
-        }
+    if (tokenAddress === USD.address) {
+      return `$ ${formattedValue} USD`;
     } else {
-        return formattedValue
-    } 
+      return `$ ${formattedValue} ${TOKEN_METADATA[tokenAddress].ticker}`;
+    }
+  } else {
+    return formattedValue;
+  }
 }
 
-function formatBigInt(n, exchangeRate = 1) {
-  const [number, decimal] = ((Number(n) * exchangeRate) / Number(BASE_FACTOR))
-    .toFixed(6)
+function formatBigInt(n, options = {}) {
+  const numberAndDecimal =
+    (Number(n) * options.exchangeRate) / Number(BASE_FACTOR);
+  const decimals = numberAndDecimal < 1 ? 6 : options.decimals || 6;
+
+  const [number, decimal] = numberAndDecimal
+    .toFixed(decimals)
     .toString()
     .split(".");
   return `${numberWithCommas(number)}.${decimal}`;

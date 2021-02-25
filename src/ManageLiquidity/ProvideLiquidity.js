@@ -140,7 +140,7 @@ export default function ProvideLiquidity(props) {
           >
             {value(baseTokenAmount || 0, USD.address)}
           </span>{" "}
-          of <Value>{baseTokenBalance}</Value>
+          of {value(baseTokenBalance)}
         </div>
       </Form.Group>
       {error ? (

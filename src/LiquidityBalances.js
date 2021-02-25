@@ -81,7 +81,7 @@ export default function LiquidityBalances(props) {
                           denomiator={liquidityToken.totalSupply}
                         />
                       </td>
-                      <td className="text-right" rowSpann="2">
+                      <td className="text-right" rowSpan="2">
                         {liquidityToken.balance ? value(0n) : 0}
                       </td>
                       <td className="text-right no-padding-bottom">
@@ -89,35 +89,49 @@ export default function LiquidityBalances(props) {
                           liquidityToken.totalSupply
                             ? (liquidityToken.poolSupplyOfToken *
                                 liquidityToken.balance) /
-                              liquidityToken.totalSupply
-                            : 0n
-                        , liquidityToken.tokenAddress, {showCurrency: true})}
+                                liquidityToken.totalSupply
+                            : 0n,
+                          liquidityToken.tokenAddress,
+                          { showCurrency: true }
+                        )}
                       </td>
                       <td className="text-right" rowSpan="2">
-                          {value(liquidityToken.poolSupplyOfBaseToken
+                        {value(
+                          liquidityToken.poolSupplyOfBaseToken
                             ? (liquidityToken.poolSupplyOfBaseToken *
                                 BASE_FACTOR) /
-                              liquidityToken.poolSupplyOfToken
-                            : 0n, USD.address, {showCurrency: true})}
+                                liquidityToken.poolSupplyOfToken
+                            : 0n,
+                          USD.address,
+                          { showCurrency: true }
+                        )}
                       </td>
                       <td className="text-right" rowSpan="2">
-                          {value(liquidityToken.balance
+                        {value(
+                          liquidityToken.balance
                             ? ((liquidityToken.poolSupplyOfBaseToken *
                                 liquidityToken.balance) /
                                 liquidityToken.totalSupply) *
-                              2n
-                            : 0n, USD.address, {showCurrency: true})}
+                                2n
+                            : 0n,
+                          USD.address,
+                          { showCurrency: true }
+                        )}
                       </td>
                     </tr>
                     <tr>
                       <td className="text-right no-border no-padding-top">
-                          {value(liquidityToken.poolSupplyOfBaseToken
+                        {value(
+                          liquidityToken.poolSupplyOfBaseToken
                             ? Number(
                                 (liquidityToken.poolSupplyOfBaseToken *
                                   liquidityToken.balance) /
                                   liquidityToken.totalSupply
-                              ) * cDAIExchangeRate
-                            : 0n, USD.address, {showCurrency: true})}
+                              )
+                            : 0n,
+                          USD.address,
+                          { showCurrency: true }
+                        )}
                       </td>
                     </tr>
                   </Fragment>
@@ -126,7 +140,10 @@ export default function LiquidityBalances(props) {
                 <td></td>
                 <td colSpan="5" className="text-right text-primary">
                   <strong>
-                    Total: {value(totalLiquidityBalance, USD.address, {showCurrency: true})}
+                    Total:{" "}
+                    {value(totalLiquidityBalance, USD.address, {
+                      showCurrency: true,
+                    })}
                   </strong>
                 </td>
               </tr>

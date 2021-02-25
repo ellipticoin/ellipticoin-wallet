@@ -73,7 +73,7 @@ export default function AppWrapper() {
     () => !compoundContext.cDAIExchangeRate || loadingEthereumAcccounts
   );
   const fadeIn = useTransition(loading, null, {
-    from: { position: "absolute", width: "100%", opacity: 0 },
+    from: { position: "absolute", width: "100%", height: "100%", opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
   });

@@ -58,7 +58,10 @@ export default function LockedValue(props) {
                         {value(btc.totalSupply, BTC.address)}
                       </td>
                       <td className="text-right">
-                          {value((btc.totalSupply * btc.price) / BASE_FACTOR, BTC.address)}
+                        {value(
+                          (btc.totalSupply * btc.price) / BASE_FACTOR,
+                          BTC.address
+                        )}
                       </td>
                     </tr>
                     <tr>
@@ -80,7 +83,10 @@ export default function LockedValue(props) {
                       </td>
                       <td className="text-right">
                         {" "}
-                        {value((weth.totalSupply * weth.price) / BASE_FACTOR, WETH.address)}
+                        {value(
+                          (weth.totalSupply * weth.price) / BASE_FACTOR,
+                          WETH.address
+                        )}
                       </td>
                     </tr>
                     <tr>

@@ -101,20 +101,16 @@ export default function RemoveLiquidity(props) {
       <Form.Group className="basic">
         <Form.Label>{token.name} to Remove</Form.Label>
         <div>
-          <Value>
-            {(percentage.value * tokensInPool) / (BASE_FACTOR * 100n)}
-          </Value>{" "}
-          of <Value>{tokensInPool}</Value>
+          {value((percentage.value * tokensInPool) / (BASE_FACTOR * 100n))}
+          of {value(tokensInPool)}
         </div>
         <hr className="mt-0" />
       </Form.Group>
       <Form.Group className="basic">
         <Form.Label>USD To Remove</Form.Label>
         <div>
-          <Value>
-            {(percentage.value * baseTokensInPool) / (BASE_FACTOR * 100n)}
-          </Value>{" "}
-          of <Value>{baseTokensInPool}</Value>
+          {value((percentage.value * baseTokensInPool) / (BASE_FACTOR * 100n))}
+          of {value(baseTokensInPool)}
         </div>
       </Form.Group>
       {error ? (
