@@ -4,7 +4,6 @@ import HostContext from "./HostContext";
 import { useSpring, useTransition, animated } from "react-spring";
 import { BOOTNODES, PROD } from "./constants";
 import { useEthereumAccounts } from "./ethereum";
-import InstallMetamask from "./InstallMetamask";
 import UnlockMetamask from "./UnlockMetamask";
 import Loading from "./Loading";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
@@ -28,13 +27,14 @@ export default function AppWrapper() {
   const [blockNumber, setBlockNumber] = useState();
   const [loadingEthereumAcccounts, ethereumAcccounts] = useEthereumAccounts();
   const uri = useMemo(() => `${PROD ? "https" : "http"}://${host}`, [host]);
-  const [apolloClient, setApolloClient] = useState(() => {
-    const cache = new InMemoryCache();
-    return new ApolloClient({
-      uri,
-      cache,
-    });
-  });
+  const [apolloClient, setApolloClient] = useState();
+  // () => {
+  //     const cache = new InMemoryCache();
+  //     return new ApolloClient({
+  //       uri,
+  //       cache,
+  //     });
+  //   });
   const refetchCallback = useCallback(
     (event) => {
       setBlockNumber(parseInt(event.lastEventId) + 1);
@@ -59,8 +59,10 @@ export default function AppWrapper() {
         cache,
       })
     );
+    return function cleanup() {};
   }, [uri]);
   useEffect(() => {
+    if (!apolloClient) return;
     apolloClient.reFetchObservableQueries();
   }, [apolloClient, blockNumber]);
   const compoundContext = useCompoundContext({
@@ -69,43 +71,44 @@ export default function AppWrapper() {
   });
 
   const [toggle, set] = useState(false);
-  const loading = useMemo(
-    () => !compoundContext.cDAIExchangeRate || loadingEthereumAcccounts
-  );
+  const loading = useMemo(() => compoundContext.loading);
   const fadeIn = useTransition(loading, null, {
     from: { position: "absolute", width: "100%", height: "100%", opacity: 0 },
+    immediate: loading,
     enter: { opacity: 1 },
     leave: { opacity: 0 },
   });
+  const metamaskUnlocked = useMemo(
+    () => ethereumAcccounts && ethereumAcccounts.length > 0
+  );
 
-  const page = useMemo(() => {
-    if (!ethereumAcccounts) {
-      return <InstallMetamask></InstallMetamask>;
-    } else if (ethereumAcccounts && ethereumAcccounts.length == 0) {
-      return <UnlockMetamask />;
-    } else {
-      return <App address={ethereumAcccounts[0]} />;
-    }
-  });
   return (
-    <HostContext.Provider value={[host, setHost]}>
-      <CompoundContext.Provider value={compoundContext}>
-        <CurrentMinerContext.Provider value={[currentMiner, setCurrentMiner]}>
-          <ApolloProvider client={apolloClient}>
-            {fadeIn.map(({ item, key, props }) =>
-              item ? (
-                <animated.div key={key} style={props}>
-                  <Loading onClick={() => set(true)} />
-                </animated.div>
-              ) : (
-                <animated.div key={key} style={props}>
-                  {page}
-                </animated.div>
-              )
-            )}
-          </ApolloProvider>
-        </CurrentMinerContext.Provider>
-      </CompoundContext.Provider>
-    </HostContext.Provider>
+    <>
+      {metamaskUnlocked ? (
+        fadeIn.map(({ item, key, props }) =>
+          item ? (
+            <animated.div key={key} style={props}>
+              <Loading />
+            </animated.div>
+          ) : (
+            <animated.div key={key} style={props}>
+              <HostContext.Provider value={[host, setHost]}>
+                <CompoundContext.Provider value={compoundContext}>
+                  <CurrentMinerContext.Provider
+                    value={[currentMiner, setCurrentMiner]}
+                  >
+                    <ApolloProvider client={apolloClient}>
+                      <App address={ethereumAcccounts[0]} />
+                    </ApolloProvider>
+                  </CurrentMinerContext.Provider>
+                </CompoundContext.Provider>
+              </HostContext.Provider>
+            </animated.div>
+          )
+        )
+      ) : (
+        <UnlockMetamask />
+      )}
+    </>
   );
 }

@@ -36,9 +36,8 @@ export function useSignAndMigrate({ setMigrated, address }) {
       .sign(ethers.utils.arrayify(accounts[0]), Buffer.from(secretKey))
       .slice(0, 64);
     const result = await migrate(publicKey, legacySignature);
-    if (result == null) {
-      localStorage.setItem("migrated", true);
-      window.location.reload();
+    if (result !== null) {
+      alert(result);
     }
   };
 }

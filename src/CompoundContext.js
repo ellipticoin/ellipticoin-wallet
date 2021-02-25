@@ -11,7 +11,7 @@ const CDAI = "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643";
 const COMPOUND_TOKENS = [CDAI];
 export function useCompoundContext(props) {
   const { blockNumber, ethereumAcccounts } = props;
-  const [context, setContext] = useState({});
+  const [context, setContext] = useState({ loading: true });
   useEffect(async () => {
     if (!(ethereumAcccounts && ethereumAcccounts.length)) return;
 
@@ -44,6 +44,7 @@ export function useCompoundContext(props) {
     setContext({
       cDAIExchangeRate,
       cDAIAPY,
+      loading: false,
     });
   }, [blockNumber]);
   return context;

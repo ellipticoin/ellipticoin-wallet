@@ -1,9 +1,13 @@
 import { ethRequestAccounts } from "./ethereum";
+import { useEthereumAccounts } from "./ethereum";
 import Button from "react-bootstrap/Button";
+import InstallMetamask from "./InstallMetamask";
 
 export default function UnlockMetamask(props) {
-  console.log("UnlockMetamask");
-  return (
+  const [loadingEthereumAcccounts, ethereumAcccounts] = useEthereumAccounts();
+  if (loadingEthereumAcccounts) return null;
+
+  return window.ethereum ? (
     <div
       className="d-flex align-content-center flex-wrap"
       style={{ height: "100%" }}
@@ -11,10 +15,12 @@ export default function UnlockMetamask(props) {
       <Button
         onClick={() => ethRequestAccounts()}
         style={{ margin: "auto" }}
-        class="align-self-center"
+        className="align-self-center"
       >
         Unlock Metamask
       </Button>
     </div>
+  ) : (
+    <InstallMetamask />
   );
 }

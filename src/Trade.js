@@ -138,7 +138,8 @@ export default function Trade(props) {
                       className="cursor-pointer"
                     >
                       <u>
-                        Your Balance: {value(inputTokenBalance, inputToken.address)}
+                        Your Balance:{" "}
+                        {value(inputTokenBalance, inputToken.address)}
                       </u>
                     </Form.Label>
                   </div>

@@ -1,10 +1,10 @@
 import Rewards from "./Rewards";
-import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
+import { BASE_FACTOR, USD, MNS, TOKEN_METADATA } from "./constants";
 import CompoundContext from "./CompoundContext";
 import { Percentage, formatPercentage, value, tokenTicker } from "./helpers";
 import { sumBy } from "lodash";
 import { blockReward } from "ellipticoin";
-import { Fragment, useContext } from "react";
+import { Fragment } from "react";
 
 export default function LiquidityBalances(props) {
   const {
@@ -16,7 +16,6 @@ export default function LiquidityBalances(props) {
     issuanceRewards,
   } = props;
 
-  const { cDAIExchangeRate } = useContext(CompoundContext);
   const totalLiquidityBalance = liquidityTokens.reduce(
     (sum, liquidityToken) => {
       if (liquidityToken.balance == 0n) return sum;
@@ -82,7 +81,18 @@ export default function LiquidityBalances(props) {
                         />
                       </td>
                       <td className="text-right" rowSpan="2">
-                        {liquidityToken.balance ? value(0n) : 0}
+                        {liquidityToken.totalSupply
+                          ? value(
+                              (liquidityToken.poolSupplyOfToken *
+                                blockReward(
+                                  blockNumber,
+                                  liquidityToken.tokenAddress
+                                )) /
+                                liquidityToken.totalSupply,
+                              MNS.address,
+                              { showCurrency: true, zeroString: "-" }
+                            )
+                          : "-"}
                       </td>
                       <td className="text-right no-padding-bottom">
                         {value(

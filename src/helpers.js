@@ -21,37 +21,36 @@ export function Percentage({ numerator, denomiator }) {
 export function value(value, tokenAddress, options = {}) {
   const { decimals } = options;
   const { cDAIExchangeRate } = useContext(CompoundContext);
-  let formattedValue;
+  let valueWithInterest;
   if (tokenAddress && isCompoundToken(tokenAddress)) {
     if (!cDAIExchangeRate) return null;
-    formattedValue = formatBigInt(value, {
+    valueWithInterest = applyExchangeRate(value, {
       exchangeRate: cDAIExchangeRate,
-      decimals,
     });
   } else {
-    formattedValue = formatBigInt(value, { exchangeRate: 1, decimals });
+    valueWithInterest = applyExchangeRate(value);
   }
-
+  if (valueWithInterest === 0 && options.zeroString) return options.zeroString;
   if (options.showCurrency) {
     if (tokenAddress === USD.address) {
-      return `$ ${formattedValue} USD`;
+      return `$ ${formatNumber(valueWithInterest, { decimals })} USD`;
     } else {
-      return `$ ${formattedValue} ${TOKEN_METADATA[tokenAddress].ticker}`;
+      return `${formatNumber(valueWithInterest, { decimals })} ${
+        TOKEN_METADATA[tokenAddress].ticker
+      }`;
     }
   } else {
-    return formattedValue;
+    return formatNumber(valueWithInterest, { decimals });
   }
 }
 
-function formatBigInt(n, options = {}) {
-  const numberAndDecimal =
-    (Number(n) * options.exchangeRate) / Number(BASE_FACTOR);
-  const decimals = numberAndDecimal < 1 ? 6 : options.decimals || 6;
+function applyExchangeRate(n, options = { exchangeRate: 1 }) {
+  return (Number(n) * options.exchangeRate) / Number(BASE_FACTOR);
+}
+function formatNumber(n, options = {}) {
+  const decimals = n < 1 ? 6 : options.decimals || 6;
 
-  const [number, decimal] = numberAndDecimal
-    .toFixed(decimals)
-    .toString()
-    .split(".");
+  const [number, decimal] = n.toFixed(decimals).toString().split(".");
   return `${numberWithCommas(number)}.${decimal}`;
 }
 

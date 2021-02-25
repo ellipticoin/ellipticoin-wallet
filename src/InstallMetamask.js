@@ -3,34 +3,46 @@ export default function InstallMetamask(props) {
     !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
   const isFirefox = typeof InstallTrigger !== "undefined";
 
+  let button;
   if (isChrome) {
-    return (
+    button = (
       <a
         href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn"
-        className="btn btn-primary"
+        className="btn btn-primary align-self-center"
+        style={{ margin: "auto" }}
       >
         Install MetaMask
       </a>
     );
   } else if (isFirefox) {
-    return (
+    button = (
       <a
         href="https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/"
         target="_blank"
-        className="btn btn-primary"
+        style={{ margin: "auto" }}
+        className="btn btn-primary align-self-center"
       >
         Install MetaMask
       </a>
     );
   } else {
-    return (
-      <>
+    button = (
+      <div className="align-self-center" style={{ margin: "auto" }}>
         Please install{" "}
         <a target="_blank" href="https://www.google.com/chrome/">
           Chrome
         </a>{" "}
         or <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>
-      </>
+      </div>
     );
   }
+
+  return (
+    <div
+      className="d-flex align-content-center flex-wrap"
+      style={{ height: "100%", width: "100%" }}
+    >
+      {button}
+    </div>
+  );
 }
