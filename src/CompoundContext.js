@@ -46,7 +46,7 @@ export function useCompoundContext(props) {
       cDAIAPY,
       loading: false,
     });
-  }, [blockNumber]);
+  });
   return context;
 }
 

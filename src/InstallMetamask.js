@@ -25,7 +25,29 @@ export default function InstallMetamask(props) {
         Install MetaMask
       </a>
     );
-  } else {
+  } else if(navigator.userAgent.match(/Android/i)) {
+    button = (
+      <a
+        href="https://play.google.com/store/apps/details?id=io.metamask"
+        target="_blank"
+        style={{ margin: "auto" }}
+        className="btn btn-primary align-self-center"
+      >
+        Install MetaMask
+      </a>
+    );
+  } else if(navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+    button = (
+      <a
+        href="https://apps.apple.com/us/app/metamask-blockchain-wallet/id1438144202"
+        target="_blank"
+        style={{ margin: "auto" }}
+        className="btn btn-primary align-self-center"
+      >
+        Install MetaMask
+      </a>
+    );
+    }else {
     button = (
       <div className="align-self-center" style={{ margin: "auto" }}>
         Please install{" "}
