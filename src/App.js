@@ -1,6 +1,8 @@
 import Actions from "./Actions";
 import Balances from "./Balances";
 import Bridge from "./Bridge";
+import Governance from "./Governance";
+import Withdraw from "./Withdraw";
 import Header from "./Header";
 import LiquidityBalances from "./LiquidityBalances";
 import ManageLiquidity from "./ManageLiquidity";
@@ -8,6 +10,8 @@ import NetworkStatistics from "./NetworkStatistics";
 import PendingTransactions from "./PendingTransactions";
 import Send from "./Send";
 import Sidebar from "./Sidebar";
+import Deposit from "./Deposit";
+import AddLiquidity from "./AddLiquidity";
 import ActionsHeader from "./ActionsHeader";
 import Trade from "./Trade";
 import { BASE_FACTOR, USD } from "./constants";
@@ -26,6 +30,7 @@ import { useMemo, useState, useEffect, useContext } from "react";
 import { animated, useTransition } from "react-spring";
 import CompoundContext from "./CompoundContext";
 import Loading from "./Loading";
+import { Button } from "react-bootstrap";
 import nacl from "tweetnacl";
 import { price } from "./selectors";
 
@@ -49,13 +54,16 @@ function App(props) {
   } = useGetLiquidityTokens(address);
   const blockNumber = useGetBlockNumber();
   const errors = useMemo(() => compact([tokenError, liquidityTokenError]));
-  const zeroBalance = useMemo(
-    () =>
-      tokens.every((token) => token.balance === 0n) &&
-      liquidityTokens.every((liquidityToken) => liquidityToken.balance === 0n)
+  const zeroLiquidityBalance = useMemo(() =>
+    liquidityTokens.every((liquidityToken) => liquidityToken.balance === 0n)
   );
-  const loading = useMemo(() => compoundContext.loading && !zeroBalance);
-  const fadeIn = useTransition(compoundContext.loading, null, {
+  const zeroBalance = useMemo(
+    () => tokens.every((token) => token.balance === 0n) && zeroLiquidityBalance
+  );
+  const loading = useMemo(
+    () => compoundContext.loading && !(tokens.length > 0 && zeroBalance)
+  );
+  const fadeIn = useTransition(loading, null, {
     from: {
       zIndex: 10000,
       position: "absolute",
@@ -85,6 +93,14 @@ function App(props) {
               setPendingTransactions([...pendingTransactions, tx]);
             }}
             tokens={tokens}
+          />
+        );
+      case "Governance":
+        return (
+          <Governance
+            tokens={tokens}
+            address={address}
+            onHide={() => setShowPage(null)}
           />
         );
       case "Trade":
@@ -125,6 +141,20 @@ function App(props) {
             liquidityTokens={liquidityTokens}
           />
         );
+      case "Withdraw":
+        return (
+          <Withdraw
+            address={address}
+            onHide={() => setShowPage(null)}
+            blockNumber={blockNumber}
+            signer={signer}
+            ethAccounts={ethAccounts}
+            pushPendingTransation={(tx) => {
+              setPendingTransactions([...pendingTransactions, tx]);
+            }}
+            tokens={tokens}
+          />
+        );
 
       default:
         return null;
@@ -156,7 +186,7 @@ function App(props) {
           item ? (
             <animated.div
               style={{
-                zIndex: 10000,
+                zIndex: 1001,
                 position: "absolute",
                 width: "100%",
                 height: "100%",
@@ -172,31 +202,43 @@ function App(props) {
         <div style={{ display: showPage ? "none" : "block" }}>
           <Header setShowSidebar={setShowSidebar} />
           <div id="appCapsule">
-            <div className="section wallet-card-section pt-1 mb-2">
-              <div className="wallet-card">
-                <ActionsHeader
-                  usdBalance={usdBalance}
-                  totalBalance={totalBalance}
-                  address={address}
-                />
-                <Actions
-                  setShowModal={setShowModal}
-                  setShowPage={setShowPage}
-                />
+            <>
+              <div className="section wallet-card-section pt-1 mb-2">
+                <div className="wallet-card">
+                  <ActionsHeader
+                    usdBalance={usdBalance}
+                    totalBalance={totalBalance}
+                    address={address}
+                  />
+                  {zeroBalance && zeroLiquidityBalance ? (
+                    <Deposit tokens={tokens} />
+                  ) : (
+                    <Actions
+                      setShowModal={setShowModal}
+                      setShowPage={setShowPage}
+                      zeroBalance={zeroBalance}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-            {tokens.some(({ balance }) => balance > 0n) && (
-              <Balances tokens={tokens} totalBalance={totalBalance} />
-            )}
-            {liquidityTokens.some(({ balance }) => balance > 0n) && (
-              <LiquidityBalances
-                address={address}
-                blockNumber={blockNumber}
-                liquidityTokens={liquidityTokens}
-                setIssuanceRewards={setIssuanceRewards}
-                issuanceRewards={issuanceRewards}
-              />
-            )}
+              {zeroBalance && zeroLiquidityBalance ? null : (
+                <>
+                  <Balances tokens={tokens} totalBalance={totalBalance} />
+                  {zeroLiquidityBalance ? (
+                    <AddLiquidity setShowPage={setShowPage} />
+                  ) : (
+                    <LiquidityBalances
+                      address={address}
+                      blockNumber={blockNumber}
+                      liquidityTokens={liquidityTokens}
+                      setIssuanceRewards={setIssuanceRewards}
+                      setShowPage={setShowPage}
+                      issuanceRewards={issuanceRewards}
+                    />
+                  )}
+                </>
+              )}
+            </>
           </div>
           <Send
             setShow={(show) =>

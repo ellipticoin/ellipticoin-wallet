@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
+import { BASE_FACTOR } from "./constants";
 import { ethers } from "ethers";
 import ERC20JSON from "@openzeppelin/contracts/build/contracts/ERC20";
 
-const { hexlify } = ethers.utils;
+const { hexlify, parseUnits } = ethers.utils;
 
 export function useEthereumAccounts() {
   const [accounts, setAccounts] = useState();
@@ -22,7 +23,7 @@ export async function sendETH({ to, value }) {
   const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
   const tx = await signer.sendTransaction({
     to: await signer.resolveName(to),
-    value,
+    value: parseUnits((Number(value) / Number(BASE_FACTOR)).toString(), 18),
   });
   return tx.wait();
 }

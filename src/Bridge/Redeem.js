@@ -25,9 +25,6 @@ export default function Redeem(props) {
   const [amount, setAmount] = useState("");
   const [redeemToken, setOutboundToken] = useState(BRIDGE_TOKENS[0]);
   const bridge = useBridge();
-  const {
-    data: { pendingRedeemRequests = [] },
-  } = usePendingRedeemRequests(address);
   const isInitialMount = useRef(true);
   const [loading, setLoading] = useState(false);
   useEffect(() => {

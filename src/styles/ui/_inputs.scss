@@ -82,6 +82,11 @@ textarea,
       border-bottom-color: $colorPrimary;
       box-shadow: inset 0 -1px 0 0 $colorPrimary;
     }
+
+    &.is-invalid {
+        border-bottom: 1px solid $colorDanger;
+        box-shadow: inset 0 -1px 0 0 $colorDanger;
+    }
   }
   textarea.form-control {
     height: auto;

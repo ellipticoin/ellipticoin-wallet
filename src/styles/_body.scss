@@ -25,13 +25,14 @@ button {
   background: none;
   border: 0;
   cursor: pointer;
-  outline: inherit;
+  outline: none;
   &:hover,
   &:active,
   &:focus,
   &.active {
     cursor: pointer;
-    outline: inherit;
+    outline: none;
+    box-shadow: none;
   }
 }
 a {

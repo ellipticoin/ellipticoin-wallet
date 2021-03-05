@@ -3,7 +3,14 @@ import { useSignAndMigrate } from "./mutations";
 import base64url from "base64url";
 import { Modal } from "react-bootstrap";
 import { useRef } from "react";
-import { BarChart, Download, Settings, Upload, X } from "react-feather";
+import {
+  BarChart,
+  Download,
+  Settings,
+  Upload,
+  X,
+  CheckSquare,
+} from "react-feather";
 import { ethers } from "ethers";
 
 const { getAddress } = ethers.utils;
@@ -80,6 +87,20 @@ export default function Sidebar(props) {
                     <Upload color="#333" />
                   </div>
                   <div className="in">Migrate Legacy Private Key</div>
+                </button>
+              </li>
+              <li>
+                <button
+                  className="item"
+                  onClick={() => {
+                    setShowSidebar(false);
+                    setShowPage("Governance");
+                  }}
+                >
+                  <div className="icon-box">
+                    <CheckSquare color="#333" />
+                  </div>
+                  <div className="in">Governance</div>
                 </button>
               </li>
               <li>

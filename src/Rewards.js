@@ -1,13 +1,13 @@
 import { usePostTransaction } from "./mutations";
 import { value } from "./helpers";
-import { MNS } from "./constants";
+import { MS } from "./constants";
 import { useGetIssuanceRewards } from "./queries";
 import { useRef } from "react";
 import chaChing from "./chaching.wav";
 import { actions } from "ellipticoin";
 
 export default function Rewards(props) {
-  const { address } = props;
+  const { address, setShowPage } = props;
   const { data: { issuanceRewards } = 0n } = useGetIssuanceRewards(address);
   const chaChingRef = useRef();
   const [harvest] = usePostTransaction(actions.Harvest, address);
@@ -18,7 +18,7 @@ export default function Rewards(props) {
   };
   return (
     <div className="row mt-2 mb-2">
-      <div className="col-4">
+      <div className="col-5">
         <div className="stat-box">
           <button
             type="button"
@@ -31,9 +31,16 @@ export default function Rewards(props) {
             </audio>
             Harvest
           </button>
+          <button
+            style={{ float: "right" }}
+            onClick={() => setShowPage("ManageLiquidity")}
+            className="btn btn-primary btn-lg mr-1"
+          >
+            Manage Liquidity
+          </button>
           <div className="title">Mature Liquidity Rewards</div>
           <div className="value text-success">
-            {value(issuanceRewards, MNS.address)}
+            {value(issuanceRewards, MS.address)}
           </div>
         </div>
       </div>

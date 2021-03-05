@@ -1,6 +1,6 @@
 import btcLogo from "./BTC-logo.png";
 import ethLogo from "./ETH-logo.png";
-import { BASE_FACTOR, BTC, USD, WETH, MNS, TOKEN_META_DATA } from "./constants";
+import { BASE_FACTOR, BTC, USD, WETH, MS, TOKEN_META_DATA } from "./constants";
 import { value } from "./helpers";
 import { find, sumBy } from "lodash";
 import { useMemo } from "react";
@@ -12,7 +12,7 @@ export default function LockedValue(props) {
   const btc = useMemo(() => find(tokens, ["address", BTC.address]), [tokens]);
   const usd = useMemo(() => find(tokens, ["address", USD.address]), [tokens]);
   const totalLockedValue = tokens.reduce((sum, token) => {
-    if (token.address.toString("hex") === MNS.address.toString("hex"))
+    if (token.address.toString("hex") === MS.address.toString("hex"))
       return sum;
     const price =
       token.address.toString("hex") === USD.toString("hex")

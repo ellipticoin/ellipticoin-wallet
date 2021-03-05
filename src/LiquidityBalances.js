@@ -1,5 +1,5 @@
 import Rewards from "./Rewards";
-import { BASE_FACTOR, USD, MNS, TOKEN_METADATA } from "./constants";
+import { BASE_FACTOR, USD, MS, TOKEN_METADATA } from "./constants";
 import CompoundContext from "./CompoundContext";
 import { Percentage, formatPercentage, value, tokenTicker } from "./helpers";
 import { sumBy } from "lodash";
@@ -9,11 +9,12 @@ import { Fragment } from "react";
 export default function LiquidityBalances(props) {
   const {
     address,
-    liquidityTokens,
     blockNumber,
+    issuanceRewards,
+    liquidityTokens,
     publicKey,
     setIssuanceRewards,
-    issuanceRewards,
+    setShowPage,
   } = props;
 
   const totalLiquidityBalance = liquidityTokens.reduce(
@@ -39,6 +40,7 @@ export default function LiquidityBalances(props) {
           publicKey={publicKey}
           setIssuanceRewards={setIssuanceRewards}
           issuanceRewards={issuanceRewards}
+          setShowPage={setShowPage}
           blockNumber={blockNumber}
         />
       )}
@@ -89,7 +91,7 @@ export default function LiquidityBalances(props) {
                                   liquidityToken.tokenAddress
                                 )) /
                                 liquidityToken.totalSupply,
-                              MNS.address,
+                              MS.address,
                               { showCurrency: true, zeroString: "-" }
                             )
                           : "-"}
