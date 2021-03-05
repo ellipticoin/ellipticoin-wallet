@@ -4,6 +4,7 @@ import { gql, useQuery } from "@apollo/client";
 import BridgeABI from "./BridgeABI.json";
 import { useEthereumAccounts } from "./ethereum";
 import { useMemo } from "react";
+import cbor from "cbor";
 
 const { arrayify, hexlify } = ethers.utils;
 
@@ -65,6 +66,23 @@ const GET_BRIDGE = gql`
     bridge {
       address
       signers
+    }
+  }
+`;
+
+export const GET_PROPOSALS = gql`
+  query proposals {
+    proposals {
+      id
+      title
+      subtitle
+      content
+      actions
+      votes {
+        address
+        balance
+        yes
+      }
     }
   }
 `;
@@ -165,4 +183,36 @@ export function useBridge() {
       signer
     );
   }
+}
+
+export function usePendingRedeemRequests(address) {
+  const result = useQuery(GET_PENDING_REDEEM_REQUESTS, {
+    variables: {
+      address: Buffer.from(arrayify(address)).toString("base64"),
+    },
+  });
+
+  return {
+    ...result,
+    data: {
+      ...result.data,
+      nextTransactionNumber:
+        (result.data && parseInt(result.data.nextTransactionNumber)) || 0,
+    },
+  };
+}
+
+export function useGetProposals() {
+  const { data: { proposals } = { proposals: [] } } = useQuery(GET_PROPOSALS);
+  return proposals.map((proposal) => ({
+    ...proposal,
+    actions: proposal.actions.map((action) =>
+      cbor.decode(Buffer.from(action, "base64"))
+    ),
+    votes: proposal.votes.map((vote) => ({
+      ...vote,
+      balance: BigInt(vote.balance),
+    })),
+    id: Number(proposal.id),
+  }));
 }

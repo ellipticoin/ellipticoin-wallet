@@ -12,10 +12,10 @@ const { arrayify } = ethers.utils;
 
 export default function Send(props) {
   const { show, setShow, setHost, address, tokens } = props;
-  const [amount, setAmount] = useState();
-  const [toAddress, setToAddress] = useState();
+  const [amount, setAmount] = useState("");
+  const [toAddress, setToAddress] = useState("");
   const [token, setToken] = useState(tokens[0]);
-  const [postTransfer] = usePostTransaction(actions.Transfer, address);
+  const [post] = usePostTransaction(actions.Pay, address);
   const handleTokenChange = (tokenString) => {
     const token = TOKENS.find((token) => tokenToString(token) === tokenString);
     setToken(token);
@@ -29,12 +29,12 @@ export default function Send(props) {
 
   const send = async (event) => {
     event.preventDefault();
-    const result = await postTransfer(amount, token.address, toAddress);
+    const result = await post(amount, token.address, toAddress);
     if (result == null) {
       clearForm();
       setShow(false);
     } else {
-      console.log(result);
+      alert(result);
     }
   };
 

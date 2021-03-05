@@ -11,11 +11,11 @@ export const ZERO = 0n;
 export const BOOTNODES = PROD
   ? ["battery.ellipticoin.org"]
   : ["localhost:8080"];
-export const MNS = {
-  ticker: "MNS",
+export const MS = {
+  ticker: "MS",
   name: "Moonshine",
   address: Buffer.from(
-    "0000000000000000000000000000000000000001",
+    "0000000000000000000000000000000000000002",
     "hex"
   ).toString("base64"),
   balance: 0n,
@@ -62,14 +62,14 @@ export const USD = {
   totalSupply: 0n,
 };
 
-export const LIQUIDITY_TOKENS = [BTC, MNS, WETH];
+export const LIQUIDITY_TOKENS = [BTC, MS, WETH];
 export const BRIDGE_TOKENS = [WETH, BTC, USD];
-export const TOKENS = [MNS, WETH, BTC, USD];
+export const TOKENS = [MS, WETH, BTC, USD];
 export const TOKEN_METADATA = {
   [USD.address]: USD,
   [BTC.address]: BTC,
-  [MNS.address]: MNS,
+  [MS.address]: MS,
   [WETH.address]: WETH,
   [BTC.address]: BTC,
-  [MNS.address]: MNS,
+  [MS.address]: MS,
 };

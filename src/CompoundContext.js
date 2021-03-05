@@ -9,6 +9,9 @@ const CompoundContext = createContext();
 // const CDAI = "0x6d7f0754ffeb405d23c51ce938289d4835be3b14";
 const CDAI = "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643";
 const COMPOUND_TOKENS = [CDAI];
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 export function useCompoundContext(props) {
   const { blockNumber, ethereumAcccounts } = props;
   const [context, setContext] = useState({
@@ -50,7 +53,7 @@ export function useCompoundContext(props) {
       cDAIAPY,
       loading: false,
     });
-  });
+  }, [blockNumber, ethereumAcccounts]);
   return context;
 }
 

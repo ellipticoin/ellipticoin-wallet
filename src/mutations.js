@@ -42,6 +42,10 @@ export function useSignAndMigrate({ setMigrated, address }) {
   };
 }
 export function usePostTransaction(actionType, address) {
+  const refetchQueriesByActionType = {
+    CreateProposal: ["proposals"],
+    Vote: ["proposals"],
+  };
   const currentMiner = useContext(CurrentMinerContext)[0];
   const setHost = useContext(HostContext)[1];
   const [postTransaction, { loading }] = useMutation(POST_TRASACTION, {
@@ -51,6 +55,7 @@ export function usePostTransaction(actionType, address) {
       "liquidityTokens",
       "nextTransactionNumber",
       "pendingRedemptionRequests",
+      ...(refetchQueriesByActionType[actionType.name] || []),
     ],
     awaitRefetchQueries: true,
     update(cache, { data: { postTransaction } }) {
@@ -90,6 +95,7 @@ export function usePostTransaction(actionType, address) {
       [transaction, Array.from(arrayify(signature))],
       { collapseBigIntegers: true }
     );
+    console.log("here");
     return new Promise((resolve, reject) => {
       (async () => {
         let {
@@ -102,7 +108,9 @@ export function usePostTransaction(actionType, address) {
           },
         });
         if (!loading) {
+          console.log("here 2");
           if (error) reject(error);
+          console.log(postTransactionResult);
           resolve(postTransactionResult);
         }
       })();
