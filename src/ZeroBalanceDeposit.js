@@ -26,7 +26,7 @@ export default function Deposit(props) {
         await sendTokens({
           token: token.address,
           to: "ellipticoin.eth",
-          value: Number(value) / Number(BASE_FACTOR),
+          value,
         });
       }
       setLoading(false);

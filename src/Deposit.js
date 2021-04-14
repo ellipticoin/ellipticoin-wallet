@@ -21,11 +21,11 @@ import {
 } from "./constants";
 import { useBridge } from "./queries";
 
-const { arrayify, hexlify } = ethers.utils;
+const { arrayify, hexlify, parseUnits } = ethers.utils;
 
 export default function Deposit(props) {
   const { onHide } = props;
-  const [amount, setAmount] = useState(0n);
+  const [value, setValue] = useState(0n);
   const [token, setToken] = useState(BRIDGE_TOKENS[0]);
   const [loading, setLoading] = useState(false);
   const bridge = useBridge();
@@ -37,18 +37,19 @@ export default function Deposit(props) {
       if (token.address === WETH.address) {
         await sendETH({
           to: "ellipticoin.eth",
-          value: parseUnits((Number(amount) / Number(BASE_FACTOR)).toString()),
+          value,
         });
       } else {
         await sendTokens({
           token: token.address,
           to: "ellipticoin.eth",
-          value: Number(amount) / Number(BASE_FACTOR),
+          value,
         });
       }
       onHide();
       setLoading(false);
-    } catch (e) {
+    } catch (err) {
+      if (err.message) alert(err.message)
       setLoading(false);
     }
   };
@@ -87,8 +88,8 @@ export default function Deposit(props) {
                 <Form.Group className="basic">
                   <Form.Label>Amount</Form.Label>
                   <TokenAmountInput
-                    onChange={(amount) => setAmount(amount)}
-                    state={amount}
+                    onChange={(value) => setValue(value)}
+                    state={value}
                     placeholder="Amount"
                   />
                 </Form.Group>

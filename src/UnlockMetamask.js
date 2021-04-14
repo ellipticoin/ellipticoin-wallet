@@ -37,9 +37,9 @@ export default function UnlockMetamask(props) {
           className="d-flex align-self-center align-content-center flex-column"
           style={{ margin: "auto" }}
         >
-          <h1 className="text-center">This is a testnet.</h1>
+          <h1 className="text-center">Moonshine has not been audited.</h1>
           <h1 className="text-center">
-            Bugs will be present and balances will be reset.
+            Bugs will be present and funds could be lost.
           </h1>
           <Button
             className="btn"
