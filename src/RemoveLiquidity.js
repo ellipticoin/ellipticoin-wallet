@@ -25,8 +25,8 @@ export default function RemoveLiquidity(props) {
     address
   );
   const tokensInPool = useMemo(() => {
-    if (!liquidityToken || liquidityToken.balance === 0n) {
-      return 0n;
+    if (!liquidityToken || liquidityToken.balance === BigInt(0)) {
+      return BigInt(0);
     }
 
     return (
@@ -35,8 +35,8 @@ export default function RemoveLiquidity(props) {
     );
   }, [liquidityToken]);
   const baseTokensInPool = useMemo(() => {
-    if (!liquidityToken || liquidityToken.balance === 0n) {
-      return 0n;
+    if (!liquidityToken || liquidityToken.balance === BigInt(0)) {
+      return BigInt(0);
     }
 
     return (
@@ -56,7 +56,7 @@ export default function RemoveLiquidity(props) {
   };
 
   const removePoolExists = useMemo(
-    () => liquidityToken && liquidityToken.totalSupply > 0n
+    () => liquidityToken && liquidityToken.totalSupply > BigInt(0)
   );
 
   return (
@@ -136,7 +136,7 @@ export default function RemoveLiquidity(props) {
           <Button
             type="submit"
             disabled={
-              !removePoolExists || !percentage || percentage == 0n || false
+              !removePoolExists || !percentage || percentage == BigInt(0) || false
             }
             className="btn btn-lg btn-block btn-primary mt-1"
             variant="contained"
