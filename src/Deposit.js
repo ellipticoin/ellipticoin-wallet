@@ -49,7 +49,7 @@ export default function Deposit(props) {
       onHide();
       setLoading(false);
     } catch (err) {
-      if (err.message) alert(err.message)
+      if (err.message) alert(err.message);
       setLoading(false);
     }
   };

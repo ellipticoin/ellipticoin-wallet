@@ -23,7 +23,7 @@ export async function sendETH({ to, value }) {
   const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
   const tx = await signer.sendTransaction({
     to: await signer.resolveName(to),
-    value: parseUnits(((Number(value) / Number(BASE_FACTOR)).toString()), 18),
+    value: parseUnits((Number(value) / Number(BASE_FACTOR)).toString(), 18),
   });
   return tx.wait();
 }
@@ -39,7 +39,7 @@ export async function sendTokens({ token, to, value }) {
   const decimals = await tokenContract.decimals();
   const tx = await tokenContract.transfer(
     to,
-    parseUnits(((Number(value) / Number(BASE_FACTOR)).toString()), decimals),
+    parseUnits((Number(value) / Number(BASE_FACTOR)).toString(), decimals)
   );
   return tx.wait();
 }

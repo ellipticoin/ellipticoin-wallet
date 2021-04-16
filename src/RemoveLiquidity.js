@@ -136,7 +136,10 @@ export default function RemoveLiquidity(props) {
           <Button
             type="submit"
             disabled={
-              !removePoolExists || !percentage || percentage == BigInt(0) || false
+              !removePoolExists ||
+              !percentage ||
+              percentage == BigInt(0) ||
+              false
             }
             className="btn btn-lg btn-block btn-primary mt-1"
             variant="contained"

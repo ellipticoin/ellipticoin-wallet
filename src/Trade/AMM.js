@@ -40,7 +40,7 @@ export default function AMM(props) {
   );
   const [trade] = usePostTransaction(actions.Trade, address);
   const handleTrade = async (e) => {
-    console.log(e)
+    console.log(e);
     e.preventDefault();
     let result = await trade(
       inputAmount,
@@ -50,7 +50,7 @@ export default function AMM(props) {
     );
 
     if (result) {
-      console.log(result)
+      console.log(result);
       setError(result);
     } else {
       onHide();

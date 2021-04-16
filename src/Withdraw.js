@@ -36,6 +36,7 @@ export default function Withdraw(props) {
     if (
       isInitialMount.current &&
       pendingRedeemRequests &&
+      bridge &&
       pendingRedeemRequests.length
     ) {
       pendingRedeemRequests.map(completeWithdraw);
@@ -48,8 +49,9 @@ export default function Withdraw(props) {
     }
   });
   const userTokenBalance = useMemo(() => {
-    return tokens.find((token) => token.address === redeemToken.address)
-      .balance;
+    const token = tokens.find((token) => token.address === redeemToken.address);
+    if (!token) return;
+    token.balance;
   }, [tokens, redeemToken]);
   const [
     createWithdrawRequest,
@@ -112,9 +114,14 @@ export default function Withdraw(props) {
                   {pendingRedeemRequests.map((pendingWithdrawRequest) => (
                     <div>
                       <Button
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          margin: "auto",
+                        }}
                         onClick={() => completeWithdraw(pendingWithdrawRequest)}
                       >
-                        Retry redeem{" "}
+                        Retry redeem of{" "}
                         {value(BigInt(pendingWithdrawRequest.amount))}{" "}
                         {TOKEN_METADATA[pendingWithdrawRequest.token].ticker}
                       </Button>
