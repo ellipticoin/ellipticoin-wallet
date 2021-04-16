@@ -7,7 +7,7 @@ import TokenSelect from "../Inputs/TokenSelect.js";
 import TokenAmountInput from "../Inputs/TokenAmountInput.js";
 import { ArrowDown } from "react-feather";
 import Spinner from "react-bootstrap/Spinner";
-import { useBridge } from "../queries";
+import { useGetBlockchainState } from "../queries";
 import {
   USD,
   BASE_FACTOR,
@@ -22,7 +22,7 @@ export default function Mint(props) {
   const [amount, setAmount] = useState(0n);
   const [token, setToken] = useState(BRIDGE_TOKENS[0]);
   const [loading, setLoading] = useState(false);
-  const bridge = useBridge();
+  const { bridge } = useGetBlockchainState();
   const mint = async (evt) => {
     evt.preventDefault();
     setLoading(true);

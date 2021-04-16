@@ -14,11 +14,11 @@ import NetworkStatistics from "./NetworkStatistics";
 import PendingTransactions from "./PendingTransactions";
 import Send from "./Send";
 import Sidebar from "./Sidebar";
-import ZeroBalanceDeposit from "./ZeroBalanceDeposit";
+import { default as BalancesEmptyState } from "./Balances/EmptyState";
 import ActionsHeader from "./ActionsHeader";
 import Trade from "./Trade";
 import { BASE_FACTOR, USD } from "./constants";
-import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
+import { LIQUIDITY_TOKENS, BRIDGE_TOKENS, TOKENS } from "./constants.js";
 import {
   useGetBlockNumber,
   useGetLiquidityTokens,
@@ -50,6 +50,11 @@ function App(props) {
     loading: tokensLoading,
     error: tokenError,
   } = useGetTokens(address);
+  const bridgeTokens = useMemo(() =>
+    tokens.filter((token) =>
+      BRIDGE_TOKENS.find(({ address }) => address === token.address)
+    )
+  );
   const {
     data: { liquidityTokens } = { liquidityTokens: LIQUIDITY_TOKENS },
     loading: liquidityTokensLoading,
@@ -114,8 +119,11 @@ function App(props) {
             tokens={tokens.filter(
               (token) =>
                 token.address == USD.address ||
-                find(liquidityTokens, ["tokenAddress", token.address])
-                  .totalSupply !== 0n
+                get(
+                  find(liquidityTokens, ["tokenAddress", token.address]),
+                  "totalSupply",
+                  0n
+                ) !== 0n
             )}
             onHide={() => setShowPage(null)}
           />
@@ -156,7 +164,9 @@ function App(props) {
           />
         );
       case "Deposit":
-        return <Deposit onHide={() => setShowPage(null)} tokens={tokens} />;
+        return (
+          <Deposit onHide={() => setShowPage(null)} tokens={bridgeTokens} />
+        );
       case "Withdraw":
         return (
           <Withdraw
@@ -237,7 +247,7 @@ function App(props) {
                     address={address}
                   />
                   {zeroBalance && zeroLiquidityBalance ? (
-                    <ZeroBalanceDeposit tokens={tokens} />
+                    <BalancesEmptyState tokens={bridgeTokens} />
                   ) : (
                     <Actions
                       setShowModal={setShowModal}

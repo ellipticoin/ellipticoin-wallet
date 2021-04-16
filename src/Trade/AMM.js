@@ -21,6 +21,7 @@ import {
   formatCurrency,
 } from "../helpers";
 import { usePostTransaction } from "../mutations";
+import { useGetBlockchainState } from "../queries";
 
 const MAX_SLIPPAGE = 1000n;
 
@@ -29,6 +30,7 @@ export default function AMM(props) {
   const [inputToken, setInputToken] = useState(USD);
   const [outputToken, setOutputToken] = useState(tokens[0]);
   const [inputAmount, setInputAmount] = useState();
+  const { bridge, baseTokenExchangeRate } = useGetBlockchainState();
   const inputAmountRef = useRef(null);
   const [error, setError] = useState("");
   const { investorModeEnabled } = useContext(SettingsContext);
@@ -40,7 +42,6 @@ export default function AMM(props) {
   );
   const [trade] = usePostTransaction(actions.Trade, address);
   const handleTrade = async (e) => {
-    console.log(e);
     e.preventDefault();
     let result = await trade(
       inputAmount,
@@ -67,6 +68,7 @@ export default function AMM(props) {
     if (liquidityTokens.length === 0) return;
     let exchangeRateCalculator = new ExchangeCalculator({
       liquidityTokens,
+      baseTokenExchangeRate,
       baseTokenAddress: USD.address,
     });
     if (!inputAmount || inputAmount == 0n) return;
@@ -76,14 +78,10 @@ export default function AMM(props) {
   const outputAmount = useMemo(() => {
     if (!outputToken) return;
     if (!exchangeRateCalculator) return;
-    return (
-      (exchangeRateCalculator.getOutputAmount(
-        inputAmount,
-        inputToken.address,
-        outputToken.address
-      ) *
-        (BASE_FACTOR - MAX_SLIPPAGE)) /
-      BASE_FACTOR
+    return exchangeRateCalculator.getOutputAmount(
+      inputAmount,
+      inputToken.address,
+      outputToken.address
     );
   });
   const exchangeRate = useMemo(() => {
@@ -173,12 +171,12 @@ export default function AMM(props) {
           </li>
           <li>
             <strong>Liquidity Fee</strong>
-            {value(fee, inputToken.address)}
+            {value(fee, inputToken.address, { showCurrency: true })}
           </li>
           <li>
             <strong>Output Amount</strong>
             <h3 className="m-0">
-              {value(outputAmount)}{" "}
+              {Number(outputAmount)} {value(outputAmount)}{" "}
               {outputToken && TOKEN_METADATA[outputToken.address].ticker}
               <small>
                 {outputAmount && outputToken.ticker !== "USD" ? (

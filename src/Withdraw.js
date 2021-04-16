@@ -18,7 +18,7 @@ import {
   ETH_BRIDGE_ADDRESS,
   WETH,
 } from "./constants";
-import { useBridge } from "./queries";
+import { useGetBlockchainState } from "./queries";
 
 const { arrayify, hexlify } = ethers.utils;
 
@@ -29,7 +29,7 @@ export default function Withdraw(props) {
   } = usePendingRedeemRequests(address);
   const [amount, setAmount] = useState("");
   const [redeemToken, setOutboundToken] = useState(BRIDGE_TOKENS[0]);
-  const bridge = useBridge();
+  const { bridge } = useGetBlockchainState();
   const isInitialMount = useRef(true);
   const [loading, setLoading] = useState(false);
   useEffect(() => {

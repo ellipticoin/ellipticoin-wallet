@@ -1,9 +1,8 @@
-import { usePostTransaction } from "./mutations";
-import { value } from "./helpers";
-import { MS } from "./constants";
-import { useGetIssuanceRewards } from "./queries";
+import { usePostTransaction } from "../mutations";
+import { value } from "../helpers";
+import { MS } from "../constants";
+import { useGetIssuanceRewards } from "../queries";
 import { useRef } from "react";
-import chaChing from "./chaching.wav";
 import { actions } from "ellipticoin";
 
 export default function USDBalance(props) {

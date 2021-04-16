@@ -46,6 +46,7 @@ export function usePostTransaction(actionType, address) {
     CreateProposal: ["proposals"],
     CreateOrder: ["orders"],
     Vote: ["proposals"],
+    CreatePool: ["liquidityTokens"],
     AddLiquidity: ["liquidityTokens"],
     FillOrder: ["tokens", "orders"],
     Harvest: ["issuanceRewards"],
@@ -75,7 +76,7 @@ export function usePostTransaction(actionType, address) {
   const accounts = useEthereumAccounts();
 
   const postTransactionFn = async (...args) => {
-    setHost(currentMiner);
+    // setHost(currentMiner);
 
     const action = new actionType(...args);
     const transaction = new Transaction({

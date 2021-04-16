@@ -1,13 +1,13 @@
 import { useContext } from "react";
 import USDBalance from "./USDBalance";
-import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
+import { BASE_FACTOR, USD, TOKEN_METADATA } from "../constants";
 import {
   value,
   value2,
   Value,
   formatBigInt,
   formatPercentage,
-} from "./helpers";
+} from "../helpers";
 
 export default function Balances(props) {
   const { tokens } = props;
@@ -46,12 +46,10 @@ export default function Balances(props) {
                   <th scope="row">{TOKEN_METADATA[token.address].name}</th>
                   <td className="text-right">{formatBigInt(token.balance)}</td>
                   <td className="text-right">
-                    {token.address === USD.address
-                      ? "$ 1.00"
-                      : value(token.price, USD.address, {
-                          showCurrency: true,
-                          decimals: 2,
-                        })}
+                    {value(token.price, USD.address, {
+                      showCurrency: true,
+                      decimals: 2,
+                    })}
                   </td>
                   <td className="text-right text-primary">
                     {value(
@@ -77,28 +75,3 @@ export default function Balances(props) {
     </div>
   );
 }
-//     <td className="text-right">
-//       {token.address === USD.address
-//         ? "$ 1.00"
-//         : value(token.price, USD.address, {
-//             showCurrency: true,
-//             decimals: 2,
-//           })}
-//     </td>
-//     <td className="text-right text-primary">
-//       {value(
-//         (token.balance * token.price) / BASE_FACTOR,
-//         USD.address,
-//         { showCurrency: true }
-//       )}
-//     </td>
-//   </tr>
-// ))}
-// <tr>
-//   <td colSpan="5" className="text-right text-primary">
-//     <strong>
-//       Total:{" "}
-//       {value(totalBalance, USD.address, { showCurrency: true })}
-//     </strong>
-//   </td>
-// </tr>

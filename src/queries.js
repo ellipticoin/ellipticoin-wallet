@@ -8,12 +8,11 @@ import cbor from "cbor";
 
 const { arrayify, hexlify } = ethers.utils;
 
-const GET_STATE = gql`
-  query state {
-    state {
+const GET_BLOCKCHAIN_STATE = gql`
+  query blockchainState {
+    blockchainState {
       bridgeAddress
-      blockNumber
-      baseToken
+      baseTokenExchangeRate
     }
   }
 `;
@@ -71,15 +70,6 @@ const GET_PENDING_REDEEM_REQUESTS = gql`
   }
 `;
 
-const GET_BRIDGE = gql`
-  query bridge {
-    bridge {
-      address
-      signers
-    }
-  }
-`;
-
 export const GET_PROPOSALS = gql`
   query proposals {
     proposals {
@@ -110,20 +100,22 @@ export const GET_ORDERS = gql`
   }
 `;
 
-export function useGetState(apolloClient) {
+export function useGetBlockchainState(apolloClient) {
   const {
-    data: { bridge, baseToken, blockNumber } = {
-      bridge: { address: null },
-      baseToken: { exchangeRate: null, apy: null },
+    data: { blockchainState: { bridgeAddress, baseTokenExchangeRate } } = {
+      blockchainState: {
+        bridgeAddress: null,
+        baseTokenExchangeRate: null,
+      },
     },
-  } = useQuery(GET_STATE, { client: apolloClient });
+  } = useQuery(GET_BLOCKCHAIN_STATE, { client: apolloClient });
   let bridgeContract;
-  if (bridge.address) {
+  if (bridgeAddress) {
     const signer = new ethers.providers.Web3Provider(
       window.ethereum
     ).getSigner();
     bridgeContract = new ethers.Contract(
-      hexlify(Buffer.from(bridge.address, "base64")),
+      hexlify(Buffer.from(bridgeAddress, "base64")),
       BridgeABI,
       signer
     );
@@ -131,27 +123,31 @@ export function useGetState(apolloClient) {
 
   return {
     bridgeContract,
-    baseToken,
-    blockNumber,
+    baseTokenExchangeRate: BigInt(baseTokenExchangeRate || 0),
   };
 }
 
 export function useGetTokens(address) {
   const accounts = useEthereumAccounts();
-  let { data: { tokens } = { tokens: [] }, error } = useQuery(GET_TOKENS, {
-    variables: {
-      tokens: TOKENS.map(({ address }) => address.toString("base64")),
-      address: Buffer.from(arrayify(address)).toString("base64"),
-    },
-  });
+  let { data: { tokens } = { tokens: TOKENS }, error, loading } = useQuery(
+    GET_TOKENS,
+    {
+      variables: {
+        tokens: TOKENS.map(({ address }) => address.toString("base64")),
+        address: Buffer.from(arrayify(address)).toString("base64"),
+      },
+    }
+  );
   tokens = tokens.map((token) => ({
     ...token,
     balance: BigInt(token.balance),
+    underlyingBalance: BigInt(token.underlyingBalance || 0),
     price: BigInt(token.price || 0),
+    underlyingPrice: BigInt(token.underlyingPrice || 0),
     interestRate: token.interestRate && BigInt(token.interestRate),
     totalSupply: BigInt(token.totalSupply),
   }));
-  return { data: { tokens }, error };
+  return { data: { tokens }, error, loading };
 }
 
 export function useGetLiquidityTokens(address) {
@@ -217,22 +213,6 @@ export function useGetNextTransactionNumber(address) {
         (result.data && parseInt(result.data.nextTransactionNumber)) || 0,
     },
   };
-}
-
-export function useBridge() {
-  const {
-    data: { bridge } = { bridge: { address: null, signers: [] } },
-  } = useQuery(GET_BRIDGE);
-  if (bridge.address) {
-    const signer = new ethers.providers.Web3Provider(
-      window.ethereum
-    ).getSigner();
-    return new ethers.Contract(
-      hexlify(Buffer.from(bridge.address, "base64")),
-      BridgeABI,
-      signer
-    );
-  }
 }
 
 export function usePendingRedeemRequests(address) {
