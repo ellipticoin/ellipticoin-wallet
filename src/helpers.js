@@ -12,9 +12,9 @@ import {
 import { ethers } from "ethers";
 import { useState, useEffect, useContext } from "react";
 
-export function Percentage({ numerator, denomiator }) {
+export function Percentage({ numerator, denominator }) {
   if (numerator === 0n) return (0).toFixed(4);
-  return `${(Number(numerator * 100n) / Number(denomiator)).toFixed(4)}%`;
+  return `${(Number(numerator * 100n) / Number(denominator)).toFixed(4)}%`;
 }
 
 export function formatPercentage(n, options = { decimals: 4 }) {
