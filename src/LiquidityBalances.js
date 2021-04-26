@@ -6,6 +6,7 @@ import { sumBy } from "lodash";
 import { Button } from "react-bootstrap";
 import { Fragment } from "react";
 import RewardPerBlock from "./RewardPerBlock";
+import TokenIssuancePerBlock from "./TokenIssuancePerBlock";
 
 export default function LiquidityBalances(props) {
   const {
@@ -68,8 +69,11 @@ export default function LiquidityBalances(props) {
               <tr>
                 <th scope="col">Token</th>
                 <th scope="col" className="text-right">
-                  Your Share of Pool (MS Issuance for Token Pool Per Block) = MS
-                  per Block
+                  MS Issuance per Block
+                </th>
+
+                <th scope="col" className="text-right">
+                  Your Percentage of Pool (MS per Block)
                 </th>
                 <th scope="col" className="text-right">
                   Tokens In Pool
@@ -88,6 +92,12 @@ export default function LiquidityBalances(props) {
                       <th scope="row" rowSpan="2">
                         {TOKEN_METADATA[liquidityToken.tokenAddress].name}
                       </th>
+                      <td className="text-right" rowSpan="2">
+                        <TokenIssuancePerBlock
+                          liquidityToken={liquidityToken}
+                          blockNumber={blockNumber}
+                        />
+                      </td>
                       <td className="text-right" rowSpan="2">
                         <RewardPerBlock
                           liquidityToken={liquidityToken}
