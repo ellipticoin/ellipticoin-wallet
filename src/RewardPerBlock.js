@@ -1,15 +1,13 @@
 import { Percentage } from "./helpers";
 import { blockReward } from "ellipticoin";
-import { BASE_FACTOR } from "./constants";
-export default function RewardPerBlock({ liquidityToken, blockNumber }) {
-  const yourPercentageOfIssuance =
-    Number(liquidityToken.balance) / Number(liquidityToken.totalSupply);
-  const tokenIssuance = blockReward(blockNumber, liquidityToken.tokenAddress);
+import { value } from "./helpers";
+import { MS } from "./constants";
 
-  const yourIssuance = (
-    (Number(tokenIssuance) * yourPercentageOfIssuance) /
-    Number(BASE_FACTOR)
-  ).toFixed(6);
+export default function RewardPerBlock({ liquidityToken, blockNumber }) {
+  const yourIssuance =
+    (liquidityToken.balance *
+      blockReward(blockNumber, liquidityToken.tokenAddress)) /
+    liquidityToken.totalSupply;
 
   return (
     <>
@@ -17,7 +15,10 @@ export default function RewardPerBlock({ liquidityToken, blockNumber }) {
         numerator={liquidityToken.balance}
         denominator={liquidityToken.totalSupply}
       />
-      {` (${yourIssuance} MS)`}
+      {` (${value(yourIssuance, MS.address, {
+        showCurrency: true,
+        zeroString: "N/A",
+      })})`}
     </>
   );
 }
