@@ -1,5 +1,5 @@
 import Rewards from "./Rewards";
-import { BASE_FACTOR, USD, MS, TOKEN_METADATA } from "./constants";
+import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
 import CompoundContext from "./CompoundContext";
 import { formatPercentage, value, tokenTicker } from "./helpers";
 import { sumBy } from "lodash";
@@ -92,7 +92,6 @@ export default function LiquidityBalances(props) {
                         <RewardPerBlock
                           liquidityToken={liquidityToken}
                           blockNumber={blockNumber}
-                          MS={MS}
                         />
                       </td>
                       <td className="text-right no-padding-bottom">
