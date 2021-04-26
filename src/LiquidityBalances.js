@@ -1,7 +1,7 @@
 import Rewards from "./Rewards";
 import { BASE_FACTOR, USD, MS, TOKEN_METADATA } from "./constants";
 import CompoundContext from "./CompoundContext";
-import { Percentage, formatPercentage, value, tokenTicker } from "./helpers";
+import { formatPercentage, value, tokenTicker } from "./helpers";
 import { sumBy } from "lodash";
 import { Button } from "react-bootstrap";
 import { Fragment } from "react";
@@ -89,10 +89,6 @@ export default function LiquidityBalances(props) {
                         {TOKEN_METADATA[liquidityToken.tokenAddress].name}
                       </th>
                       <td className="text-right" rowSpan="2">
-                        <Percentage
-                          numerator={liquidityToken.balance}
-                          denominator={liquidityToken.totalSupply}
-                        />
                         <RewardPerBlock
                           liquidityToken={liquidityToken}
                           blockNumber={blockNumber}
