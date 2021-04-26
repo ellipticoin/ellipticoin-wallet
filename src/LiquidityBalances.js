@@ -1,11 +1,12 @@
 import Rewards from "./Rewards";
-import { BASE_FACTOR, USD, MS, TOKEN_METADATA } from "./constants";
+import { BASE_FACTOR, USD, TOKEN_METADATA } from "./constants";
 import CompoundContext from "./CompoundContext";
-import { Percentage, formatPercentage, value, tokenTicker } from "./helpers";
+import { formatPercentage, value, tokenTicker } from "./helpers";
 import { sumBy } from "lodash";
 import { Button } from "react-bootstrap";
-import { blockReward } from "ellipticoin";
 import { Fragment } from "react";
+import RewardPerBlock from "./RewardPerBlock";
+import TokenIssuancePerBlock from "./TokenIssuancePerBlock";
 
 export default function LiquidityBalances(props) {
   const {
@@ -68,7 +69,11 @@ export default function LiquidityBalances(props) {
               <tr>
                 <th scope="col">Token</th>
                 <th scope="col" className="text-right">
-                  Share of Pool (MS Issuance Per Block)
+                  MS Issuance per Block
+                </th>
+
+                <th scope="col" className="text-right">
+                  Your Percentage of Pool (MS per Block)
                 </th>
                 <th scope="col" className="text-right">
                   Tokens In Pool
@@ -88,23 +93,16 @@ export default function LiquidityBalances(props) {
                         {TOKEN_METADATA[liquidityToken.tokenAddress].name}
                       </th>
                       <td className="text-right" rowSpan="2">
-                        <Percentage
-                          numerator={liquidityToken.balance}
-                          denomiator={liquidityToken.totalSupply}
+                        <TokenIssuancePerBlock
+                          liquidityToken={liquidityToken}
+                          blockNumber={blockNumber}
                         />
-                        {liquidityToken.totalSupply &&
-                        blockReward(blockNumber, liquidityToken.tokenAddress)
-                          ? ` (${value(
-                              (liquidityToken.poolSupplyOfToken *
-                                blockReward(
-                                  blockNumber,
-                                  liquidityToken.tokenAddress
-                                )) /
-                                liquidityToken.totalSupply,
-                              MS.address,
-                              { showCurrency: true, zeroString: "N/A" }
-                            )})`
-                          : null}
+                      </td>
+                      <td className="text-right" rowSpan="2">
+                        <RewardPerBlock
+                          liquidityToken={liquidityToken}
+                          blockNumber={blockNumber}
+                        />
                       </td>
                       <td className="text-right no-padding-bottom">
                         {value(
