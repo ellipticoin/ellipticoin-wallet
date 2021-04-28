@@ -27,7 +27,7 @@ export default function AddLiquidity(props) {
     if (providePoolExists) {
       if (amount === null) return;
       return (
-        (amount * liquidityToken.poolSupplyOfBaseToken) /
+        (amount * liquidityToken.underlyingPoolSupplyOfBaseToken) /
         liquidityToken.poolSupplyOfToken
       );
     } else {
