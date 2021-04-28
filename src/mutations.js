@@ -49,9 +49,9 @@ export function usePostTransaction(actionType, address) {
     CreatePool: ["liquidityTokens"],
     AddLiquidity: ["liquidityTokens"],
     FillOrder: ["tokens", "orders"],
+    Trade: ["tokens"],
     Harvest: ["issuanceRewards"],
   };
-  // const currentMiner = useContext(CurrentMinerContext)[0];
   const { setHost, currentMiner } = useContext(AppContext);
   const [postTransaction, { loading }] = useMutation(POST_TRASACTION, {
     awaitRefetchQueries: true,
@@ -76,7 +76,7 @@ export function usePostTransaction(actionType, address) {
   const accounts = useEthereumAccounts();
 
   const postTransactionFn = async (...args) => {
-    // setHost(currentMiner);
+    setHost(currentMiner);
 
     const action = new actionType(...args);
     const transaction = new Transaction({

@@ -35,6 +35,7 @@ export const GET_LIQUIDITY_TOKENS = gql`
       totalSupply
       poolSupplyOfToken
       poolSupplyOfBaseToken
+      underlyingPoolSupplyOfBaseToken
     }
   }
 `;
@@ -168,6 +169,7 @@ export function useGetLiquidityTokens(address) {
     totalSupply: BigInt(liquidityToken.totalSupply),
     poolSupplyOfToken: BigInt(liquidityToken.poolSupplyOfToken),
     poolSupplyOfBaseToken: BigInt(liquidityToken.poolSupplyOfBaseToken),
+    underlyingPoolSupplyOfBaseToken: BigInt(liquidityToken.underlyingPoolSupplyOfBaseToken),
   }));
 
   return { data: { liquidityTokens }, error };

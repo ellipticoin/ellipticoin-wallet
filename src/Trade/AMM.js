@@ -78,11 +78,14 @@ export default function AMM(props) {
   const outputAmount = useMemo(() => {
     if (!outputToken) return;
     if (!exchangeRateCalculator) return;
-    return exchangeRateCalculator.getOutputAmount(
-      inputAmount,
-      inputToken.address,
-      outputToken.address
-    );
+    return (
+      (exchangeRateCalculator.getOutputAmount(
+        inputAmount,
+        inputToken.address,
+        outputToken.address
+      ) *
+        (BASE_FACTOR - MAX_SLIPPAGE)) /
+      BASE_FACTOR);
   });
   const exchangeRate = useMemo(() => {
     if (!outputToken) return;
@@ -176,7 +179,7 @@ export default function AMM(props) {
           <li>
             <strong>Output Amount</strong>
             <h3 className="m-0">
-              {Number(outputAmount)} {value(outputAmount)}{" "}
+              {value(outputAmount)}{" "}
               {outputToken && TOKEN_METADATA[outputToken.address].ticker}
               <small>
                 {outputAmount && outputToken.ticker !== "USD" ? (
