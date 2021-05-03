@@ -85,7 +85,8 @@ export default function AMM(props) {
         outputToken.address
       ) *
         (BASE_FACTOR - MAX_SLIPPAGE)) /
-      BASE_FACTOR);
+      BASE_FACTOR
+    );
   });
   const exchangeRate = useMemo(() => {
     if (!outputToken) return;

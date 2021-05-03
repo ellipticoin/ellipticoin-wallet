@@ -247,7 +247,10 @@ function App(props) {
                     address={address}
                   />
                   {zeroBalance && zeroLiquidityBalance ? (
-                    <BalancesEmptyState tokens={bridgeTokens} />
+                    <BalancesEmptyState
+                      onHide={() => setShowPage(null)}
+                      tokens={bridgeTokens}
+                    />
                   ) : (
                     <Actions
                       setShowModal={setShowModal}

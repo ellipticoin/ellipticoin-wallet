@@ -24,7 +24,8 @@ export default function LiquidityBalances(props) {
     (sum, liquidityToken) => {
       if (liquidityToken.balance == 0n) return sum;
       let total =
-        ((liquidityToken.underlyingPoolSupplyOfBaseToken * liquidityToken.balance) /
+        ((liquidityToken.underlyingPoolSupplyOfBaseToken *
+          liquidityToken.balance) /
           liquidityToken.totalSupply) *
         2n;
 

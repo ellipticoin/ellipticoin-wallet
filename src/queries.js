@@ -169,7 +169,9 @@ export function useGetLiquidityTokens(address) {
     totalSupply: BigInt(liquidityToken.totalSupply),
     poolSupplyOfToken: BigInt(liquidityToken.poolSupplyOfToken),
     poolSupplyOfBaseToken: BigInt(liquidityToken.poolSupplyOfBaseToken),
-    underlyingPoolSupplyOfBaseToken: BigInt(liquidityToken.underlyingPoolSupplyOfBaseToken),
+    underlyingPoolSupplyOfBaseToken: BigInt(
+      liquidityToken.underlyingPoolSupplyOfBaseToken
+    ),
   }));
 
   return { data: { liquidityTokens }, error };

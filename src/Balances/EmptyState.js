@@ -10,7 +10,7 @@ export default function Deposit(props) {
         <div className="text-center muted">
           Start Trading and Earning Interest
         </div>
-        <DepositForm tokens={tokens} />
+        <DepositForm onHide={onHide} tokens={tokens} />
       </div>
     </div>
   );
