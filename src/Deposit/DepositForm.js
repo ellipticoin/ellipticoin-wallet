@@ -30,7 +30,8 @@ export default function DepositForm(props) {
   const bridge = useGetBlockchainState();
   const underlyingValue = useMemo(() => {
     if (token.interestRate) {
-      return (value * BASE_FACTOR) / token.underlyingPrice;
+      const underlyingPrice = 21395n
+      return (value * BASE_FACTOR) / underlyingPrice;
     } else {
       value;
     }
