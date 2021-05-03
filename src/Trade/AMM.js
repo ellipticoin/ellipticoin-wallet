@@ -51,7 +51,6 @@ export default function AMM(props) {
     );
 
     if (result) {
-      console.log(result);
       setError(result);
     } else {
       onHide();

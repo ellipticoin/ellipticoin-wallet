@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useContext } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
@@ -7,8 +7,7 @@ import TokenSelect from "../Inputs/TokenSelect.js";
 import { usePendingRedeemRequests } from "../queries";
 import { sendETH, sendTokens } from "../ethereum";
 import { usePostTransaction } from "../mutations";
-import { value } from "../helpers";
-import { actions } from "ellipticoin";
+import { actions, BRIDGE_ADDRESS, SAFE_ADDRESS } from "ellipticoin";
 import { ArrowDown } from "react-feather";
 import TokenAmountInput from "../Inputs/TokenAmountInput.js";
 import {
@@ -19,16 +18,21 @@ import {
   WETH,
 } from "../constants";
 import { useGetBlockchainState } from "../queries";
+import SettingsContext from "../SettingsContext";
 
 const { arrayify, hexlify, parseUnits } = ethers.utils;
 
 export default function DepositForm(props) {
   const { onHide, tokens } = props;
   const [value, setValue] = useState(0n);
+  const [depositToSafe, setDepositToSafe] = useState(false);
   const [token, setToken] = useState(tokens[0]);
   const [loading, setLoading] = useState(false);
-  const bridge = useGetBlockchainState();
+  const { investorModeEnabled } = useContext(SettingsContext);
   const underlyingValue = useMemo(() => (value * token.underlyingExchangeRate) / BASE_FACTOR);
+  const bridgeContractAddress = useMemo(() =>
+    depositToSafe ? SAFE_ADDRESS : BRIDGE_ADDRESS
+  );
   const handleDeposit = async (evt) => {
     evt.preventDefault();
     setLoading(true);
@@ -36,13 +40,13 @@ export default function DepositForm(props) {
     try {
       if (token.address === WETH.address) {
         await sendETH({
-          to: "ellipticoin.eth",
+          to: bridgeContractAddress,
           value,
         });
       } else {
         await sendTokens({
           token: token.address,
-          to: "ellipticoin.eth",
+          to: bridgeContractAddress,
           value: underlyingValue,
         });
       }
@@ -76,6 +80,16 @@ export default function DepositForm(props) {
           placeholder="Amount"
         />
       </Form.Group>
+      {investorModeEnabled && (
+        <Form.Group className="basic">
+          <Form.Check
+            checked={depositToSafe}
+            onChange={({ target: checked }) => setDepositToSafe(checked)}
+            type="checkbox"
+            label="Deposit Directly To Safe"
+          />
+        </Form.Group>
+      )}
       <Button
         type="submit"
         disabled={loading}

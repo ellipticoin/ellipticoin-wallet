@@ -14,7 +14,7 @@ import nacl from "tweetnacl";
 import { ethers } from "ethers";
 import { useWeb3 } from "./web3";
 import { useEthereumAccounts } from "./ethereum";
-import { NETWORK_ID, TOKEN_META_DATA } from "./constants";
+import { NETWORK_ID, TOKEN_META_DATA, PROD } from "./constants";
 import { Transaction, actions } from "ellipticoin";
 
 const { arrayify, hexlify, getAddress } = ethers.utils;
@@ -76,7 +76,9 @@ export function usePostTransaction(actionType, address) {
   const accounts = useEthereumAccounts();
 
   const postTransactionFn = async (...args) => {
-    setHost(currentMiner);
+    if (PROD) {
+      setHost(currentMiner);
+    }
 
     const action = new actionType(...args);
     const transaction = new Transaction({

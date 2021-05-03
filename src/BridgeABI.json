@@ -39,14 +39,27 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "contract ERC20",
-        "name": "from",
+        "internalType": "address",
+        "name": "sender",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "uint64",
+        "internalType": "uint256",
         "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "ReceivedETH",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "id",
         "type": "uint64"
       }
     ],
@@ -59,13 +72,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
+        "name": "sender",
         "type": "address"
       },
       {
@@ -75,21 +82,8 @@
         "type": "uint256"
       }
     ],
-    "name": "TransferETH",
+    "name": "SentETH",
     "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "_WELC",
-    "outputs": [
-      {
-        "internalType": "contract WELC",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [
@@ -115,7 +109,7 @@
       },
       {
         "internalType": "uint64",
-        "name": "redemptionId",
+        "name": "redeemId",
         "type": "uint64"
       },
       {
@@ -167,7 +161,7 @@
       },
       {
         "internalType": "uint64",
-        "name": "redemptionId",
+        "name": "redeemId",
         "type": "uint64"
       },
       {
@@ -194,7 +188,7 @@
         "type": "uint64"
       }
     ],
-    "name": "redeemedTransactions",
+    "name": "redeems",
     "outputs": [
       {
         "internalType": "bool",
@@ -208,6 +202,19 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "lastRedeemId",
+        "type": "uint64"
+      }
+    ],
+    "name": "resetRedeems",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -284,19 +291,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint64",
-        "name": "lastRedemptionId",
-        "type": "uint64"
-      }
-    ],
-    "name": "undoTransactions",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
@@ -308,19 +302,6 @@
       }
     ],
     "name": "withdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdrawETH",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

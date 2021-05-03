@@ -67,8 +67,8 @@ export const DAI = {
   name: "DAI",
   ethName: "DAI",
   address: Buffer.from(
-    "6b175474e89094c44da98b954eedeac495271d0f",
-    // "5596ac7380a934802e782e0ff6471d642e488674",
+    // "6b175474e89094c44da98b954eedeac495271d0f",
+    "5596ac7380a934802e782e0ff6471d642e488674",
     "hex"
   ).toString("base64"),
   balance: 0n,

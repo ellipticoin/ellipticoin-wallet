@@ -54,8 +54,6 @@ export default function Withdraw(props) {
   ] = usePostTransaction(actions.CreateRedeemRequest, address);
   const completeWithdraw = async (pendingRedemption) => {
     setLoading(true);
-    // let tx = await bridge.undoTransactions(1);
-    // await tx.wait();
     const tx = await bridgeContract.redeem(
       pendingRedemption.amount,
       hexlify(arrayify(Buffer.from(pendingRedemption.token, "base64"))),

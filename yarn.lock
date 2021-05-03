@@ -5356,10 +5356,10 @@ elliptic@^6.0.0:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-ellipticoin@^0.0.16:
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/ellipticoin/-/ellipticoin-0.0.16.tgz#7aef92299792791a7368a3b135508adfed58a741"
-  integrity sha512-4puomqk0Q52dXnm35ViSs4aBFj9nMtmJ2R4NezZuZJko6J1xheBmdBNHq9RhrxqMjXflvcfuD452FsXiO/HWaw==
+ellipticoin@^0.0.17:
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/ellipticoin/-/ellipticoin-0.0.17.tgz#93e23f2234cf796cd0e93935ba14ec82f251cefa"
+  integrity sha512-LknD5krTEcGvd2DDuDk2QQRgGHlEykpFsV8zcI3+bD71IVgrOJoPtnufkuQITHQU3X6yjgarkDrmnUCD60qg+A==
   dependencies:
     base64url "^3.0.1"
     cbor "^6.0.1"
