@@ -29,14 +29,14 @@ export default function Withdraw(props) {
   } = usePendingRedeemRequests(address);
   const [amount, setAmount] = useState("");
   const [redeemToken, setOutboundToken] = useState(BRIDGE_TOKENS[0]);
-  const { bridge } = useGetBlockchainState();
+  const { bridgeContract } = useGetBlockchainState();
   const isInitialMount = useRef(true);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (
       isInitialMount.current &&
       pendingRedeemRequests &&
-      bridge &&
+      bridgeContract &&
       pendingRedeemRequests.length
     ) {
       pendingRedeemRequests.map(completeWithdraw);
@@ -57,13 +57,11 @@ export default function Withdraw(props) {
     createWithdrawRequest,
     { loading: createWithdrawRequestLoading },
   ] = usePostTransaction(actions.CreateRedeemRequest, address);
-  console.log(actions);
   const completeWithdraw = async (pendingRedemption) => {
     setLoading(true);
-    console.log(bridge.address);
     // let tx = await bridge.undoTransactions(1);
     // await tx.wait();
-    const tx = await bridge.redeem(
+    const tx = await bridgeContract.redeem(
       pendingRedemption.amount,
       hexlify(arrayify(Buffer.from(pendingRedemption.token, "base64"))),
       pendingRedemption.expirationBlockNumber,
@@ -111,19 +109,19 @@ export default function Withdraw(props) {
                     refunded
                   </p>
                   .
-                  {pendingRedeemRequests.map((pendingWithdrawRequest) => (
-                    <div>
+                  {pendingRedeemRequests.map((pendingRedeemRequest) => (
+                    <div key={pendingRedeemRequest.id}>
                       <Button
                         style={{
                           display: "flex",
                           justifyContent: "center",
                           margin: "auto",
                         }}
-                        onClick={() => completeWithdraw(pendingWithdrawRequest)}
+                        onClick={() => completeWithdraw(pendingRedeemRequest)}
                       >
                         Retry redeem of{" "}
-                        {value(BigInt(pendingWithdrawRequest.amount))}{" "}
-                        {TOKEN_METADATA[pendingWithdrawRequest.token].ticker}
+                        {value(BigInt(pendingRedeemRequest.amount))}{" "}
+                        {TOKEN_METADATA[pendingRedeemRequest.token].ticker}
                       </Button>
                     </div>
                   ))}
