@@ -27,8 +27,8 @@ export default function Withdraw(props) {
   const {
     data: { pendingRedeemRequests = [] },
   } = usePendingRedeemRequests(address);
-  const [amount, setAmount] = useState("");
-  const [redeemToken, setOutboundToken] = useState(BRIDGE_TOKENS[0]);
+  const [value, setValue] = useState(0n);
+  const [token, setToken] = useState(tokens[0]);
   const { bridgeContract } = useGetBlockchainState();
   const isInitialMount = useRef(true);
   const [loading, setLoading] = useState(false);
@@ -48,11 +48,6 @@ export default function Withdraw(props) {
       setLoading(false);
     }
   });
-  const userTokenBalance = useMemo(() => {
-    const token = tokens.find((token) => token.address === redeemToken.address);
-    if (!token) return;
-    token.balance;
-  }, [tokens, redeemToken]);
   const [
     createWithdrawRequest,
     { loading: createWithdrawRequestLoading },
@@ -76,8 +71,8 @@ export default function Withdraw(props) {
   const handleWithdraw = async (e) => {
     e.preventDefault();
     const result = await createWithdrawRequest(
-      Number(amount),
-      redeemToken.address
+      Number(value),
+      token.address
     );
     if (result == null) {
     } else {
@@ -137,17 +132,17 @@ export default function Withdraw(props) {
                     <Form.Label>Token</Form.Label>
 
                     <TokenSelect
-                      tokens={BRIDGE_TOKENS}
-                      onChange={(token) => setOutboundToken(token)}
-                      token={redeemToken}
+                      tokens={tokens}
+                      onChange={(token) => setToken(token)}
+                      token={token}
                     />
                   </Form.Group>
                   <Form.Group className="basic">
                     <Form.Label>Amount</Form.Label>
                     <TokenAmountInput
-                      onChange={(amount) => setAmount(amount)}
-                      state={amount}
-                      currency={redeemToken.name}
+                      onChange={(value) => setValue(value)}
+                      state={value}
+                      currency={token.name}
                       placeholder="Amount"
                     />
                   </Form.Group>

@@ -28,14 +28,7 @@ export default function DepositForm(props) {
   const [token, setToken] = useState(tokens[0]);
   const [loading, setLoading] = useState(false);
   const bridge = useGetBlockchainState();
-  const underlyingValue = useMemo(() => {
-    if (token.interestRate) {
-      const underlyingPrice = 21395n
-      return (value * BASE_FACTOR) / underlyingPrice;
-    } else {
-      value;
-    }
-  });
+  const underlyingValue = useMemo(() => (value * token.underlyingExchangeRate) / BASE_FACTOR);
   const handleDeposit = async (evt) => {
     evt.preventDefault();
     setLoading(true);

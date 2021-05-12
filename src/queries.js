@@ -1,4 +1,4 @@
-import { LIQUIDITY_TOKENS, TOKENS } from "./constants.js";
+import { LIQUIDITY_TOKENS, TOKENS, BASE_FACTOR } from "./constants.js";
 import { ethers } from "ethers";
 import { gql, useQuery } from "@apollo/client";
 import BridgeABI from "./BridgeABI.json";
@@ -23,6 +23,7 @@ export const GET_TOKENS = gql`
       interestRate
       balance
       price
+      underlyingExchangeRate
       totalSupply
     }
   }
@@ -142,9 +143,8 @@ export function useGetTokens(address) {
   tokens = tokens.map((token) => ({
     ...token,
     balance: BigInt(token.balance),
-    underlyingBalance: BigInt(token.underlyingBalance || 0),
     price: BigInt(token.price || 0),
-    underlyingPrice: BigInt(token.underlyingPrice || 0),
+    underlyingExchangeRate: BigInt(token.underlyingExchangeRate || BASE_FACTOR),
     interestRate: token.interestRate && BigInt(token.interestRate),
     totalSupply: BigInt(token.totalSupply),
   }));

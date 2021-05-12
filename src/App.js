@@ -178,7 +178,7 @@ function App(props) {
             pushPendingTransation={(tx) => {
               setPendingTransactions([...pendingTransactions, tx]);
             }}
-            tokens={tokens}
+            tokens={bridgeTokens}
           />
         );
       case "Settings":
