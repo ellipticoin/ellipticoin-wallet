@@ -27,7 +27,7 @@ export default function Withdraw(props) {
   const {
     data: { pendingRedeemRequests = [] },
   } = usePendingRedeemRequests(address);
-  const [value, setValue] = useState(0n);
+  const [withdrawlValue, setWithdrawlValue] = useState(0n);
   const [token, setToken] = useState(tokens[0]);
   const { bridgeContract } = useGetBlockchainState();
   const isInitialMount = useRef(true);
@@ -69,7 +69,7 @@ export default function Withdraw(props) {
   const handleWithdraw = async (e) => {
     e.preventDefault();
     const result = await createWithdrawRequest(
-      Number(value),
+      Number(withdrawlValue),
       token.address
     );
     if (result == null) {
@@ -138,8 +138,8 @@ export default function Withdraw(props) {
                   <Form.Group className="basic">
                     <Form.Label>Amount</Form.Label>
                     <TokenAmountInput
-                      onChange={(value) => setValue(value)}
-                      state={value}
+                      onChange={(withdrawlValue) => setWithdrawlValue(withdrawlValue)}
+                      state={withdrawlValue}
                       currency={token.name}
                       placeholder="Amount"
                     />
