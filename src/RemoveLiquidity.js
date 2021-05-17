@@ -40,7 +40,7 @@ export default function RemoveLiquidity(props) {
     }
 
     return (
-      (liquidityToken.balance * liquidityToken.poolSupplyOfBaseToken) /
+      (liquidityToken.balance * liquidityToken.underlyingPoolSupplyOfBaseToken) /
       liquidityToken.totalSupply
     );
   }, [liquidityToken]);
