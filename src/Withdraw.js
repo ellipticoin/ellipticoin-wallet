@@ -29,6 +29,7 @@ export default function Withdraw(props) {
   } = usePendingRedeemRequests(address);
   const [withdrawlValue, setWithdrawlValue] = useState(0n);
   const [token, setToken] = useState(tokens[0]);
+  const underlyingWithdrawValue = useMemo(() => (withdrawlValue * token.underlyingExchangeRate) / BASE_FACTOR);
   const { bridgeContract } = useGetBlockchainState();
   const isInitialMount = useRef(true);
   const [loading, setLoading] = useState(false);
@@ -69,7 +70,7 @@ export default function Withdraw(props) {
   const handleWithdraw = async (e) => {
     e.preventDefault();
     const result = await createWithdrawRequest(
-      Number(withdrawlValue),
+      Number(underlyingWithdrawValue),
       token.address
     );
     if (result == null) {
