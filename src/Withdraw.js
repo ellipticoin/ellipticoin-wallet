@@ -112,9 +112,7 @@ export default function Withdraw(props) {
                         }}
                         onClick={() => completeWithdraw(pendingRedeemRequest)}
                       >
-                        Retry redeem of{" "}
-                        {value(BigInt(pendingRedeemRequest.amount))}{" "}
-                        {TOKEN_METADATA[pendingRedeemRequest.token].ticker}
+                        Retry redeem ID #{pendingRedeemRequest.id}
                       </Button>
                     </div>
                   ))}
