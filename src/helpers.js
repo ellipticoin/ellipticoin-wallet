@@ -1,3 +1,4 @@
+import { DateTime, Duration } from "luxon";
 import {
   BASE_FACTOR,
   BLOCKS_PER_ERA,
@@ -58,4 +59,54 @@ export function formatNumber(n, options = {}) {
 
 export function numberWithCommas(n) {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+export function useLocalStorage(key, initialValue) {
+  // State to store our value
+  // Pass initial state function to useState so logic is only executed once
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      // Get from local storage by key
+      const item = window.localStorage.getItem(key);
+      // Parse stored json or if none return initialValue
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      // If error also return initialValue
+      console.log(error);
+      return initialValue;
+    }
+  });
+  // Return a wrapped version of useState's setter function that ...
+  // ... persists the new value to localStorage.
+  const setValue = (value) => {
+    try {
+      // Allow value to be a function so we have same API as useState
+      const valueToStore =
+        value instanceof Function ? value(storedValue) : value;
+      // Save state
+      setStoredValue(valueToStore);
+      // Save to local storage
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      // A more advanced implementation would handle the error case
+      console.log(error);
+    }
+  };
+  return [storedValue, setValue];
+}
+
+const maybePluralize = (count, noun, suffix = "s") =>
+  `${count} ${noun}${count !== 1 ? suffix : ""}`;
+export function blockCountdown(blockNumber, countdownBlockNumber) {
+  if (!blockNumber) return;
+
+  const { days, hours, minutes, seconds } = Duration.fromObject({
+    seconds: Number((countdownBlockNumber - blockNumber) * 4n),
+  })
+    .shiftTo("days", "hours", "minutes", "seconds", "milliseconds")
+    .toObject();
+  return `${maybePluralize(days, "Day")} ${maybePluralize(
+    hours,
+    "Hour"
+  )} and ${maybePluralize(minutes, "Minute")}`;
 }

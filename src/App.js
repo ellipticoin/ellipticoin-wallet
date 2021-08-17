@@ -236,7 +236,7 @@ function App(props) {
           ) : null
         )}
         <div style={{ display: showPage ? "none" : "block" }}>
-          <Header setShowSidebar={setShowSidebar} />
+          <Header blockNumber={blockNumber} setShowSidebar={setShowSidebar} />
           <div id="appCapsule">
             <>
               <div className="section wallet-card-section pt-1 mb-2">

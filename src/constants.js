@@ -1,6 +1,7 @@
 import base64url from "base64url";
 import { BigInt } from "jsbi";
 
+export const MIGRATION_BLOCK_NUMBER = 6359375n;
 export const BASE_FACTOR = 1000000n;
 export const BLOCKS_PER_ERA = 8000000n;
 export const NUMBER_OF_ERAS = 8n;

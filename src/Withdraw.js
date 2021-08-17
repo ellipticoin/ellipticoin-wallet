@@ -136,7 +136,9 @@ export default function Withdraw(props) {
                   <Form.Group className="basic">
                     <Form.Label>Amount</Form.Label>
                     <TokenAmountInput
-                      onChange={(withdrawlValue) => setWithdrawlValue(withdrawlValue)}
+                      onChange={(withdrawlValue) =>
+                        setWithdrawlValue(withdrawlValue)
+                      }
                       state={withdrawlValue}
                       currency={token.name}
                       placeholder="Amount"

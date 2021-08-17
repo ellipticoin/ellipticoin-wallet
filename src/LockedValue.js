@@ -95,7 +95,7 @@ export default function LockedValue(props) {
                       <td className="text-right">{value(usd.totalSupply)}</td>
                     </tr>
                     <tr>
-                      <th colspan="2">Total Locked Value</th>
+                      <th colSpan="2">Total Locked Value</th>
                       <th className="value text-success text-right">
                         {value(totalLockedValue, USD.address)}
                       </th>

@@ -29,7 +29,9 @@ export default function DepositForm(props) {
   const [token, setToken] = useState(tokens[0]);
   const [loading, setLoading] = useState(false);
   const { investorModeEnabled } = useContext(SettingsContext);
-  const underlyingValue = useMemo(() => (value * token.underlyingExchangeRate) / BASE_FACTOR);
+  const underlyingValue = useMemo(
+    () => (value * token.underlyingExchangeRate) / BASE_FACTOR
+  );
   const bridgeContractAddress = useMemo(() =>
     depositToSafe ? SAFE_ADDRESS : BRIDGE_ADDRESS
   );
